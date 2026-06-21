@@ -6,8 +6,9 @@ interface GratitudeSectionProps {
 export function GratitudeSection({ value, onChange }: GratitudeSectionProps) {
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-base font-semibold text-gray-900">Gratitude</h2>
+      <label htmlFor="gratitude" className="text-base font-semibold text-gray-900">Gratitude</label>
       <textarea
+        id="gratitude"
         rows={4}
         placeholder="What are you grateful for today?"
         value={value}
