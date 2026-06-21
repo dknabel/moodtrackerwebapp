@@ -6,10 +6,14 @@ import { HistoryEntry } from './HistoryEntry'
 export function HistoryPage() {
   const toDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
   const fromDate = useMemo(() => format(subDays(new Date(), 90), 'yyyy-MM-dd'), [])
-  const { logs, loading } = useLogs(fromDate, toDate)
+  const { logs, loading, error } = useLogs(fromDate, toDate)
 
   if (loading) {
     return <div className="text-center text-gray-400 mt-12">Loading…</div>
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 mt-12">{error}</div>
   }
 
   if (logs.length === 0) {
