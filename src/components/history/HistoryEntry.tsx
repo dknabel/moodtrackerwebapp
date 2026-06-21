@@ -30,9 +30,9 @@ export function HistoryEntry({ log }: HistoryEntryProps) {
         )}
       </div>
       {log.gratitude && (
-        <p role="blockquote" className="text-xs text-gray-500 italic mt-1">
+        <blockquote className="text-xs text-gray-500 italic mt-1">
           "{truncate(log.gratitude, 80)}"
-        </p>
+        </blockquote>
       )}
     </button>
   )

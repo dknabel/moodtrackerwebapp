@@ -36,6 +36,11 @@ describe('HistoryEntry', () => {
     expect(screen.queryByRole('blockquote')).not.toBeInTheDocument()
   })
 
+  it('shows no gratitude preview when empty string', () => {
+    renderEntry({ ...baseLog, gratitude: '' })
+    expect(screen.queryByRole('blockquote')).not.toBeInTheDocument()
+  })
+
   it('shows the full note when 80 chars or fewer', () => {
     renderEntry({ ...baseLog, gratitude: 'Sunny weather' })
     expect(screen.getByText('"Sunny weather"')).toBeInTheDocument()
