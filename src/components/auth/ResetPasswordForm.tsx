@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
-export function ResetPasswordForm() {
+interface Props {
+  onExpiredLink: () => void
+}
+
+export function ResetPasswordForm({ onExpiredLink }: Props) {
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -18,7 +22,12 @@ export function ResetPasswordForm() {
     setError(null)
     const { error } = await supabase.auth.updateUser({ password })
     if (error) {
-      setError(error.message)
+      const msg = error.message.toLowerCase()
+      if (msg.includes('expired') || msg.includes('invalid')) {
+        setError('link-expired')
+      } else {
+        setError(error.message)
+      }
     } else {
       setDone(true)
     }
@@ -61,7 +70,16 @@ export function ResetPasswordForm() {
         required
         className="border border-gray-300 rounded-lg p-3 text-base"
       />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error === 'link-expired' ? (
+        <p className="text-red-600 text-sm text-center">
+          This link has expired.{' '}
+          <button type="button" onClick={onExpiredLink} className="underline">
+            Request a new one
+          </button>
+        </p>
+      ) : error ? (
+        <p className="text-red-600 text-sm">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={loading}

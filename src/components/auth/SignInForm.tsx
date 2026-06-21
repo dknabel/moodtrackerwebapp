@@ -38,7 +38,16 @@ export function SignInForm({ onForgotPassword }: Props) {
         required
         className="border border-gray-300 rounded-lg p-3 text-base"
       />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && (
+        <>
+          <p className="text-red-600 text-sm">{error}</p>
+          {error.toLowerCase().includes('invalid') && (
+            <p className="text-gray-500 text-xs text-center">
+              Signed up with Google? Use the button above.
+            </p>
+          )}
+        </>
+      )}
       <button
         type="submit"
         disabled={loading}

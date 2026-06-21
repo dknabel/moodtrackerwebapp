@@ -25,7 +25,7 @@ async function fillResetForm(password: string, confirm: string) {
 
 describe('ResetPasswordForm', () => {
   it('shows mismatch error without calling updateUser', async () => {
-    render(<ResetPasswordForm />)
+    render(<ResetPasswordForm onExpiredLink={vi.fn()} />)
     await fillResetForm('abc123', 'different')
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument()
     expect(supabase.auth.updateUser).not.toHaveBeenCalled()
@@ -33,7 +33,7 @@ describe('ResetPasswordForm', () => {
 
   it('calls updateUser with new password and shows success message on match', async () => {
     vi.mocked(supabase.auth.updateUser).mockResolvedValue({ data: {} as any, error: null })
-    render(<ResetPasswordForm />)
+    render(<ResetPasswordForm onExpiredLink={vi.fn()} />)
     await fillResetForm('newpass123', 'newpass123')
     await waitFor(() => {
       expect(screen.getByText(/password updated/i)).toBeInTheDocument()
@@ -46,7 +46,7 @@ describe('ResetPasswordForm', () => {
       data: {} as any,
       error: { message: 'Password is too weak' } as any,
     })
-    render(<ResetPasswordForm />)
+    render(<ResetPasswordForm onExpiredLink={vi.fn()} />)
     await fillResetForm('abc', 'abc')
     await waitFor(() => {
       expect(screen.getByText(/password is too weak/i)).toBeInTheDocument()
@@ -55,10 +55,26 @@ describe('ResetPasswordForm', () => {
 
   it('shows Continue to app button after successful update', async () => {
     vi.mocked(supabase.auth.updateUser).mockResolvedValue({ data: {} as any, error: null })
-    render(<ResetPasswordForm />)
+    render(<ResetPasswordForm onExpiredLink={vi.fn()} />)
     await fillResetForm('newpass123', 'newpass123')
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /continue to app/i })).toBeInTheDocument()
     })
+  })
+
+  it('shows expired-link message with request-new-one link when token is expired', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Token has expired or is invalid' } as any,
+    })
+    const onExpiredLink = vi.fn()
+    render(<ResetPasswordForm onExpiredLink={onExpiredLink} />)
+    await fillResetForm('newpass123', 'newpass123')
+    await waitFor(() => {
+      expect(screen.getByText(/this link has expired/i)).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /request a new one/i })).toBeInTheDocument()
+    })
+    await userEvent.click(screen.getByRole('button', { name: /request a new one/i }))
+    expect(onExpiredLink).toHaveBeenCalled()
   })
 })
