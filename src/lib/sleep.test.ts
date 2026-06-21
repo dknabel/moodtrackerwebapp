@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { calculateSleepHours } from './sleep'
 
 describe('calculateSleepHours', () => {
-  it('calculates hours within the same day', () => {
+  it('calculates hours for a typical overnight sleep', () => {
     expect(calculateSleepHours('22:00', '06:00')).toBe(8)
   })
 
