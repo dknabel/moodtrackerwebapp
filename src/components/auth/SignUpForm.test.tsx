@@ -69,4 +69,17 @@ describe('SignUpForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /sign in instead/i }))
     expect(onSwitchToSignIn).toHaveBeenCalled()
   })
+
+  it('shows switch-to-sign-in link when Supabase returns "already exists" error', async () => {
+    vi.mocked(supabase.auth.signUp).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Email address already exists' } as any,
+    })
+    const onSwitchToSignIn = vi.fn()
+    render(<SignUpForm onSuccess={vi.fn()} onSwitchToSignIn={onSwitchToSignIn} />)
+    await fillSignUpForm('taken@example.com', 'secret123', 'secret123')
+    await waitFor(() => {
+      expect(screen.getByText(/an account with this email already exists/i)).toBeInTheDocument()
+    })
+  })
 })

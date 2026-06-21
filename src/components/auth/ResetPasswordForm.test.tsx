@@ -77,4 +77,17 @@ describe('ResetPasswordForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /request a new one/i }))
     expect(onExpiredLink).toHaveBeenCalled()
   })
+
+  it('shows raw error message when error is invalid but not expired', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Invalid password: must be at least 8 characters' } as any,
+    })
+    render(<ResetPasswordForm onExpiredLink={vi.fn()} />)
+    await fillResetForm('ab', 'ab')
+    await waitFor(() => {
+      expect(screen.getByText(/invalid password/i)).toBeInTheDocument()
+      expect(screen.queryByText(/this link has expired/i)).not.toBeInTheDocument()
+    })
+  })
 })

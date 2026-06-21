@@ -71,4 +71,42 @@ describe('AuthPage', () => {
     expect(screen.getByRole('button', { name: /update password/i })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /sign in with google/i })).not.toBeInTheDocument()
   })
+
+  it('switches to sign-in mode when SignUpForm fires onSwitchToSignIn', async () => {
+    vi.mocked(supabase.auth.signUp).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'User already registered' } as any,
+    })
+    render(<AuthPage initialMode="sign-up" />)
+    await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'taken@example.com')
+    await userEvent.type(screen.getByPlaceholderText(/^password$/i), 'secret123')
+    await userEvent.type(screen.getByPlaceholderText(/^confirm password$/i), 'secret123')
+    await userEvent.click(screen.getByRole('button', { name: /create account/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /sign in instead/i })).toBeInTheDocument()
+    })
+    await userEvent.click(screen.getByRole('button', { name: /sign in instead/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /create account/i })).not.toBeInTheDocument()
+    })
+  })
+
+  it('switches to forgot-password mode when ResetPasswordForm fires onExpiredLink', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Token has expired or is invalid' } as any,
+    })
+    render(<AuthPage initialMode="reset-password" />)
+    await userEvent.type(screen.getByPlaceholderText(/^new password$/i), 'newpass123')
+    await userEvent.type(screen.getByPlaceholderText(/^confirm new password$/i), 'newpass123')
+    await userEvent.click(screen.getByRole('button', { name: /update password/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /request a new one/i })).toBeInTheDocument()
+    })
+    await userEvent.click(screen.getByRole('button', { name: /request a new one/i }))
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /send reset link/i })).toBeInTheDocument()
+    })
+  })
 })
