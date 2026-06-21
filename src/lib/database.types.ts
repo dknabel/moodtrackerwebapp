@@ -9,8 +9,8 @@ export interface DailyLog {
   exercised: boolean | null
   sleep_hours: number | null
   sleep_quality: number | null
-  bedtime: string | null  // 'HH:MM'
-  wake_time: string | null
+  bedtime: string | null  // 'HH:MM:SS' from Postgres time type
+  wake_time: string | null  // 'HH:MM:SS' from Postgres time type
   created_at: string
   updated_at: string
 }
