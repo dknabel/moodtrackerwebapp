@@ -28,7 +28,7 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     bedtimeRef.current = bedtime
     const hours = bedtime && wakeTimeRef.current
       ? calculateSleepHours(bedtime, wakeTimeRef.current)
-      : values.sleep_hours
+      : null
     onChange({ ...values, bedtime, sleep_hours: hours })
   }
 
@@ -36,7 +36,7 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     wakeTimeRef.current = wake_time
     const hours = bedtimeRef.current && wake_time
       ? calculateSleepHours(bedtimeRef.current, wake_time)
-      : values.sleep_hours
+      : null
     onChange({ ...values, wake_time, sleep_hours: hours })
   }
 

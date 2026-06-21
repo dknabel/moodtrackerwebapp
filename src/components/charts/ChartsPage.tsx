@@ -14,11 +14,10 @@ const RANGES = [
 
 export function ChartsPage() {
   const [rangeDays, setRangeDays] = useState(30)
-  const toDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
-  const fromDate = useMemo(
-    () => format(subDays(new Date(), rangeDays), 'yyyy-MM-dd'),
-    [rangeDays]
-  )
+  const { fromDate, toDate } = useMemo(() => ({
+    toDate: format(new Date(), 'yyyy-MM-dd'),
+    fromDate: format(subDays(new Date(), rangeDays), 'yyyy-MM-dd'),
+  }), [rangeDays])
   const { logs, loading } = useLogs(fromDate, toDate)
   // useLogs returns newest-first (for History). Charts need oldest-first for left-to-right time axis.
   const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])

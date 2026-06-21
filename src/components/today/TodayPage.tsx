@@ -64,6 +64,8 @@ export function TodayPage() {
         sleep_hours: log.sleep_hours,
         sleep_quality: log.sleep_quality ?? 3,
       })
+    } else {
+      setForm(DEFAULT_FORM)
     }
   }, [log])
 

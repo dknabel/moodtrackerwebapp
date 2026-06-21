@@ -12,6 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'Mood Tracker',
         short_name: 'Mood',
+        start_url: '/',
         theme_color: '#2563eb',
         background_color: '#ffffff',
         display: 'standalone',
