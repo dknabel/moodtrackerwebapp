@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import type { DailyLog } from '../../lib/database.types'
 
+function truncate(text: string, max: number): string {
+  return text.length <= max ? text : text.slice(0, max) + '…'
+}
+
 interface HistoryEntryProps {
   log: DailyLog
 }
@@ -25,6 +29,11 @@ export function HistoryEntry({ log }: HistoryEntryProps) {
           <span>{log.exercised ? '✓ Exercised' : '✗ No exercise'}</span>
         )}
       </div>
+      {log.gratitude && (
+        <p role="blockquote" className="text-xs text-gray-500 italic mt-1">
+          "{truncate(log.gratitude, 80)}"
+        </p>
+      )}
     </button>
   )
 }
