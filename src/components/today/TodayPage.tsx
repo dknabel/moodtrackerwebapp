@@ -6,6 +6,7 @@ import { MoodSection } from './MoodSection'
 import { FoodSection } from './FoodSection'
 import { ExerciseSection } from './ExerciseSection'
 import { SleepSection } from './SleepSection'
+import { GratitudeSection } from './GratitudeSection'
 
 function todayStr() {
   return format(new Date(), 'yyyy-MM-dd')
@@ -21,6 +22,7 @@ interface FormState {
   wake_time: string
   sleep_hours: number | null
   sleep_quality: number
+  gratitude: string
 }
 
 const DEFAULT_FORM: FormState = {
@@ -33,12 +35,14 @@ const DEFAULT_FORM: FormState = {
   wake_time: '',
   sleep_hours: null,
   sleep_quality: 3,
+  gratitude: '',
 }
 
 const toLogData = (f: FormState) => ({
   ...f,
   bedtime: f.bedtime || null,
   wake_time: f.wake_time || null,
+  gratitude: f.gratitude || null,
 })
 
 export function TodayPage() {
@@ -63,6 +67,7 @@ export function TodayPage() {
         wake_time: log.wake_time?.slice(0, 5) ?? '',
         sleep_hours: log.sleep_hours,
         sleep_quality: log.sleep_quality ?? 3,
+        gratitude: log.gratitude ?? '',
       })
     } else {
       setForm(DEFAULT_FORM)
@@ -119,6 +124,13 @@ export function TodayPage() {
       <SleepSection
         values={{ bedtime: form.bedtime, wake_time: form.wake_time, sleep_hours: form.sleep_hours, sleep_quality: form.sleep_quality }}
         onChange={v => setForm(f => ({ ...f, ...v }))}
+      />
+
+      <hr className="border-gray-200" />
+
+      <GratitudeSection
+        value={form.gratitude}
+        onChange={v => setForm(f => ({ ...f, gratitude: v }))}
       />
 
       {saveError && (
