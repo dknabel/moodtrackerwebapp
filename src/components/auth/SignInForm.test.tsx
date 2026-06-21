@@ -71,4 +71,19 @@ describe('SignInForm', () => {
       expect(screen.getByText(/signed up with google/i)).toBeInTheDocument()
     })
   })
+
+  it('does not show Google hint for non-credential errors', async () => {
+    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Invalid email format' } as any,
+    })
+    render(<SignInForm onForgotPassword={vi.fn()} />)
+    await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
+    await userEvent.type(screen.getByPlaceholderText(/^password$/i), 'pass')
+    await userEvent.click(screen.getByRole('button', { name: /^sign in$/i }))
+    await waitFor(() => {
+      expect(screen.getByText(/invalid email format/i)).toBeInTheDocument()
+      expect(screen.queryByText(/signed up with google/i)).not.toBeInTheDocument()
+    })
+  })
 })

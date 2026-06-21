@@ -23,7 +23,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
     const { error } = await supabase.auth.updateUser({ password })
     if (error) {
       const msg = error.message.toLowerCase()
-      if (msg.includes('expired') || msg.includes('invalid')) {
+      if (msg.includes('expired')) {
         setError('link-expired')
       } else {
         setError(error.message)
