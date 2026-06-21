@@ -1,6 +1,6 @@
 # Mood Tracker Plus
 
-A daily mood and wellness tracker designed for people managing bipolar disorder. Log how you're feeling, track sleep and habits, and spot patterns over time.
+A daily mood and wellness tracker. Log how you're feeling, track sleep and habits, and spot patterns over time.
 
 **Live app:** [moodtrackerplus.vercel.app](https://moodtrackerplus.vercel.app)
 
