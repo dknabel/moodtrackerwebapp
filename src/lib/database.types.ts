@@ -11,6 +11,7 @@ export interface DailyLog {
   sleep_quality: number | null
   bedtime: string | null  // 'HH:MM:SS' from Postgres time type
   wake_time: string | null  // 'HH:MM:SS' from Postgres time type
+  gratitude: string | null
   created_at: string
   updated_at: string
 }
