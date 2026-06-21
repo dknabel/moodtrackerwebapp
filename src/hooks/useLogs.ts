@@ -8,6 +8,7 @@ export function useLogs(fromDate: string, toDate: string) {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let stale = false
     setLoading(true)
     setError(null)
     supabase
@@ -17,10 +18,12 @@ export function useLogs(fromDate: string, toDate: string) {
       .lte('date', toDate)
       .order('date', { ascending: false })
       .then(({ data, error }) => {
+        if (stale) return
         if (error) setError(error.message)
         else setLogs(data ?? [])
         setLoading(false)
       })
+    return () => { stale = true }
   }, [fromDate, toDate])
 
   return { logs, loading, error }

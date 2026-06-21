@@ -67,7 +67,10 @@ describe('useDailyLog', () => {
     })
 
     expect(mockUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ mood_rating: 9, user_id: 'user-123', date: '2026-06-20' })
+      expect.objectContaining({ mood_rating: 9 })
+    )
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.not.objectContaining({ user_id: 'user-123', date: '2026-06-20' })
     )
     expect(result.current.log).toEqual(updatedLog)
   })

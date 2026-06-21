@@ -27,26 +27,25 @@ export function useDailyLog(date: string) {
     const user = data?.user
     if (!user) return { error: 'Not authenticated' }
 
-    const record = { ...values, user_id: user.id, date }
-
     if (log) {
-      const { data, error } = await supabase
+      const { data: updated, error } = await supabase
         .from('daily_logs')
-        .update(record)
+        .update(values)
         .eq('id', log.id)
         .select()
         .single()
       if (error) return { error: error.message }
-      setLog(data)
+      setLog(updated)
       return { error: null }
     } else {
-      const { data, error } = await supabase
+      const insertRecord = { ...values, user_id: user.id, date }
+      const { data: inserted, error } = await supabase
         .from('daily_logs')
-        .insert(record)
+        .insert(insertRecord)
         .select()
         .single()
       if (error) return { error: error.message }
-      setLog(data)
+      setLog(inserted)
       return { error: null }
     }
   }
