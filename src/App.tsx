@@ -1,13 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
-import { LoginPage } from './components/auth/LoginPage'
+import { AuthPage } from './components/auth/AuthPage'
 import { AppShell } from './components/layout/AppShell'
 import { TodayPage } from './components/today/TodayPage'
 import { HistoryPage } from './components/history/HistoryPage'
 import { ChartsPage } from './components/charts/ChartsPage'
 
 export function App() {
-  const { session, loading } = useAuth()
+  const { session, loading, isPasswordRecovery } = useAuth()
 
   if (loading) {
     return (
@@ -17,8 +17,8 @@ export function App() {
     )
   }
 
-  if (!session) {
-    return <LoginPage />
+  if (!session || isPasswordRecovery) {
+    return <AuthPage initialMode={isPasswordRecovery ? 'reset-password' : 'sign-in'} />
   }
 
   return (
