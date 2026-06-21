@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { Slider } from '../ui/Slider'
 import { calculateSleepHours } from '../../lib/sleep'
 
@@ -16,9 +16,13 @@ interface SleepSectionProps {
 
 export function SleepSection({ values, onChange }: SleepSectionProps) {
   // Track latest typed values in refs so handlers can cross-reference
-  // even when the parent hasn't flushed the prop update yet.
+  // even when the parent hasn't flushed the prop update yet (e.g. rapid typing).
+  // Also sync refs when props change externally (e.g. log loaded from Supabase).
   const bedtimeRef = useRef(values.bedtime)
   const wakeTimeRef = useRef(values.wake_time)
+
+  useEffect(() => { bedtimeRef.current = values.bedtime }, [values.bedtime])
+  useEffect(() => { wakeTimeRef.current = values.wake_time }, [values.wake_time])
 
   const handleBedtime = (bedtime: string) => {
     bedtimeRef.current = bedtime
