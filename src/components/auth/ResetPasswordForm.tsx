@@ -27,9 +27,18 @@ export function ResetPasswordForm() {
 
   if (done) {
     return (
-      <p className="text-gray-700 text-sm text-center max-w-sm">
-        Password updated. You're now signed in.
-      </p>
+      <div className="flex flex-col items-center gap-3 max-w-sm text-center">
+        <p className="text-gray-700 text-sm">
+          Password updated. You're now signed in.
+        </p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="bg-blue-600 text-white rounded-lg p-3 font-medium w-full"
+        >
+          Continue to app
+        </button>
+      </div>
     )
   }
 

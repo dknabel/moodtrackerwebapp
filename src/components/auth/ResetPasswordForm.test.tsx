@@ -52,4 +52,13 @@ describe('ResetPasswordForm', () => {
       expect(screen.getByText(/password is too weak/i)).toBeInTheDocument()
     })
   })
+
+  it('shows Continue to app button after successful update', async () => {
+    vi.mocked(supabase.auth.updateUser).mockResolvedValue({ data: {} as any, error: null })
+    render(<ResetPasswordForm />)
+    await fillResetForm('newpass123', 'newpass123')
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /continue to app/i })).toBeInTheDocument()
+    })
+  })
 })
