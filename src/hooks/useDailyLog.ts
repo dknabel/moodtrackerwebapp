@@ -23,7 +23,8 @@ export function useDailyLog(date: string) {
   }, [date])
 
   const save = async (values: DailyLogUpdate) => {
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    const user = data?.user
     if (!user) return { error: 'Not authenticated' }
 
     const record = { ...values, user_id: user.id, date }

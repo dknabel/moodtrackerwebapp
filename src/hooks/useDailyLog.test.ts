@@ -43,6 +43,35 @@ describe('useDailyLog', () => {
     expect(result.current.log).toBeNull()
   })
 
+  it('sets error state when fetch fails', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: null, error: { message: 'Network error' } })
+
+    const { result } = renderHook(() => useDailyLog('2026-06-20'))
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.error).toBe('Network error')
+    expect(result.current.log).toBeNull()
+  })
+
+  it('updates an existing log', async () => {
+    const existingLog = { id: '1', date: '2026-06-20', mood_rating: 5 }
+    mockMaybeSingle.mockResolvedValue({ data: existingLog, error: null })
+    const updatedLog = { id: '1', date: '2026-06-20', mood_rating: 9 }
+    mockSingle.mockResolvedValue({ data: updatedLog, error: null })
+
+    const { result } = renderHook(() => useDailyLog('2026-06-20'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    await act(async () => {
+      await result.current.save({ mood_rating: 9 })
+    })
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ mood_rating: 9, user_id: 'user-123', date: '2026-06-20' })
+    )
+    expect(result.current.log).toEqual(updatedLog)
+  })
+
   it('inserts a new log when none exists', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null })
     const newLog = { id: '2', date: '2026-06-20', mood_rating: 8 }
