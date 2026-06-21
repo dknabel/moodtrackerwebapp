@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import { BottomNav } from './BottomNav'
 import { useAuth } from '../../hooks/useAuth'
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children }: { children: ReactNode }) {
   const { signOut } = useAuth()
 
   return (
@@ -9,7 +10,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="max-w-lg mx-auto px-4 pt-4 flex justify-end">
         <button
           type="button"
-          onClick={() => signOut()}
+          onClick={signOut}
           className="text-xs text-gray-400 hover:text-gray-600"
         >
           Sign out

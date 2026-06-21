@@ -8,7 +8,7 @@ const tabs = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex safe-area-pb">
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex">
       {tabs.map(tab => (
         <NavLink
           key={tab.to}
