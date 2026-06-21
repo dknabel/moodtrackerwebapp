@@ -28,7 +28,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
 
       {mode === 'verify-email' && <VerifyEmailNotice email={verifyEmail} />}
 
-      {mode === 'reset-password' && <ResetPasswordForm />}
+      {mode === 'reset-password' && <ResetPasswordForm onExpiredLink={() => setMode('forgot-password')} />}
 
       {mode === 'forgot-password' && (
         <>
@@ -55,7 +55,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
             <SignInForm onForgotPassword={() => setMode('forgot-password')} />
           )}
           {mode === 'sign-up' && (
-            <SignUpForm onSuccess={handleSignUpSuccess} />
+            <SignUpForm onSuccess={handleSignUpSuccess} onSwitchToSignIn={() => setMode('sign-in')} />
           )}
           <p className="text-sm text-gray-500">
             {mode === 'sign-in' ? (

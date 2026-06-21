@@ -3,9 +3,10 @@ import { supabase } from '../../lib/supabase'
 
 interface Props {
   onSuccess: (email: string) => void
+  onSwitchToSignIn: () => void
 }
 
-export function SignUpForm({ onSuccess }: Props) {
+export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -26,7 +27,12 @@ export function SignUpForm({ onSuccess }: Props) {
       options: { emailRedirectTo: window.location.origin },
     })
     if (error) {
-      setError(error.message)
+      const msg = error.message.toLowerCase()
+      if (msg.includes('already registered') || msg.includes('already exists')) {
+        setError('already-exists')
+      } else {
+        setError(error.message)
+      }
     } else {
       onSuccess(email)
     }
@@ -59,7 +65,16 @@ export function SignUpForm({ onSuccess }: Props) {
         required
         className="border border-gray-300 rounded-lg p-3 text-base"
       />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error === 'already-exists' ? (
+        <p className="text-red-600 text-sm">
+          An account with this email already exists.{' '}
+          <button type="button" onClick={onSwitchToSignIn} className="underline">
+            Sign in instead?
+          </button>
+        </p>
+      ) : error ? (
+        <p className="text-red-600 text-sm">{error}</p>
+      ) : null}
       <button
         type="submit"
         disabled={loading}

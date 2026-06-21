@@ -56,4 +56,19 @@ describe('SignInForm', () => {
     await userEvent.click(screen.getByRole('button', { name: /forgot password/i }))
     expect(onForgotPassword).toHaveBeenCalled()
   })
+
+  it('shows Google hint when sign-in fails with invalid credentials', async () => {
+    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+      data: {} as any,
+      error: { message: 'Invalid login credentials' } as any,
+    })
+    render(<SignInForm onForgotPassword={vi.fn()} />)
+    await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
+    await userEvent.type(screen.getByPlaceholderText(/^password$/i), 'wrong')
+    await userEvent.click(screen.getByRole('button', { name: /^sign in$/i }))
+    await waitFor(() => {
+      expect(screen.getByText(/invalid login credentials/i)).toBeInTheDocument()
+      expect(screen.getByText(/signed up with google/i)).toBeInTheDocument()
+    })
+  })
 })
