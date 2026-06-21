@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//usr/local/bin/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(command -v node)",
+      "Read(//Users/drew/.nvm/**)",
+      "Read(//Users/drew/**)",
+      "Bash(git -C /Users/drew/Projects/bipolarmoodtracker status)",
+      "Bash(git -C /Users/drew/Projects/bipolarmoodtracker log --oneline)",
+      "Bash(git *)",
+      "Bash(npx vitest *)",
+      "Bash(npm test *)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)"
+    ]
+  }
+}
