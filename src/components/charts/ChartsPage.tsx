@@ -20,6 +20,8 @@ export function ChartsPage() {
     [rangeDays]
   )
   const { logs, loading } = useLogs(fromDate, toDate)
+  // useLogs returns newest-first (for History). Charts need oldest-first for left-to-right time axis.
+  const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])
 
   return (
     <div className="flex flex-col gap-4">
@@ -51,12 +53,12 @@ export function ChartsPage() {
         </div>
       )}
 
-      {!loading && logs.length > 0 && (
+      {!loading && chronologicalLogs.length > 0 && (
         <>
-          <MoodChart logs={logs} />
-          <SleepChart logs={logs} />
-          <MealsChart logs={logs} />
-          <ExerciseChart logs={logs} />
+          <MoodChart logs={chronologicalLogs} />
+          <SleepChart logs={chronologicalLogs} />
+          <MealsChart logs={chronologicalLogs} />
+          <ExerciseChart logs={chronologicalLogs} />
         </>
       )}
     </div>
