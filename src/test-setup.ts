@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { beforeEach } from 'vitest'
 
 globalThis.ResizeObserver = class ResizeObserver {
   observe() {}
@@ -39,4 +40,10 @@ Object.defineProperty(globalThis, 'localStorage', {
   enumerable: true,
   value: localStorageImpl,
   writable: true,
+})
+
+beforeEach(() => {
+  // reset the in-memory store between tests to prevent cross-file contamination
+  // (the store is module-level; useTheme.test.ts also calls clear() in its own beforeEach, which is redundant but harmless)
+  localStorage.clear()
 })
