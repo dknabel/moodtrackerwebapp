@@ -80,7 +80,7 @@ Single `SupabaseClient` instance. Reads `SUPABASE_URL` and `SUPABASE_ANON_KEY` f
 
 ### SleepCalculator
 
-Pure function `sleepHours(bedtime: String, wakeTime: String) -> Double?`. Parses `HH:MM` strings, handles overnight crossings (bedtime > wake time adds 24 hours). Direct port of `src/lib/sleep.ts`.
+Pure function `sleepHours(bedtime: String, wakeTime: String) -> Double?`. Accepts `HH:MM` or `HH:MM:SS` strings (strips seconds if present). Handles overnight crossings (bedtime > wake time adds 24 hours). Direct port of `src/lib/sleep.ts`.
 
 ## Auth Flow
 
@@ -97,6 +97,8 @@ Pure function `sleepHours(bedtime: String, wakeTime: String) -> Double?`. Parses
 **Sign Out** — accessible from a button in the tab bar navigation header.
 
 ## Screens
+
+**Main tab structure:** When authenticated, the app shows a `TabView` with three tabs: Today (calendar icon), History (list icon), Charts (chart icon). Each tab's root view is wrapped in a `NavigationStack` to support push navigation (e.g. History → past-date TodayView).
 
 ### Today (`TodayView`)
 
