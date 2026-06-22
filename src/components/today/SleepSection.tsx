@@ -22,11 +22,6 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     onChange({ ...values, wake_time, sleep_hours: hours })
   }
 
-  const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = parseFloat(e.target.value)
-    onChange({ ...values, sleep_hours: isNaN(v) ? null : v })
-  }
-
   const inputClass = "border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg p-2 text-base"
 
   return (
@@ -43,22 +38,6 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
             value={values.wake_time}
             onChange={e => handleWakeTime(e.target.value)}
             className={inputClass}
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="sleep_hours" className="text-sm text-gray-600 dark:text-gray-400">
-            Hours slept {values.sleep_hours !== null ? `(${values.sleep_hours}h)` : ''}
-          </label>
-          <input
-            id="sleep_hours"
-            type="number"
-            min={0}
-            max={24}
-            step={0.5}
-            value={values.sleep_hours ?? ''}
-            onChange={handleHoursChange}
-            placeholder="e.g. 7.5"
-            className={`${inputClass} dark:placeholder-gray-400`}
           />
         </div>
         <Slider
