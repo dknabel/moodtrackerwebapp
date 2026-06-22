@@ -17,6 +17,7 @@ const baseLog: DailyLog = {
   sleep_quality: 4,
   bedtime: null,
   wake_time: null,
+  tonight_bedtime: null,
   gratitude: null,
   created_at: '',
   updated_at: '',
