@@ -8,16 +8,31 @@ vi.mock('../../hooks/useDailyLog')
 
 const mockSave = vi.fn().mockResolvedValue({ error: null })
 
-function emptyLog(date: string, overrides: Record<string, unknown> = {}) {
-  return {
-    id: 'x', user_id: 'u1', date,
+// Stable object references — must not be created inside the mock factory.
+// The useEffect in TodayPage depends on `yesterdayLog` by reference; creating
+// a new object on every render causes an infinite re-render loop.
+const noLog = { log: null, loading: false, error: null, save: mockSave }
+const yesterdayWithBedtime = {
+  log: {
+    id: 'y1', user_id: 'u1', date: '2026-06-21',
     mood_rating: null, mood_energy: null, mood_anxiety: null,
     meals_count: null, exercised: null,
     sleep_hours: null, sleep_quality: null,
-    bedtime: null, wake_time: null, tonight_bedtime: null,
+    bedtime: null, wake_time: null, tonight_bedtime: '23:00:00',
     gratitude: null, created_at: '', updated_at: '',
-    ...overrides,
-  }
+  },
+  loading: false, error: null, save: vi.fn(),
+}
+const todayWithBedtime = {
+  log: {
+    id: 't1', user_id: 'u1', date: '2026-06-22',
+    mood_rating: null, mood_energy: null, mood_anxiety: null,
+    meals_count: null, exercised: null,
+    sleep_hours: null, sleep_quality: null,
+    bedtime: '22:30:00', wake_time: null, tonight_bedtime: null,
+    gratitude: null, created_at: '', updated_at: '',
+  },
+  loading: false, error: null, save: mockSave,
 }
 
 function renderPage(date = '2026-06-22') {
@@ -33,16 +48,9 @@ function renderPage(date = '2026-06-22') {
 describe('TodayPage auto-populate bedtime', () => {
   beforeEach(() => {
     vi.mocked(useDailyLogModule.useDailyLog).mockImplementation((date: string) => {
-      if (date === '2026-06-22') {
-        return { log: null, loading: false, error: null, save: mockSave }
-      }
-      if (date === '2026-06-21') {
-        return {
-          log: emptyLog('2026-06-21', { tonight_bedtime: '23:00:00' }),
-          loading: false, error: null, save: vi.fn(),
-        }
-      }
-      return { log: null, loading: false, error: null, save: vi.fn() }
+      if (date === '2026-06-22') return noLog
+      if (date === '2026-06-21') return yesterdayWithBedtime
+      return noLog
     })
   })
 
@@ -55,19 +63,9 @@ describe('TodayPage auto-populate bedtime', () => {
 
   it('does not overwrite bedtime when today log already has one', async () => {
     vi.mocked(useDailyLogModule.useDailyLog).mockImplementation((date: string) => {
-      if (date === '2026-06-22') {
-        return {
-          log: emptyLog('2026-06-22', { bedtime: '22:30:00' }),
-          loading: false, error: null, save: mockSave,
-        }
-      }
-      if (date === '2026-06-21') {
-        return {
-          log: emptyLog('2026-06-21', { tonight_bedtime: '23:00:00' }),
-          loading: false, error: null, save: vi.fn(),
-        }
-      }
-      return { log: null, loading: false, error: null, save: vi.fn() }
+      if (date === '2026-06-22') return todayWithBedtime
+      if (date === '2026-06-21') return yesterdayWithBedtime
+      return noLog
     })
     renderPage('2026-06-22')
     await waitFor(() => {
