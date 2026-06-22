@@ -28,7 +28,7 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -36,13 +36,13 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       {error && (
         <>
           <p className="text-red-600 text-sm">{error}</p>
           {error === 'Invalid login credentials' && (
-            <p className="text-gray-500 text-xs text-center">
+            <p className="text-gray-500 dark:text-gray-400 text-xs text-center">
               Signed up with Google? Use the button above.
             </p>
           )}

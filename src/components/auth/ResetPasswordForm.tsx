@@ -37,7 +37,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-3 max-w-sm text-center">
-        <p className="text-gray-700 text-sm">
+        <p className="text-gray-700 dark:text-gray-300 text-sm">
           Password updated. You're now signed in.
         </p>
         <button
@@ -53,14 +53,14 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm">
-      <p className="text-gray-500 text-sm text-center">Choose a new password</p>
+      <p className="text-gray-500 dark:text-gray-400 text-sm text-center">Choose a new password</p>
       <input
         type="password"
         value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder="New password"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -68,7 +68,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
         onChange={e => setConfirm(e.target.value)}
         placeholder="Confirm new password"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       {error === 'link-expired' ? (
         <p className="text-red-600 text-sm text-center">
