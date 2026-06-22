@@ -8,25 +8,45 @@ const defaults = {
   wake_time: '',
   sleep_hours: null as number | null,
   sleep_quality: 3,
+  tonight_bedtime: '',
 }
 
 describe('SleepSection', () => {
-  it('renders bedtime and wake time inputs', () => {
+  it('renders "Last night\'s sleep" and "Tonight" sub-section headings', () => {
     render(<SleepSection values={defaults} onChange={vi.fn()} />)
-    expect(screen.getByLabelText(/bedtime/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/wake time/i)).toBeInTheDocument()
+    expect(screen.getByText("Last night's sleep")).toBeInTheDocument()
+    expect(screen.getByText('Tonight')).toBeInTheDocument()
   })
 
-  it('auto-calculates sleep hours when both times are set', async () => {
+  it('renders wake time before bedtime in the Last night sub-section', () => {
+    render(<SleepSection values={defaults} onChange={vi.fn()} />)
+    const wakeTime = screen.getByLabelText('Wake time')
+    const bedtime = screen.getByLabelText('Bedtime')
+    expect(wakeTime.compareDocumentPosition(bedtime) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('renders a "Tonight\'s bedtime" field', () => {
+    render(<SleepSection values={defaults} onChange={vi.fn()} />)
+    expect(screen.getByLabelText("Tonight's bedtime")).toBeInTheDocument()
+  })
+
+  it('auto-calculates sleep hours when bedtime and wake time are set', async () => {
     const onChange = vi.fn()
     render(<SleepSection values={defaults} onChange={onChange} />)
-
-    await userEvent.type(screen.getByLabelText(/bedtime/i), '22:00')
-    await userEvent.type(screen.getByLabelText(/wake time/i), '06:00')
-
+    await userEvent.type(screen.getByLabelText('Bedtime'), '22:00')
+    await userEvent.type(screen.getByLabelText('Wake time'), '06:00')
     await waitFor(() => {
-      const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0]
-      expect(lastCall.sleep_hours).toBe(8)
+      const last = onChange.mock.calls[onChange.mock.calls.length - 1][0]
+      expect(last.sleep_hours).toBe(8)
     })
+  })
+
+  it('propagates tonight_bedtime through onChange without affecting sleep_hours', async () => {
+    const onChange = vi.fn()
+    render(<SleepSection values={defaults} onChange={onChange} />)
+    await userEvent.type(screen.getByLabelText("Tonight's bedtime"), '23:00')
+    const last = onChange.mock.calls[onChange.mock.calls.length - 1][0]
+    expect(last.tonight_bedtime).toBe('23:00')
+    expect(last.sleep_hours).toBeNull()
   })
 })
