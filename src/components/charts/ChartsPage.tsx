@@ -20,6 +20,7 @@ export function ChartsPage() {
     fromDate: format(subDays(new Date(), rangeDays), 'yyyy-MM-dd'),
   }), [rangeDays])
   const { logs, loading } = useLogs(fromDate, toDate)
+  // useLogs returns newest-first (for History). Charts need oldest-first for left-to-right time axis.
   const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])
   const { isDark } = useTheme()
 
