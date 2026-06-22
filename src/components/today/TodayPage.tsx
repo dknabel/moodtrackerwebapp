@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { format } from 'date-fns'
+import { format, subDays, parseISO } from 'date-fns'
 import { useDailyLog } from '../../hooks/useDailyLog'
 import { MoodSection } from './MoodSection'
 import { FoodSection } from './FoodSection'
@@ -22,6 +22,7 @@ interface FormState {
   wake_time: string
   sleep_hours: number | null
   sleep_quality: number
+  tonight_bedtime: string
   gratitude: string
 }
 
@@ -35,6 +36,7 @@ const DEFAULT_FORM: FormState = {
   wake_time: '',
   sleep_hours: null,
   sleep_quality: 3,
+  tonight_bedtime: '',
   gratitude: '',
 }
 
@@ -42,13 +44,17 @@ const toLogData = (f: FormState) => ({
   ...f,
   bedtime: f.bedtime || null,
   wake_time: f.wake_time || null,
+  tonight_bedtime: f.tonight_bedtime || null,
   gratitude: f.gratitude || null,
 })
 
 export function TodayPage() {
   const { date: dateParam } = useParams<{ date?: string }>()
   const date = dateParam ?? todayStr()
+  const yesterday = format(subDays(parseISO(date), 1), 'yyyy-MM-dd')
+
   const { log, loading, save } = useDailyLog(date)
+  const { log: yesterdayLog, loading: yesterdayLoading } = useDailyLog(yesterday)
 
   const [form, setForm] = useState<FormState>(DEFAULT_FORM)
   const [saving, setSaving] = useState(false)
@@ -56,6 +62,8 @@ export function TodayPage() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
+    if (loading || yesterdayLoading) return
+    const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
     if (log) {
       setForm({
         mood_rating: log.mood_rating ?? 5,
@@ -63,16 +71,17 @@ export function TodayPage() {
         mood_anxiety: log.mood_anxiety ?? 5,
         meals_count: log.meals_count ?? 0,
         exercised: log.exercised ?? false,
-        bedtime: log.bedtime?.slice(0, 5) ?? '',
+        bedtime: log.bedtime?.slice(0, 5) || autoBedtime,
         wake_time: log.wake_time?.slice(0, 5) ?? '',
         sleep_hours: log.sleep_hours,
         sleep_quality: log.sleep_quality ?? 3,
+        tonight_bedtime: log.tonight_bedtime?.slice(0, 5) ?? '',
         gratitude: log.gratitude ?? '',
       })
     } else {
-      setForm(DEFAULT_FORM)
+      setForm({ ...DEFAULT_FORM, bedtime: autoBedtime })
     }
-  }, [log])
+  }, [log, loading, yesterdayLog, yesterdayLoading])
 
   const handleSave = async () => {
     setSaving(true)
@@ -88,7 +97,7 @@ export function TodayPage() {
     setSaving(false)
   }
 
-  if (loading) {
+  if (loading || yesterdayLoading) {
     return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
@@ -122,7 +131,13 @@ export function TodayPage() {
       <hr className="border-gray-200 dark:border-gray-700" />
 
       <SleepSection
-        values={{ bedtime: form.bedtime, wake_time: form.wake_time, sleep_hours: form.sleep_hours, sleep_quality: form.sleep_quality }}
+        values={{
+          bedtime: form.bedtime,
+          wake_time: form.wake_time,
+          sleep_hours: form.sleep_hours,
+          sleep_quality: form.sleep_quality,
+          tonight_bedtime: form.tonight_bedtime,
+        }}
         onChange={v => setForm(f => ({ ...f, ...v }))}
       />
 
