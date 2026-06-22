@@ -23,8 +23,8 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
-      <h1 className="text-2xl font-bold text-gray-900">Mood Tracker</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4 dark:bg-gray-900">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Mood Tracker</h1>
 
       {mode === 'verify-email' && <VerifyEmailNotice email={verifyEmail} />}
 
@@ -32,7 +32,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
 
       {mode === 'forgot-password' && (
         <>
-          <p className="text-gray-500 text-sm">Reset your password</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Reset your password</p>
           <ForgotPasswordForm />
           <button
             type="button"
@@ -46,7 +46,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
 
       {(mode === 'sign-in' || mode === 'sign-up') && (
         <>
-          <p className="text-gray-500 text-sm">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
             {mode === 'sign-in' ? 'Sign in to your account' : 'Create an account'}
           </p>
           <GoogleButton />
@@ -57,7 +57,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
           {mode === 'sign-up' && (
             <SignUpForm onSuccess={handleSignUpSuccess} onSwitchToSignIn={() => setMode('sign-in')} />
           )}
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             {mode === 'sign-in' ? (
               <>
                 No account?{' '}

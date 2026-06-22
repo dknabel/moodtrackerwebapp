@@ -47,7 +47,7 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -55,7 +55,7 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -63,7 +63,7 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
         onChange={e => setConfirm(e.target.value)}
         placeholder="Confirm password"
         required
-        className="border border-gray-300 rounded-lg p-3 text-base"
+        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
       />
       {error === 'already-exists' ? (
         <p className="text-red-600 text-sm">
