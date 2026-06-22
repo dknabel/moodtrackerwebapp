@@ -89,14 +89,14 @@ export function TodayPage() {
   }
 
   if (loading) {
-    return <div className="text-center text-gray-400 mt-12">Loading…</div>
+    return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
   const isToday = date === todayStr()
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-gray-900">
+      <h1 className="text-xl font-bold text-gray-900 dark:text-white">
         {isToday ? 'Today' : date}
       </h1>
 
@@ -105,28 +105,28 @@ export function TodayPage() {
         onChange={v => setForm(f => ({ ...f, ...v }))}
       />
 
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-700" />
 
       <FoodSection
         value={form.meals_count}
         onChange={v => setForm(f => ({ ...f, meals_count: v }))}
       />
 
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-700" />
 
       <ExerciseSection
         value={form.exercised}
         onChange={v => setForm(f => ({ ...f, exercised: v }))}
       />
 
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-700" />
 
       <SleepSection
         values={{ bedtime: form.bedtime, wake_time: form.wake_time, sleep_hours: form.sleep_hours, sleep_quality: form.sleep_quality }}
         onChange={v => setForm(f => ({ ...f, ...v }))}
       />
 
-      <hr className="border-gray-200" />
+      <hr className="border-gray-200 dark:border-gray-700" />
 
       <GratitudeSection
         value={form.gratitude}
