@@ -54,28 +54,30 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     onChange({ ...values, sleep_hours: isNaN(v) ? null : v })
   }
 
+  const inputClass = "border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg p-2 text-base"
+
   const bedtimeField = (
     <div className="flex flex-col gap-1 flex-1">
-      <label htmlFor="bedtime" className="text-sm text-gray-600">Bedtime</label>
+      <label htmlFor="bedtime" className="text-sm text-gray-600 dark:text-gray-400">Bedtime</label>
       <input
         id="bedtime"
         type="time"
         value={values.bedtime}
         onChange={e => handleBedtime(e.target.value)}
-        className="border border-gray-300 rounded-lg p-2 text-base"
+        className={inputClass}
       />
     </div>
   )
 
   const wakeTimeField = (
     <div className="flex flex-col gap-1 flex-1">
-      <label htmlFor="wake_time" className="text-sm text-gray-600">Wake time</label>
+      <label htmlFor="wake_time" className="text-sm text-gray-600 dark:text-gray-400">Wake time</label>
       <input
         id="wake_time"
         type="time"
         value={values.wake_time}
         onChange={e => handleWakeTime(e.target.value)}
-        className="border border-gray-300 rounded-lg p-2 text-base"
+        className={inputClass}
       />
     </div>
   )
@@ -88,14 +90,14 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="text-base font-semibold text-gray-900">Sleep</h2>
-        {contextLabel && <p className="text-sm text-gray-500 mt-0.5">{contextLabel}</p>}
+        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Sleep</h2>
+        {contextLabel && <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{contextLabel}</p>}
       </div>
       <div className="flex gap-4">
         {timeOfDay === 'morning' ? <>{wakeTimeField}{bedtimeField}</> : <>{bedtimeField}{wakeTimeField}</>}
       </div>
       <div className="flex flex-col gap-1">
-        <label htmlFor="sleep_hours" className="text-sm text-gray-600">
+        <label htmlFor="sleep_hours" className="text-sm text-gray-600 dark:text-gray-400">
           Hours slept {values.sleep_hours !== null ? `(${values.sleep_hours}h)` : ''}
         </label>
         <input
@@ -107,7 +109,7 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
           value={values.sleep_hours ?? ''}
           onChange={handleHoursChange}
           placeholder="e.g. 7.5"
-          className="border border-gray-300 rounded-lg p-2 text-base"
+          className={`${inputClass} dark:placeholder-gray-400`}
         />
       </div>
       <Slider

@@ -10,7 +10,7 @@ export function Slider({ label, value, min = 1, max = 10, onChange }: SliderProp
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between text-sm">
-        <span className="text-gray-700">{label}</span>
+        <span className="text-gray-700 dark:text-gray-300">{label}</span>
         <span className="font-semibold text-blue-600">{value}</span>
       </div>
       <input
