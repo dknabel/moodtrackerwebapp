@@ -16,10 +16,10 @@ export function HistoryEntry({ log }: HistoryEntryProps) {
     <button
       type="button"
       onClick={() => navigate(`/log/${log.date}`)}
-      className="w-full text-left bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col gap-1"
+      className="w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1"
     >
-      <span className="text-sm font-semibold text-gray-900">{log.date}</span>
-      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+      <span className="text-sm font-semibold text-gray-900 dark:text-white">{log.date}</span>
+      <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
         {log.mood_rating !== null && <span>Mood {log.mood_rating}/10</span>}
         {log.mood_energy !== null && <span>Energy {log.mood_energy}/10</span>}
         {log.mood_anxiety !== null && <span>Anxiety {log.mood_anxiety}/10</span>}
@@ -30,7 +30,7 @@ export function HistoryEntry({ log }: HistoryEntryProps) {
         )}
       </div>
       {log.gratitude && (
-        <blockquote className="text-xs text-gray-500 italic mt-1">
+        <blockquote className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
           "{truncate(log.gratitude, 80)}"
         </blockquote>
       )}
