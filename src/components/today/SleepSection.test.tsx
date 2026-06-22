@@ -18,22 +18,14 @@ describe('SleepSection', () => {
     expect(screen.getByText('Tonight')).toBeInTheDocument()
   })
 
-  it('renders wake time before bedtime in the Last night sub-section', () => {
-    render(<SleepSection values={defaults} onChange={vi.fn()} />)
-    const wakeTime = screen.getByLabelText('Wake time')
-    const bedtime = screen.getByLabelText('Bedtime')
-    expect(wakeTime.compareDocumentPosition(bedtime) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-  })
-
   it('renders a "Tonight\'s bedtime" field', () => {
     render(<SleepSection values={defaults} onChange={vi.fn()} />)
     expect(screen.getByLabelText("Tonight's bedtime")).toBeInTheDocument()
   })
 
-  it('auto-calculates sleep hours when bedtime and wake time are set', async () => {
+  it('auto-calculates sleep hours from bedtime prop and typed wake time', async () => {
     const onChange = vi.fn()
-    render(<SleepSection values={defaults} onChange={onChange} />)
-    await userEvent.type(screen.getByLabelText('Bedtime'), '22:00')
+    render(<SleepSection values={{ ...defaults, bedtime: '22:00' }} onChange={onChange} />)
     await userEvent.type(screen.getByLabelText('Wake time'), '06:00')
     await waitFor(() => {
       const last = onChange.mock.calls[onChange.mock.calls.length - 1][0]

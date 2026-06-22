@@ -1,4 +1,3 @@
-import { useRef, useEffect } from 'react'
 import { Slider } from '../ui/Slider'
 import { calculateSleepHours } from '../../lib/sleep'
 
@@ -16,24 +15,9 @@ interface SleepSectionProps {
 }
 
 export function SleepSection({ values, onChange }: SleepSectionProps) {
-  const bedtimeRef = useRef(values.bedtime)
-  const wakeTimeRef = useRef(values.wake_time)
-
-  useEffect(() => { bedtimeRef.current = values.bedtime }, [values.bedtime])
-  useEffect(() => { wakeTimeRef.current = values.wake_time }, [values.wake_time])
-
-  const handleBedtime = (bedtime: string) => {
-    bedtimeRef.current = bedtime
-    const hours = bedtime && wakeTimeRef.current
-      ? calculateSleepHours(bedtime, wakeTimeRef.current)
-      : null
-    onChange({ ...values, bedtime, sleep_hours: hours })
-  }
-
   const handleWakeTime = (wake_time: string) => {
-    wakeTimeRef.current = wake_time
-    const hours = bedtimeRef.current && wake_time
-      ? calculateSleepHours(bedtimeRef.current, wake_time)
+    const hours = values.bedtime && wake_time
+      ? calculateSleepHours(values.bedtime, wake_time)
       : null
     onChange({ ...values, wake_time, sleep_hours: hours })
   }
@@ -51,27 +35,15 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
 
       <div className="flex flex-col gap-3">
         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Last night's sleep</h3>
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-1 flex-1">
-            <label htmlFor="wake_time" className="text-sm text-gray-600 dark:text-gray-400">Wake time</label>
-            <input
-              id="wake_time"
-              type="time"
-              value={values.wake_time}
-              onChange={e => handleWakeTime(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-          <div className="flex flex-col gap-1 flex-1">
-            <label htmlFor="bedtime" className="text-sm text-gray-600 dark:text-gray-400">Bedtime</label>
-            <input
-              id="bedtime"
-              type="time"
-              value={values.bedtime}
-              onChange={e => handleBedtime(e.target.value)}
-              className={inputClass}
-            />
-          </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="wake_time" className="text-sm text-gray-600 dark:text-gray-400">Wake time</label>
+          <input
+            id="wake_time"
+            type="time"
+            value={values.wake_time}
+            onChange={e => handleWakeTime(e.target.value)}
+            className={inputClass}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="sleep_hours" className="text-sm text-gray-600 dark:text-gray-400">
