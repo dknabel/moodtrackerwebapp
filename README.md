@@ -1,4 +1,4 @@
-# Mood Tracker Plus
+# Mood Tracker+
 
 A daily mood and wellness tracker. Log how you're feeling, track sleep and habits, and spot patterns over time.
 
