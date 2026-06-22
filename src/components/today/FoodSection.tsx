@@ -19,7 +19,7 @@ export function FoodSection({ value, onChange }: FoodSectionProps) {
           >
             −
           </button>
-          <span className="text-xl font-semibold w-6 text-center">{value}</span>
+          <span className="text-xl font-semibold w-6 text-center dark:text-white">{value}</span>
           <button
             type="button"
             onClick={() => onChange(value + 1)}
