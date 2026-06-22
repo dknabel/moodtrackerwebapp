@@ -14,7 +14,16 @@ interface SleepSectionProps {
   onChange: (values: SleepValues) => void
 }
 
+function getTimeOfDay(): 'morning' | 'evening' | 'day' {
+  const h = new Date().getHours()
+  if (h >= 5 && h < 12) return 'morning'
+  if (h >= 20 || h < 5) return 'evening'
+  return 'day'
+}
+
 export function SleepSection({ values, onChange }: SleepSectionProps) {
+  const timeOfDay = getTimeOfDay()
+
   // Track latest typed values in refs so handlers can cross-reference
   // even when the parent hasn't flushed the prop update yet (e.g. rapid typing).
   // Also sync refs when props change externally (e.g. log loaded from Supabase).
@@ -45,30 +54,45 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     onChange({ ...values, sleep_hours: isNaN(v) ? null : v })
   }
 
+  const bedtimeField = (
+    <div className="flex flex-col gap-1 flex-1">
+      <label htmlFor="bedtime" className="text-sm text-gray-600">Bedtime</label>
+      <input
+        id="bedtime"
+        type="time"
+        value={values.bedtime}
+        onChange={e => handleBedtime(e.target.value)}
+        className="border border-gray-300 rounded-lg p-2 text-base"
+      />
+    </div>
+  )
+
+  const wakeTimeField = (
+    <div className="flex flex-col gap-1 flex-1">
+      <label htmlFor="wake_time" className="text-sm text-gray-600">Wake time</label>
+      <input
+        id="wake_time"
+        type="time"
+        value={values.wake_time}
+        onChange={e => handleWakeTime(e.target.value)}
+        className="border border-gray-300 rounded-lg p-2 text-base"
+      />
+    </div>
+  )
+
+  const contextLabel =
+    timeOfDay === 'morning' ? 'Good morning — how did you sleep?' :
+    timeOfDay === 'evening' ? 'Heading to bed?' :
+    null
+
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-base font-semibold text-gray-900">Sleep</h2>
+      <div>
+        <h2 className="text-base font-semibold text-gray-900">Sleep</h2>
+        {contextLabel && <p className="text-sm text-gray-500 mt-0.5">{contextLabel}</p>}
+      </div>
       <div className="flex gap-4">
-        <div className="flex flex-col gap-1 flex-1">
-          <label htmlFor="bedtime" className="text-sm text-gray-600">Bedtime</label>
-          <input
-            id="bedtime"
-            type="time"
-            value={values.bedtime}
-            onChange={e => handleBedtime(e.target.value)}
-            className="border border-gray-300 rounded-lg p-2 text-base"
-          />
-        </div>
-        <div className="flex flex-col gap-1 flex-1">
-          <label htmlFor="wake_time" className="text-sm text-gray-600">Wake time</label>
-          <input
-            id="wake_time"
-            type="time"
-            value={values.wake_time}
-            onChange={e => handleWakeTime(e.target.value)}
-            className="border border-gray-300 rounded-lg p-2 text-base"
-          />
-        </div>
+        {timeOfDay === 'morning' ? <>{wakeTimeField}{bedtimeField}</> : <>{bedtimeField}{wakeTimeField}</>}
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="sleep_hours" className="text-sm text-gray-600">
