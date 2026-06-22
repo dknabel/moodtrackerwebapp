@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 function getInitialTheme(): boolean {
   const stored = localStorage.getItem('theme')
@@ -25,13 +25,13 @@ export function useTheme() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  const toggle = () => {
+  const toggle = useCallback(() => {
     setIsDark(prev => {
       const next = !prev
       localStorage.setItem('theme', next ? 'dark' : 'light')
       return next
     })
-  }
+  }, [])
 
   return { isDark, toggle }
 }
