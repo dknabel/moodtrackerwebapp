@@ -9,7 +9,7 @@ interface MedData {
 
 interface Props {
   medications: Medication[]
-  onAdd: (data: MedData) => Promise<void>
+  onAdd: (data: MedData) => Promise<string | null>
   onUpdate: (id: string, data: MedData) => Promise<void>
   onDeactivate: (id: string) => Promise<void>
   onClose: () => void
@@ -21,14 +21,20 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
   const [addForm, setAddForm] = useState(EMPTY)
   const [editId, setEditId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState(EMPTY)
+  const [addError, setAddError] = useState<string | null>(null)
 
   const handleAdd = async () => {
     if (!addForm.name.trim() || !addForm.dose.trim()) return
-    await onAdd({
+    setAddError(null)
+    const error = await onAdd({
       name: addForm.name.trim(),
       dose: addForm.dose.trim(),
       scheduled_time: addForm.scheduled_time || null,
     })
+    if (error) {
+      setAddError(error)
+      return
+    }
     setAddForm(EMPTY)
   }
 
@@ -154,6 +160,9 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
             value={addForm.scheduled_time}
             onChange={e => setAddForm(f => ({ ...f, scheduled_time: e.target.value }))}
           />
+          {addError && (
+            <p className="text-red-500 text-xs">{addError}</p>
+          )}
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim() || !addForm.dose.trim()}
