@@ -19,3 +19,26 @@ export interface DailyLog {
 
 export type DailyLogInsert = Omit<DailyLog, 'id' | 'created_at' | 'updated_at'>
 export type DailyLogUpdate = Partial<Omit<DailyLogInsert, 'user_id' | 'date'>>
+
+export interface Medication {
+  id: string
+  user_id: string
+  name: string
+  dose: string
+  scheduled_time: string | null  // 'HH:MM'
+  active: boolean
+  created_at: string
+}
+
+export interface MedicationLog {
+  id: string
+  user_id: string
+  date: string                   // 'YYYY-MM-DD'
+  medication_id: string
+  taken: boolean
+  taken_at: string | null        // 'HH:MM'
+  created_at: string
+}
+
+export type MedicationInsert = Omit<Medication, 'id' | 'created_at'>
+export type MedicationLogUpsert = Omit<MedicationLog, 'id' | 'created_at'>
