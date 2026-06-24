@@ -4,8 +4,9 @@ import { format, subDays, parseISO } from 'date-fns'
 import { useDailyLog } from '../../hooks/useDailyLog'
 import { MoodSection } from './MoodSection'
 import { FoodSection } from './FoodSection'
-import { ExerciseSection } from './ExerciseSection'
+import { MedsSection } from './MedsSection'
 import { SleepSection } from './SleepSection'
+import { ExerciseSection } from './ExerciseSection'
 import { GratitudeSection } from './GratitudeSection'
 
 function todayStr() {
@@ -123,10 +124,7 @@ export function TodayPage() {
 
       <hr className="border-gray-200 dark:border-gray-700" />
 
-      <ExerciseSection
-        value={form.exercised}
-        onChange={v => setForm(f => ({ ...f, exercised: v }))}
-      />
+      <MedsSection date={date} />
 
       <hr className="border-gray-200 dark:border-gray-700" />
 
@@ -139,6 +137,13 @@ export function TodayPage() {
           tonight_bedtime: form.tonight_bedtime,
         }}
         onChange={v => setForm(f => ({ ...f, ...v }))}
+      />
+
+      <hr className="border-gray-200 dark:border-gray-700" />
+
+      <ExerciseSection
+        value={form.exercised}
+        onChange={v => setForm(f => ({ ...f, exercised: v }))}
       />
 
       <hr className="border-gray-200 dark:border-gray-700" />
