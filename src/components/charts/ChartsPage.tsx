@@ -10,6 +10,7 @@ import { SleepChart } from './SleepChart'
 import { MealsChart } from './MealsChart'
 import { ExerciseChart } from './ExerciseChart'
 import { StatsSection } from './StatsSection'
+import { CorrelationsSection } from './CorrelationsSection'
 
 const RANGES = [
   { label: '7 days', days: 7 },
@@ -76,6 +77,10 @@ export function ChartsPage() {
       )}
 
       <StatsSection {...streaks} />
+
+      {chronologicalLogs.length > 0 && (
+        <CorrelationsSection logs={chronologicalLogs} isDark={isDark} />
+      )}
     </div>
   )
 }
