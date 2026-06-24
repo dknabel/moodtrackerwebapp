@@ -11,8 +11,6 @@ const log1Taken = { ...log1, taken: true, taken_at: '08:30' }
 const mockSingle = vi.fn()
 const mockSelectAfterUpsert = vi.fn(() => ({ single: mockSingle }))
 const mockUpsert = vi.fn(() => ({ select: mockSelectAfterUpsert }))
-const mockFetchResult = vi.fn().mockResolvedValue({ data: [log1], error: null })
-const mockEqForFetch = vi.fn(() => ({ then: mockFetchResult.bind(null) }))
 
 // chain: .select('*').eq('date', date) → Promise
 const mockSelectForFetch = vi.fn(() => ({

@@ -10,8 +10,6 @@ const med1 = {
 const mockSingle = vi.fn()
 const mockSelectAfterInsert = vi.fn(() => ({ single: mockSingle }))
 const mockInsert = vi.fn(() => ({ select: mockSelectAfterInsert }))
-const mockSelectAfterUpdate = vi.fn(() => ({ single: mockSingle }))
-const mockEqForUpdate = vi.fn(() => ({ select: mockSelectAfterUpdate }))
 const mockEqForDeactivate = vi.fn().mockResolvedValue({ data: null, error: null })
 const mockUpdate = vi.fn()
 const mockOrder = vi.fn().mockResolvedValue({ data: [med1], error: null })
