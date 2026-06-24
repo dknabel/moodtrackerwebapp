@@ -1,11 +1,15 @@
 import { useState, useMemo } from 'react'
 import { format, subDays } from 'date-fns'
 import { useLogs } from '../../hooks/useLogs'
+import { useMedications } from '../../hooks/useMedications'
+import { useMedicationLogsBulk } from '../../hooks/useMedicationLogsBulk'
 import { useTheme } from '../../hooks/useTheme'
+import { useStreaks } from '../../hooks/useStreaks'
 import { MoodChart } from './MoodChart'
 import { SleepChart } from './SleepChart'
 import { MealsChart } from './MealsChart'
 import { ExerciseChart } from './ExerciseChart'
+import { StatsSection } from './StatsSection'
 
 const RANGES = [
   { label: '7 days', days: 7 },
@@ -15,17 +19,25 @@ const RANGES = [
 
 export function ChartsPage() {
   const [rangeDays, setRangeDays] = useState(30)
-  const { fromDate, toDate } = useMemo(() => ({
-    toDate: format(new Date(), 'yyyy-MM-dd'),
-    fromDate: format(subDays(new Date(), rangeDays), 'yyyy-MM-dd'),
-  }), [rangeDays])
+  const { fromDate, toDate, from365 } = useMemo(() => {
+    const now = new Date()
+    return {
+      toDate: format(now, 'yyyy-MM-dd'),
+      fromDate: format(subDays(now, rangeDays), 'yyyy-MM-dd'),
+      from365: format(subDays(now, 365), 'yyyy-MM-dd'),
+    }
+  }, [rangeDays])
+
   const { logs, loading } = useLogs(fromDate, toDate)
-  // useLogs returns newest-first (for History). Charts need oldest-first for left-to-right time axis.
+  const { logs: logs365 } = useLogs(from365, toDate)
+  const { medications } = useMedications()
+  const { logs: medLogs365 } = useMedicationLogsBulk(from365, toDate)
   const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])
   const { isDark } = useTheme()
+  const streaks = useStreaks(logs365, medLogs365, medications)
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Charts</h1>
         <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
@@ -62,6 +74,8 @@ export function ChartsPage() {
           <ExerciseChart logs={chronologicalLogs} isDark={isDark} />
         </>
       )}
+
+      <StatsSection {...streaks} />
     </div>
   )
 }
