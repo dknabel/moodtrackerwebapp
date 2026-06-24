@@ -12,7 +12,7 @@ export function computeCorrelation(
   splitFn: (log: DailyLog) => boolean,
   labelA: string,
   labelB: string,
-  minPoints = 5
+  minPoints = 3
 ): CorrelationResult {
   const withValue = (arr: DailyLog[]) => arr.filter(l => l[yKey] != null)
   const groupA = withValue(logs.filter(splitFn))
