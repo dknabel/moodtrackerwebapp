@@ -25,15 +25,17 @@ export function useMedications() {
       })
   }, [])
 
-  const addMedication = async (data: MedData): Promise<void> => {
+  const addMedication = async (data: MedData): Promise<string | null> => {
     const { data: auth } = await supabase.auth.getUser()
-    if (!auth.user) return
-    const { data: inserted } = await supabase
+    if (!auth.user) return 'Not authenticated'
+    const { data: inserted, error } = await supabase
       .from('medications')
       .insert({ ...data, user_id: auth.user.id, active: true })
       .select()
       .single()
+    if (error) return error.message
     if (inserted) setMedications(m => [...m, inserted])
+    return null
   }
 
   const updateMedication = async (id: string, data: MedData): Promise<void> => {
