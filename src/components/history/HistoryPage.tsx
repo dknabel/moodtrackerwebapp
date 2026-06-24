@@ -20,44 +20,47 @@ export function HistoryPage() {
 
   const handleExport = async () => {
     setExporting(true)
-    const today = format(new Date(), 'yyyy-MM-dd')
-    const from =
-      exportRange === 'all'
-        ? '2020-01-01'
-        : format(subDays(new Date(), exportRange === '30' ? 30 : 90), 'yyyy-MM-dd')
+    try {
+      const today = format(new Date(), 'yyyy-MM-dd')
+      const from =
+        exportRange === 'all'
+          ? '2020-01-01'
+          : format(subDays(new Date(), exportRange === '30' ? 30 : 90), 'yyyy-MM-dd')
 
-    const [{ data: exportLogs }, { data: medications }, { data: medLogs }] = await Promise.all([
-      supabase
-        .from('daily_logs')
-        .select('*')
-        .gte('date', from)
-        .lte('date', today)
-        .order('date', { ascending: false }),
-      supabase
-        .from('medications')
-        .select('*')
-        .eq('active', true)
-        .order('created_at', { ascending: true }),
-      supabase
-        .from('medication_logs')
-        .select('*')
-        .gte('date', from)
-        .lte('date', today),
-    ])
+      const [{ data: exportLogs }, { data: medications }, { data: medLogs }] = await Promise.all([
+        supabase
+          .from('daily_logs')
+          .select('*')
+          .gte('date', from)
+          .lte('date', today)
+          .order('date', { ascending: false }),
+        supabase
+          .from('medications')
+          .select('*')
+          .eq('active', true)
+          .order('created_at', { ascending: true }),
+        supabase
+          .from('medication_logs')
+          .select('*')
+          .gte('date', from)
+          .lte('date', today),
+      ])
 
-    const rangeLabel =
-      exportRange === 'all' ? 'All time' : `Last ${exportRange} days`
-    const filename = `mood-tracker-${format(new Date(), 'yyyy-MM-dd')}`
+      const rangeLabel =
+        exportRange === 'all' ? 'All time' : `Last ${exportRange} days`
+      const filename = `mood-tracker-${format(new Date(), 'yyyy-MM-dd')}`
 
-    if (exportFormat === 'csv') {
-      const content = buildCsvRows(exportLogs ?? [], medications ?? [], medLogs ?? [])
-      downloadCsv(content, `${filename}.csv`)
-    } else {
-      await downloadPdf(exportLogs ?? [], medications ?? [], medLogs ?? [], rangeLabel, `${filename}.pdf`)
+      if (exportFormat === 'csv') {
+        const content = buildCsvRows(exportLogs ?? [], medications ?? [], medLogs ?? [])
+        downloadCsv(content, `${filename}.csv`)
+      } else {
+        await downloadPdf(exportLogs ?? [], medications ?? [], medLogs ?? [], rangeLabel, `${filename}.pdf`)
+      }
+
+      setShowExport(false)
+    } finally {
+      setExporting(false)
     }
-
-    setExporting(false)
-    setShowExport(false)
   }
 
   if (loading) {
