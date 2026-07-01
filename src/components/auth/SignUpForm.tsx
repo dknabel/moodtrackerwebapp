@@ -21,7 +21,7 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
     }
     setLoading(true)
     setError(null)
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: window.location.origin },
@@ -33,6 +33,10 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
       } else {
         setError(error.message)
       }
+    } else if (data.user && data.user.identities?.length === 0) {
+      // Email enumeration protection returns a fake success with an empty
+      // identities array when the address is already registered.
+      setError('already-exists')
     } else {
       onSuccess(email)
     }

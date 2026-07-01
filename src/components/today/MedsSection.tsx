@@ -8,14 +8,25 @@ interface Props {
 }
 
 export function MedsSection({ date }: Props) {
-  const { medications, loading: medsLoading, addMedication, updateMedication, deactivateMedication } = useMedications()
-  const { logs, loading: logsLoading, setTaken } = useMedicationLogs(date)
+  const {
+    medications, loading: medsLoading, error: medsError,
+    addMedication, updateMedication, deactivateMedication,
+  } = useMedications()
+  const { logs, loading: logsLoading, error: logsError, setTaken } = useMedicationLogs(date)
   const [showModal, setShowModal] = useState(false)
+  const [takenError, setTakenError] = useState<string | null>(null)
 
-  if (medsLoading || logsLoading) return null
+  const loading = medsLoading || logsLoading
+  const fetchError = medsError ?? logsError
 
   const getLog = (medicationId: string) =>
     logs.find(l => l.medication_id === medicationId)
+
+  const handleSetTaken = async (medicationId: string, taken: boolean, takenAt: string | null) => {
+    setTakenError(null)
+    const error = await setTaken(medicationId, taken, takenAt)
+    if (error) setTakenError(error)
+  }
 
   return (
     <>
@@ -31,7 +42,11 @@ export function MedsSection({ date }: Props) {
           </button>
         </div>
 
-        {medications.length === 0 ? (
+        {loading ? (
+          <p className="text-sm text-gray-400 dark:text-gray-500">Loading…</p>
+        ) : fetchError ? (
+          <p className="text-sm text-red-500">Could not load medications: {fetchError}</p>
+        ) : medications.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No medications added.{' '}
             <button onClick={() => setShowModal(true)} className="text-blue-600 underline">
@@ -50,7 +65,7 @@ export function MedsSection({ date }: Props) {
                   <input
                     type="checkbox"
                     checked={taken}
-                    onChange={e => setTaken(med.id, e.target.checked, taken ? null : takenAt || null)}
+                    onChange={e => handleSetTaken(med.id, e.target.checked, taken ? null : takenAt || null)}
                     className="w-5 h-5 accent-blue-600 cursor-pointer"
                   />
                   <span className="flex-1 text-sm text-gray-900 dark:text-white">
@@ -65,7 +80,7 @@ export function MedsSection({ date }: Props) {
                     <input
                       type="time"
                       value={takenAt}
-                      onChange={e => setTaken(med.id, true, e.target.value || null)}
+                      onChange={e => handleSetTaken(med.id, true, e.target.value || null)}
                       className="text-xs border border-gray-200 dark:border-gray-700 rounded p-1 dark:bg-gray-800 dark:text-white"
                     />
                   )}
@@ -73,6 +88,10 @@ export function MedsSection({ date }: Props) {
               )
             })}
           </div>
+        )}
+
+        {takenError && (
+          <p className="text-sm text-red-500">Could not save: {takenError}</p>
         )}
       </div>
 

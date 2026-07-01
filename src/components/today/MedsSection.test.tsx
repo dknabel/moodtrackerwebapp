@@ -23,6 +23,7 @@ beforeEach(() => {
   mockUseMedications.mockReturnValue({
     medications: [],
     loading: false,
+    error: null,
     addMedication: vi.fn(),
     updateMedication: vi.fn(),
     deactivateMedication: vi.fn(),
@@ -30,6 +31,7 @@ beforeEach(() => {
   mockUseMedicationLogs.mockReturnValue({
     logs: [],
     loading: false,
+    error: null,
     setTaken: mockSetTaken,
   })
 })
@@ -44,6 +46,7 @@ describe('MedsSection', () => {
     mockUseMedications.mockReturnValue({
       medications: [med],
       loading: false,
+    error: null,
       addMedication: vi.fn(),
       updateMedication: vi.fn(),
       deactivateMedication: vi.fn(),
@@ -57,6 +60,7 @@ describe('MedsSection', () => {
     mockUseMedications.mockReturnValue({
       medications: [med],
       loading: false,
+    error: null,
       addMedication: vi.fn(),
       updateMedication: vi.fn(),
       deactivateMedication: vi.fn(),
@@ -70,6 +74,7 @@ describe('MedsSection', () => {
     mockUseMedications.mockReturnValue({
       medications: [med],
       loading: false,
+    error: null,
       addMedication: vi.fn(),
       updateMedication: vi.fn(),
       deactivateMedication: vi.fn(),
@@ -77,10 +82,53 @@ describe('MedsSection', () => {
     mockUseMedicationLogs.mockReturnValue({
       logs: [{ id: 'l1', user_id: 'u1', date: '2026-06-24', medication_id: 'm1', taken: true, taken_at: '08:00', created_at: '' }],
       loading: false,
+    error: null,
       setTaken: mockSetTaken,
     })
     render(<MedsSection date="2026-06-24" />)
     expect(screen.getByRole('checkbox')).toBeChecked()
     expect(screen.getByDisplayValue('08:00')).toBeInTheDocument()
+  })
+
+  it('keeps the section heading visible while loading', () => {
+    mockUseMedications.mockReturnValue({
+      medications: [],
+      loading: true,
+      error: null,
+      addMedication: vi.fn(),
+      updateMedication: vi.fn(),
+      deactivateMedication: vi.fn(),
+    })
+    render(<MedsSection date="2026-06-24" />)
+    expect(screen.getByRole('heading', { name: 'Medications' })).toBeInTheDocument()
+  })
+
+  it('shows a fetch error instead of the empty state', () => {
+    mockUseMedications.mockReturnValue({
+      medications: [],
+      loading: false,
+      error: 'fetch broke',
+      addMedication: vi.fn(),
+      updateMedication: vi.fn(),
+      deactivateMedication: vi.fn(),
+    })
+    render(<MedsSection date="2026-06-24" />)
+    expect(screen.getByText(/fetch broke/)).toBeInTheDocument()
+    expect(screen.queryByText(/No medications added/)).not.toBeInTheDocument()
+  })
+
+  it('shows an error when marking a medication taken fails', async () => {
+    mockUseMedications.mockReturnValue({
+      medications: [med],
+      loading: false,
+      error: null,
+      addMedication: vi.fn(),
+      updateMedication: vi.fn(),
+      deactivateMedication: vi.fn(),
+    })
+    mockSetTaken.mockResolvedValue('upsert failed')
+    render(<MedsSection date="2026-06-24" />)
+    await userEvent.click(screen.getByRole('checkbox'))
+    expect(await screen.findByText(/upsert failed/)).toBeInTheDocument()
   })
 })

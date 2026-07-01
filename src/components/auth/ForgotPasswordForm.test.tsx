@@ -12,6 +12,7 @@ vi.mock('../../lib/supabase', () => ({
 }))
 
 import { supabase } from '../../lib/supabase'
+import { AuthError } from '@supabase/supabase-js'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -19,7 +20,7 @@ beforeEach(() => {
 
 describe('ForgotPasswordForm', () => {
   it('calls resetPasswordForEmail with redirectTo and shows confirmation on success', async () => {
-    vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({ data: {} as any, error: null })
+    vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({ data: {}, error: null })
 
     render(<ForgotPasswordForm />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
@@ -36,8 +37,8 @@ describe('ForgotPasswordForm', () => {
 
   it('shows error message on failure', async () => {
     vi.mocked(supabase.auth.resetPasswordForEmail).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'Email not found' } as any,
+      data: null,
+      error: new AuthError('Email not found'),
     })
 
     render(<ForgotPasswordForm />)

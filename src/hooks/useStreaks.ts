@@ -9,9 +9,12 @@ interface StreakResult {
 
 function computeStreak(dateSet: Set<string>): StreakResult {
   const today = format(new Date(), 'yyyy-MM-dd')
+  const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd')
 
   let current = 0
-  let cursor = today
+  // Today not being logged yet shouldn't read as a broken streak — count
+  // from yesterday until today's entry exists.
+  let cursor = dateSet.has(today) ? today : yesterday
   while (dateSet.has(cursor)) {
     current++
     cursor = format(subDays(parseISO(cursor), 1), 'yyyy-MM-dd')

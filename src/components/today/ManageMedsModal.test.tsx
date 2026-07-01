@@ -11,13 +11,17 @@ const med: Medication = {
 
 const defaultProps = {
   medications: [] as Medication[],
-  onAdd: vi.fn().mockResolvedValue(undefined),
-  onUpdate: vi.fn().mockResolvedValue(undefined),
-  onDeactivate: vi.fn().mockResolvedValue(undefined),
+  onAdd: vi.fn().mockResolvedValue(null),
+  onUpdate: vi.fn().mockResolvedValue(null),
+  onDeactivate: vi.fn().mockResolvedValue(null),
   onClose: vi.fn(),
 }
 
-beforeEach(() => vi.clearAllMocks())
+beforeEach(() => {
+  vi.clearAllMocks()
+  vi.restoreAllMocks()
+  vi.spyOn(window, 'confirm').mockReturnValue(true)
+})
 
 describe('ManageMedsModal', () => {
   it('renders a list of medications', () => {
@@ -45,11 +49,27 @@ describe('ManageMedsModal', () => {
     expect(onAdd).not.toHaveBeenCalled()
   })
 
-  it('calls onDeactivate when Delete button is clicked', async () => {
-    const onDeactivate = vi.fn().mockResolvedValue(undefined)
+  it('calls onDeactivate when Delete button is clicked and confirmed', async () => {
+    const onDeactivate = vi.fn().mockResolvedValue(null)
     render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
     expect(onDeactivate).toHaveBeenCalledWith('m1')
+  })
+
+  it('does not deactivate when the confirmation is declined', async () => {
+    vi.mocked(window.confirm).mockReturnValue(false)
+    const onDeactivate = vi.fn().mockResolvedValue(null)
+    render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(onDeactivate).not.toHaveBeenCalled()
+  })
+
+  it('shows the error when deactivation fails', async () => {
+    const onDeactivate = vi.fn().mockResolvedValue('RLS violation')
+    render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(await screen.findByText(/RLS violation/)).toBeInTheDocument()
+    expect(screen.getByText('Lithium')).toBeInTheDocument()
   })
 
   it('calls onClose when Close button is clicked', async () => {
@@ -60,7 +80,7 @@ describe('ManageMedsModal', () => {
   })
 
   it('enters edit mode and calls onUpdate on save', async () => {
-    const onUpdate = vi.fn().mockResolvedValue(undefined)
+    const onUpdate = vi.fn().mockResolvedValue(null)
     render(<ManageMedsModal {...defaultProps} medications={[med]} onUpdate={onUpdate} />)
     await userEvent.click(screen.getByRole('button', { name: 'Edit' }))
     // clear dose field and type new value
@@ -69,5 +89,21 @@ describe('ManageMedsModal', () => {
     await userEvent.type(doseInput, '600mg')
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(onUpdate).toHaveBeenCalledWith('m1', expect.objectContaining({ dose: '600mg' }))
+  })
+
+  it('stays in edit mode and shows the error when saving fails', async () => {
+    const onUpdate = vi.fn().mockResolvedValue('update failed')
+    render(<ManageMedsModal {...defaultProps} medications={[med]} onUpdate={onUpdate} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Edit' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText(/update failed/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument()
+  })
+
+  it('closes when Escape is pressed', async () => {
+    const onClose = vi.fn()
+    render(<ManageMedsModal {...defaultProps} onClose={onClose} />)
+    await userEvent.keyboard('{Escape}')
+    expect(onClose).toHaveBeenCalled()
   })
 })

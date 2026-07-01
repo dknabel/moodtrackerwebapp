@@ -1,27 +1,21 @@
-import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { MedicationLog } from '../lib/database.types'
+import { useSupabaseQuery } from './useSupabaseQuery'
 
 export function useMedicationLogs(date: string) {
-  const [logs, setLogs] = useState<MedicationLog[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data, loading, error, mutate } = useSupabaseQuery<MedicationLog[]>(
+    `medication_logs:${date}`,
+    () => supabase.from('medication_logs').select('*').eq('date', date)
+  )
 
-  useEffect(() => {
-    setLoading(true)
-    supabase
-      .from('medication_logs')
-      .select('*')
-      .eq('date', date)
-      .then(({ data }) => {
-        setLogs(data ?? [])
-        setLoading(false)
-      })
-  }, [date])
-
-  const setTaken = async (medicationId: string, taken: boolean, takenAt: string | null): Promise<void> => {
+  const setTaken = async (
+    medicationId: string,
+    taken: boolean,
+    takenAt: string | null
+  ): Promise<string | null> => {
     const { data: auth } = await supabase.auth.getUser()
-    if (!auth.user) return
-    const { data } = await supabase
+    if (!auth.user) return 'Not authenticated'
+    const { data: upserted, error } = await supabase
       .from('medication_logs')
       .upsert(
         { user_id: auth.user.id, date, medication_id: medicationId, taken, taken_at: takenAt },
@@ -29,14 +23,17 @@ export function useMedicationLogs(date: string) {
       )
       .select()
       .single()
-    if (data) {
-      setLogs(prev => {
-        const idx = prev.findIndex(l => l.medication_id === medicationId)
-        if (idx >= 0) return prev.map((l, i) => (i === idx ? data : l))
-        return [...prev, data]
+    if (error) return error.message
+    if (upserted) {
+      mutate(prev => {
+        const logs = prev ?? []
+        const idx = logs.findIndex(l => l.medication_id === medicationId)
+        if (idx >= 0) return logs.map((l, i) => (i === idx ? upserted : l))
+        return [...logs, upserted]
       })
     }
+    return null
   }
 
-  return { logs, loading, setTaken }
+  return { logs: data ?? [], loading, error, setTaken }
 }

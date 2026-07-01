@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Medication } from '../../lib/database.types'
 
 interface MedData {
@@ -10,8 +10,8 @@ interface MedData {
 interface Props {
   medications: Medication[]
   onAdd: (data: MedData) => Promise<string | null>
-  onUpdate: (id: string, data: MedData) => Promise<void>
-  onDeactivate: (id: string) => Promise<void>
+  onUpdate: (id: string, data: MedData) => Promise<string | null>
+  onDeactivate: (id: string) => Promise<string | null>
   onClose: () => void
 }
 
@@ -22,6 +22,16 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
   const [editId, setEditId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState(EMPTY)
   const [addError, setAddError] = useState<string | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [listError, setListError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onClose])
 
   const handleAdd = async () => {
     if (!addForm.name.trim() || !addForm.dose.trim()) return
@@ -41,16 +51,29 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
   const startEdit = (med: Medication) => {
     setEditId(med.id)
     setEditForm({ name: med.name, dose: med.dose, scheduled_time: med.scheduled_time ?? '' })
+    setEditError(null)
   }
 
   const handleSaveEdit = async () => {
     if (!editId) return
-    await onUpdate(editId, {
+    setEditError(null)
+    const error = await onUpdate(editId, {
       name: editForm.name.trim(),
       dose: editForm.dose.trim(),
       scheduled_time: editForm.scheduled_time || null,
     })
+    if (error) {
+      setEditError(error)
+      return
+    }
     setEditId(null)
+  }
+
+  const handleDeactivate = async (med: Medication) => {
+    if (!window.confirm(`Remove ${med.name}? Past history is kept.`)) return
+    setListError(null)
+    const error = await onDeactivate(med.id)
+    if (error) setListError(error)
   }
 
   return (
@@ -97,6 +120,9 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                   value={editForm.scheduled_time}
                   onChange={e => setEditForm(f => ({ ...f, scheduled_time: e.target.value }))}
                 />
+                {editError && (
+                  <p className="text-red-500 text-xs">{editError}</p>
+                )}
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveEdit}
@@ -129,7 +155,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                     Edit
                   </button>
                   <button
-                    onClick={() => onDeactivate(med.id)}
+                    onClick={() => handleDeactivate(med)}
                     className="text-red-500 text-sm"
                   >
                     Delete
@@ -137,6 +163,9 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 </div>
               </div>
             )
+          )}
+          {listError && (
+            <p className="text-red-500 text-xs">{listError}</p>
           )}
         </div>
 

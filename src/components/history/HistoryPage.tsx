@@ -1,11 +1,10 @@
 import { useState, useMemo } from 'react'
 import { format, subDays } from 'date-fns'
 import { useLogs } from '../../hooks/useLogs'
-import { supabase } from '../../lib/supabase'
 import { buildCsvRows, downloadCsv, downloadPdf } from '../../lib/export'
+import { fetchExportData, type ExportRange } from '../../lib/exportData'
 import { HistoryEntry } from './HistoryEntry'
 
-type ExportRange = '30' | '90' | 'all'
 type ExportFormat = 'csv' | 'pdf'
 
 export function HistoryPage() {
@@ -17,47 +16,28 @@ export function HistoryPage() {
   const [exportRange, setExportRange] = useState<ExportRange>('90')
   const [exportFormat, setExportFormat] = useState<ExportFormat>('csv')
   const [exporting, setExporting] = useState(false)
+  const [exportError, setExportError] = useState<string | null>(null)
 
   const handleExport = async () => {
     setExporting(true)
+    setExportError(null)
     try {
-      const today = format(new Date(), 'yyyy-MM-dd')
-      const from =
-        exportRange === 'all'
-          ? '2020-01-01'
-          : format(subDays(new Date(), exportRange === '30' ? 30 : 90), 'yyyy-MM-dd')
-
-      const [{ data: exportLogs }, { data: medications }, { data: medLogs }] = await Promise.all([
-        supabase
-          .from('daily_logs')
-          .select('*')
-          .gte('date', from)
-          .lte('date', today)
-          .order('date', { ascending: false }),
-        supabase
-          .from('medications')
-          .select('*')
-          .eq('active', true)
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('medication_logs')
-          .select('*')
-          .gte('date', from)
-          .lte('date', today),
-      ])
+      const { logs: exportLogs, medications, medLogs } = await fetchExportData(exportRange)
 
       const rangeLabel =
         exportRange === 'all' ? 'All time' : `Last ${exportRange} days`
       const filename = `mood-tracker-${format(new Date(), 'yyyy-MM-dd')}`
 
       if (exportFormat === 'csv') {
-        const content = buildCsvRows(exportLogs ?? [], medications ?? [], medLogs ?? [])
+        const content = buildCsvRows(exportLogs, medications, medLogs)
         downloadCsv(content, `${filename}.csv`)
       } else {
-        await downloadPdf(exportLogs ?? [], medications ?? [], medLogs ?? [], rangeLabel, `${filename}.pdf`)
+        await downloadPdf(exportLogs, medications, medLogs, rangeLabel, `${filename}.pdf`)
       }
 
       setShowExport(false)
+    } catch (e) {
+      setExportError(e instanceof Error ? e.message : 'Export failed')
     } finally {
       setExporting(false)
     }
@@ -123,6 +103,9 @@ export function HistoryPage() {
             </div>
           </div>
 
+          {exportError && (
+            <p className="text-red-600 text-xs">Export failed: {exportError}</p>
+          )}
           <button
             onClick={handleExport}
             disabled={exporting}

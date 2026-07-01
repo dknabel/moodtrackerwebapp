@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Medication } from '../lib/database.types'
+import { useSupabaseQuery } from './useSupabaseQuery'
 
 interface MedData {
   name: string
@@ -9,49 +9,54 @@ interface MedData {
 }
 
 export function useMedications() {
-  const [medications, setMedications] = useState<Medication[]>([])
-  const [loading, setLoading] = useState(true)
+  const { data, loading, error, mutate } = useSupabaseQuery<Medication[]>(
+    'medications:active',
+    () =>
+      supabase
+        .from('medications')
+        .select('*')
+        .eq('active', true)
+        .order('created_at', { ascending: true })
+  )
 
-  useEffect(() => {
-    setLoading(true)
-    supabase
-      .from('medications')
-      .select('*')
-      .eq('active', true)
-      .order('created_at', { ascending: true })
-      .then(({ data }) => {
-        setMedications(data ?? [])
-        setLoading(false)
-      })
-  }, [])
-
-  const addMedication = async (data: MedData): Promise<string | null> => {
+  const addMedication = async (medData: MedData): Promise<string | null> => {
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) return 'Not authenticated'
     const { data: inserted, error } = await supabase
       .from('medications')
-      .insert({ ...data, user_id: auth.user.id, active: true })
+      .insert({ ...medData, user_id: auth.user.id, active: true })
       .select()
       .single()
     if (error) return error.message
-    if (inserted) setMedications(m => [...m, inserted])
+    if (inserted) mutate(m => [...(m ?? []), inserted])
     return null
   }
 
-  const updateMedication = async (id: string, data: MedData): Promise<void> => {
-    const { data: updated } = await supabase
+  const updateMedication = async (id: string, medData: MedData): Promise<string | null> => {
+    const { data: updated, error } = await supabase
       .from('medications')
-      .update(data)
+      .update(medData)
       .eq('id', id)
       .select()
       .single()
-    if (updated) setMedications(m => m.map(med => med.id === id ? updated : med))
+    if (error) return error.message
+    if (updated) mutate(m => (m ?? []).map(med => med.id === id ? updated : med))
+    return null
   }
 
-  const deactivateMedication = async (id: string): Promise<void> => {
-    await supabase.from('medications').update({ active: false }).eq('id', id)
-    setMedications(m => m.filter(med => med.id !== id))
+  const deactivateMedication = async (id: string): Promise<string | null> => {
+    const { error } = await supabase.from('medications').update({ active: false }).eq('id', id)
+    if (error) return error.message
+    mutate(m => (m ?? []).filter(med => med.id !== id))
+    return null
   }
 
-  return { medications, loading, addMedication, updateMedication, deactivateMedication }
+  return {
+    medications: data ?? [],
+    loading,
+    error,
+    addMedication,
+    updateMedication,
+    deactivateMedication,
+  }
 }

@@ -14,11 +14,11 @@ interface Props {
 interface Config {
   title: string
   yKey: keyof DailyLog
+  xKey: keyof DailyLog
   splitFn: (l: DailyLog) => boolean
   labelA: string
   labelB: string
-  pointsA: (l: DailyLog) => { x: number; y: number } | null
-  pointsB: (l: DailyLog) => { x: number; y: number } | null
+  point: (l: DailyLog) => { x: number; y: number }
   xAxisLabel: string
   yAxisLabel: string
 }
@@ -27,46 +27,46 @@ const CONFIGS: Config[] = [
   {
     title: 'Exercise vs Mood',
     yKey: 'mood_rating',
+    xKey: 'exercised',
     splitFn: l => !!l.exercised,
     labelA: 'Exercised',
     labelB: 'Not exercised',
     xAxisLabel: 'Exercised (1=yes, 0=no)',
     yAxisLabel: 'Mood',
-    pointsA: l => l.mood_rating != null ? { x: 1, y: l.mood_rating } : null,
-    pointsB: l => l.mood_rating != null ? { x: 0, y: l.mood_rating } : null,
+    point: l => ({ x: l.exercised ? 1 : 0, y: l.mood_rating! }),
   },
   {
     title: 'Sleep Hours vs Mood',
     yKey: 'mood_rating',
+    xKey: 'sleep_hours',
     splitFn: l => (l.sleep_hours ?? 0) >= 7,
     labelA: '7+ hours',
     labelB: '<7 hours',
     xAxisLabel: 'Sleep hours',
     yAxisLabel: 'Mood',
-    pointsA: l => l.mood_rating != null && l.sleep_hours != null ? { x: l.sleep_hours, y: l.mood_rating } : null,
-    pointsB: l => l.mood_rating != null && l.sleep_hours != null ? { x: l.sleep_hours, y: l.mood_rating } : null,
+    point: l => ({ x: l.sleep_hours!, y: l.mood_rating! }),
   },
   {
     title: 'Meals vs Mood',
     yKey: 'mood_rating',
+    xKey: 'meals_count',
     splitFn: l => (l.meals_count ?? 0) >= 3,
     labelA: '3+ meals',
-    labelB: '1-2 meals',
+    labelB: '0-2 meals',
     xAxisLabel: 'Meals count',
     yAxisLabel: 'Mood',
-    pointsA: l => l.mood_rating != null && l.meals_count != null ? { x: l.meals_count, y: l.mood_rating } : null,
-    pointsB: l => l.mood_rating != null && l.meals_count != null ? { x: l.meals_count, y: l.mood_rating } : null,
+    point: l => ({ x: l.meals_count!, y: l.mood_rating! }),
   },
   {
     title: 'Sleep Quality vs Energy',
     yKey: 'mood_energy',
+    xKey: 'sleep_quality',
     splitFn: l => (l.sleep_quality ?? 0) >= 3,
     labelA: 'Quality 3-5',
     labelB: 'Quality 1-2',
     xAxisLabel: 'Sleep quality (1-5)',
     yAxisLabel: 'Energy',
-    pointsA: l => l.mood_energy != null && l.sleep_quality != null ? { x: l.sleep_quality, y: l.mood_energy } : null,
-    pointsB: l => l.mood_energy != null && l.sleep_quality != null ? { x: l.sleep_quality, y: l.mood_energy } : null,
+    point: l => ({ x: l.sleep_quality!, y: l.mood_energy! }),
   },
 ]
 
@@ -77,9 +77,10 @@ export function CorrelationsSection({ logs, isDark }: Props) {
 
   const cards = useMemo(() =>
     CONFIGS.map(cfg => {
-      const result = computeCorrelation(logs, cfg.yKey, cfg.splitFn, cfg.labelA, cfg.labelB)
-      const pA = logs.map(cfg.pointsA).filter(Boolean) as { x: number; y: number }[]
-      const pB = logs.map(cfg.pointsB).filter(Boolean) as { x: number; y: number }[]
+      const result = computeCorrelation(logs, cfg.yKey, cfg.splitFn, cfg.labelA, cfg.labelB, { xKey: cfg.xKey })
+      const eligible = logs.filter(l => l[cfg.yKey] != null && l[cfg.xKey] != null)
+      const pA = eligible.filter(cfg.splitFn).map(cfg.point)
+      const pB = eligible.filter(l => !cfg.splitFn(l)).map(cfg.point)
       return { cfg, result, pA, pB }
     }).filter(c => c.result.hasEnoughData),
     [logs]

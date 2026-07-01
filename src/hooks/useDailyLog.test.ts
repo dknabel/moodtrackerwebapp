@@ -94,4 +94,23 @@ describe('useDailyLog', () => {
     )
     expect(result.current.log).toEqual(newLog)
   })
+
+  it('ignores a stale response that resolves after the date changed', async () => {
+    let resolveOld!: (r: { data: unknown; error: null }) => void
+    mockMaybeSingle.mockReturnValueOnce(new Promise(r => { resolveOld = r }))
+    const freshLog = { id: 'b', date: '2026-06-21', mood_rating: 3 }
+    mockMaybeSingle.mockResolvedValueOnce({ data: freshLog, error: null })
+
+    const { result, rerender } = renderHook(({ date }) => useDailyLog(date), {
+      initialProps: { date: '2026-06-20' },
+    })
+    rerender({ date: '2026-06-21' })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.log).toEqual(freshLog)
+
+    await act(async () => {
+      resolveOld({ data: { id: 'a', date: '2026-06-20', mood_rating: 9 }, error: null })
+    })
+    expect(result.current.log).toEqual(freshLog)
+  })
 })

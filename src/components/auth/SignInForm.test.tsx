@@ -12,6 +12,7 @@ vi.mock('../../lib/supabase', () => ({
 }))
 
 import { supabase } from '../../lib/supabase'
+import { AuthError, type Session, type User } from '@supabase/supabase-js'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -19,7 +20,7 @@ beforeEach(() => {
 
 describe('SignInForm', () => {
   it('calls signInWithPassword with email and password on submit', async () => {
-    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({ data: {} as any, error: null })
+    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({ data: { user: {} as User, session: {} as Session }, error: null })
 
     render(<SignInForm onForgotPassword={vi.fn()} />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
@@ -36,8 +37,8 @@ describe('SignInForm', () => {
 
   it('shows error message on sign-in failure', async () => {
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'Invalid login credentials' } as any,
+      data: { user: null, session: null },
+      error: new AuthError('Invalid login credentials'),
     })
 
     render(<SignInForm onForgotPassword={vi.fn()} />)
@@ -59,8 +60,8 @@ describe('SignInForm', () => {
 
   it('shows Google hint when sign-in fails with invalid credentials', async () => {
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'Invalid login credentials' } as any,
+      data: { user: null, session: null },
+      error: new AuthError('Invalid login credentials'),
     })
     render(<SignInForm onForgotPassword={vi.fn()} />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
@@ -74,8 +75,8 @@ describe('SignInForm', () => {
 
   it('does not show Google hint for non-credential errors', async () => {
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'Invalid email format' } as any,
+      data: { user: null, session: null },
+      error: new AuthError('Invalid email format'),
     })
     render(<SignInForm onForgotPassword={vi.fn()} />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')

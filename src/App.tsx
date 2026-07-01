@@ -3,12 +3,13 @@ import { Analytics } from '@vercel/analytics/react'
 import { useAuth } from './hooks/useAuth'
 import { AuthPage } from './components/auth/AuthPage'
 import { AppShell } from './components/layout/AppShell'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { TodayPage } from './components/today/TodayPage'
 import { HistoryPage } from './components/history/HistoryPage'
 import { ChartsPage } from './components/charts/ChartsPage'
 
 export function App() {
-  const { session, loading, isPasswordRecovery } = useAuth()
+  const { session, loading, isPasswordRecovery, signOut } = useAuth()
 
   if (loading) {
     return (
@@ -23,17 +24,19 @@ export function App() {
   }
 
   return (
-    <BrowserRouter>
-      <AppShell>
-        <Routes>
-          <Route path="/" element={<TodayPage />} />
-          <Route path="/log/:date" element={<TodayPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/charts" element={<ChartsPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AppShell>
-      <Analytics />
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppShell signOut={signOut}>
+          <Routes>
+            <Route path="/" element={<TodayPage />} />
+            <Route path="/log/:date" element={<TodayPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/charts" element={<ChartsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppShell>
+        <Analytics />
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }

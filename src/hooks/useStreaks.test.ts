@@ -40,6 +40,18 @@ describe('useStreaks', () => {
     expect(result.current.logging.current).toBe(1)
   })
 
+  it('keeps the current streak alive when today is not yet logged', () => {
+    const logs = [makeLog(1), makeLog(2), makeLog(3)]
+    const { result } = renderHook(() => useStreaks(logs, [], []))
+    expect(result.current.logging.current).toBe(3)
+  })
+
+  it('current streak is 0 when neither today nor yesterday is logged', () => {
+    const logs = [makeLog(2), makeLog(3)]
+    const { result } = renderHook(() => useStreaks(logs, [], []))
+    expect(result.current.logging.current).toBe(0)
+  })
+
   it('computes longest logging streak', () => {
     const logs = [makeLog(0), makeLog(1), makeLog(3), makeLog(4), makeLog(5)]
     const { result } = renderHook(() => useStreaks(logs, [], []))
