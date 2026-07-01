@@ -1,10 +1,13 @@
 import type { ReactNode } from 'react'
 import { BottomNav } from './BottomNav'
-import { useAuth } from '../../hooks/useAuth'
 import { useTheme } from '../../hooks/useTheme'
 
-export function AppShell({ children }: { children: ReactNode }) {
-  const { signOut } = useAuth()
+interface Props {
+  children: ReactNode
+  signOut: () => void
+}
+
+export function AppShell({ children, signOut }: Props) {
   const { isDark, toggle } = useTheme()
 
   return (

@@ -69,4 +69,22 @@ describe('useMedicationLogs', () => {
     )
     expect(result.current.logs[0].taken).toBe(true)
   })
+
+  it('setTaken returns the error message and keeps state when the upsert fails', async () => {
+    mockSelectForFetch.mockReturnValue({
+      eq: vi.fn().mockResolvedValue({ data: [log1], error: null }),
+    })
+    mockSingle.mockResolvedValue({ data: null, error: { message: 'upsert failed' } })
+
+    const { result } = renderHook(() => useMedicationLogs('2026-06-24'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let returned: string | null = null
+    await act(async () => {
+      returned = await result.current.setTaken('m1', true, '08:30')
+    })
+
+    expect(returned).toBe('upsert failed')
+    expect(result.current.logs[0].taken).toBe(false)
+  })
 })

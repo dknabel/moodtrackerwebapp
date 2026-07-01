@@ -29,10 +29,11 @@ export function ChartsPage() {
     }
   }, [rangeDays])
 
-  const { logs, loading } = useLogs(fromDate, toDate)
-  const { logs: logs365 } = useLogs(from365, toDate)
+  // One fetch covers both the charts (sliced to the selected range) and streaks.
+  const { logs: logs365, loading } = useLogs(from365, toDate)
   const { medications } = useMedications()
   const { logs: medLogs365 } = useMedicationLogsBulk(from365, toDate)
+  const logs = useMemo(() => logs365.filter(l => l.date >= fromDate), [logs365, fromDate])
   const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])
   const { isDark } = useTheme()
   const streaks = useStreaks(logs365, medLogs365, medications)

@@ -1,30 +1,18 @@
-import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import type { DailyLog } from '../lib/database.types'
+import { useSupabaseQuery } from './useSupabaseQuery'
 
 export function useLogs(fromDate: string, toDate: string) {
-  const [logs, setLogs] = useState<DailyLog[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { data, loading, error } = useSupabaseQuery<DailyLog[]>(
+    `daily_logs:${fromDate}:${toDate}`,
+    () =>
+      supabase
+        .from('daily_logs')
+        .select('*')
+        .gte('date', fromDate)
+        .lte('date', toDate)
+        .order('date', { ascending: false })
+  )
 
-  useEffect(() => {
-    let stale = false
-    setLoading(true)
-    setError(null)
-    supabase
-      .from('daily_logs')
-      .select('*')
-      .gte('date', fromDate)
-      .lte('date', toDate)
-      .order('date', { ascending: false })
-      .then(({ data, error }) => {
-        if (stale) return
-        if (error) setError(error.message)
-        else setLogs(data ?? [])
-        setLoading(false)
-      })
-    return () => { stale = true }
-  }, [fromDate, toDate])
-
-  return { logs, loading, error }
+  return { logs: data ?? [], loading, error }
 }

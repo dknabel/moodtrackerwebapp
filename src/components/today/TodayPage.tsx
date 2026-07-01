@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
-import { format, subDays, parseISO } from 'date-fns'
+import { useEffect, useRef, useState } from 'react'
+import { useParams, Navigate } from 'react-router-dom'
+import { format, subDays, parseISO, isValid } from 'date-fns'
 import { useDailyLog } from '../../hooks/useDailyLog'
+import type { DailyLog, DailyLogUpdate } from '../../lib/database.types'
 import { MoodSection } from './MoodSection'
 import { FoodSection } from './FoodSection'
 import { MedsSection } from './MedsSection'
@@ -11,6 +12,12 @@ import { GratitudeSection } from './GratitudeSection'
 
 function todayStr() {
   return format(new Date(), 'yyyy-MM-dd')
+}
+
+function isValidDateParam(s: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false
+  const parsed = parseISO(s)
+  return isValid(parsed) && format(parsed, 'yyyy-MM-dd') === s
 }
 
 interface FormState {
@@ -49,40 +56,70 @@ const toLogData = (f: FormState) => ({
   gratitude: f.gratitude || null,
 })
 
+function initialForm(log: DailyLog | null, autoBedtime: string): FormState {
+  if (!log) return { ...DEFAULT_FORM, bedtime: autoBedtime }
+  return {
+    mood_rating: log.mood_rating ?? 5,
+    mood_energy: log.mood_energy ?? 5,
+    mood_anxiety: log.mood_anxiety ?? 5,
+    meals_count: log.meals_count ?? 0,
+    exercised: log.exercised ?? false,
+    bedtime: log.bedtime?.slice(0, 5) || autoBedtime,
+    wake_time: log.wake_time?.slice(0, 5) ?? '',
+    sleep_hours: log.sleep_hours,
+    sleep_quality: log.sleep_quality ?? 3,
+    tonight_bedtime: log.tonight_bedtime?.slice(0, 5) ?? '',
+    gratitude: log.gratitude ?? '',
+  }
+}
+
 export function TodayPage() {
   const { date: dateParam } = useParams<{ date?: string }>()
-  const date = dateParam ?? todayStr()
+  const paramValid = dateParam == null || isValidDateParam(dateParam)
+  const date = dateParam != null && paramValid ? dateParam : todayStr()
   const yesterday = format(subDays(parseISO(date), 1), 'yyyy-MM-dd')
 
-  const { log, loading, save } = useDailyLog(date)
+  const { log, loading, error, save } = useDailyLog(date)
   const { log: yesterdayLog, loading: yesterdayLoading } = useDailyLog(yesterday)
 
-  const [form, setForm] = useState<FormState>(DEFAULT_FORM)
+  if (!paramValid) {
+    return <Navigate to="/" replace />
+  }
+
+  if (loading || yesterdayLoading) {
+    return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 mt-12">Could not load this entry: {error}</div>
+  }
+
+  const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
+
+  return (
+    <LogForm
+      key={date}
+      date={date}
+      initial={initialForm(log, autoBedtime)}
+      save={save}
+    />
+  )
+}
+
+interface LogFormProps {
+  date: string
+  initial: FormState
+  save: (values: DailyLogUpdate) => Promise<{ error: string | null }>
+}
+
+function LogForm({ date, initial, save }: LogFormProps) {
+  const [form, setForm] = useState<FormState>(initial)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const savedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  useEffect(() => {
-    if (loading || yesterdayLoading) return
-    const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
-    if (log) {
-      setForm({
-        mood_rating: log.mood_rating ?? 5,
-        mood_energy: log.mood_energy ?? 5,
-        mood_anxiety: log.mood_anxiety ?? 5,
-        meals_count: log.meals_count ?? 0,
-        exercised: log.exercised ?? false,
-        bedtime: log.bedtime?.slice(0, 5) || autoBedtime,
-        wake_time: log.wake_time?.slice(0, 5) ?? '',
-        sleep_hours: log.sleep_hours,
-        sleep_quality: log.sleep_quality ?? 3,
-        tonight_bedtime: log.tonight_bedtime?.slice(0, 5) ?? '',
-        gratitude: log.gratitude ?? '',
-      })
-    } else {
-      setForm({ ...DEFAULT_FORM, bedtime: autoBedtime })
-    }
-  }, [log, loading, yesterdayLog, yesterdayLoading])
+  useEffect(() => () => clearTimeout(savedTimeout.current), [])
 
   const handleSave = async () => {
     setSaving(true)
@@ -93,13 +130,10 @@ export function TodayPage() {
       setSaveError(error)
     } else {
       setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
+      clearTimeout(savedTimeout.current)
+      savedTimeout.current = setTimeout(() => setSaved(false), 2000)
     }
     setSaving(false)
-  }
-
-  if (loading || yesterdayLoading) {
-    return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
   const isToday = date === todayStr()

@@ -16,6 +16,7 @@ vi.mock('../../lib/supabase', () => ({
 }))
 
 import { supabase } from '../../lib/supabase'
+import { AuthError } from '@supabase/supabase-js'
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -54,7 +55,7 @@ describe('AuthPage', () => {
   })
 
   it('shows verify-email notice after successful sign-up', async () => {
-    vi.mocked(supabase.auth.signUp).mockResolvedValue({ data: {} as any, error: null })
+    vi.mocked(supabase.auth.signUp).mockResolvedValue({ data: { user: null, session: null }, error: null })
     render(<AuthPage initialMode="sign-up" />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'user@example.com')
     await userEvent.type(screen.getByPlaceholderText(/^password$/i), 'secret123')
@@ -74,8 +75,8 @@ describe('AuthPage', () => {
 
   it('switches to sign-in mode when SignUpForm fires onSwitchToSignIn', async () => {
     vi.mocked(supabase.auth.signUp).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'User already registered' } as any,
+      data: { user: null, session: null },
+      error: new AuthError('User already registered'),
     })
     render(<AuthPage initialMode="sign-up" />)
     await userEvent.type(screen.getByPlaceholderText(/your@email/i), 'taken@example.com')
@@ -94,8 +95,8 @@ describe('AuthPage', () => {
 
   it('switches to forgot-password mode when ResetPasswordForm fires onExpiredLink', async () => {
     vi.mocked(supabase.auth.updateUser).mockResolvedValue({
-      data: {} as any,
-      error: { message: 'Token has expired or is invalid' } as any,
+      data: { user: null },
+      error: new AuthError('Token has expired or is invalid'),
     })
     render(<AuthPage initialMode="reset-password" />)
     await userEvent.type(screen.getByPlaceholderText(/^new password$/i), 'newpass123')

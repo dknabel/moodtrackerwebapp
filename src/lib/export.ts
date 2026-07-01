@@ -50,7 +50,7 @@ export function buildCsvRows(
     ].map(escapeCsv).join(',')
   })
 
-  return [headers.join(','), ...rows].join('\n')
+  return [headers.map(escapeCsv).join(','), ...rows].join('\n')
 }
 
 export function downloadCsv(content: string, filename: string): void {
@@ -88,7 +88,7 @@ export async function downloadPdf(
   const head = [[
     'Date', 'Mood', 'Energy', 'Anxiety', 'Meals',
     ...medHeaders,
-    'Exercised', 'Sleep h', 'Sleep Q', 'Bedtime', 'Wake', 'Gratitude',
+    'Exercised', 'Sleep h', 'Sleep Q', 'Bedtime', 'Wake', 'Tonight bed', 'Gratitude',
   ]]
 
   const body = logs.map(log => [
@@ -106,6 +106,7 @@ export async function downloadPdf(
     log.sleep_quality ?? '',
     log.bedtime?.slice(0, 5) ?? '',
     log.wake_time?.slice(0, 5) ?? '',
+    log.tonight_bedtime?.slice(0, 5) ?? '',
     log.gratitude ?? '',
   ])
 

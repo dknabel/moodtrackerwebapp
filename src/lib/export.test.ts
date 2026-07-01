@@ -1,6 +1,15 @@
-import { describe, it, expect } from 'vitest'
-import { buildCsvRows } from './export'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { buildCsvRows, downloadPdf } from './export'
 import type { DailyLog, Medication, MedicationLog } from './database.types'
+
+vi.mock('jspdf', () => ({
+  jsPDF: vi.fn(function (this: Record<string, unknown>) {
+    this.setFontSize = vi.fn()
+    this.text = vi.fn()
+    this.save = vi.fn()
+  }),
+}))
+vi.mock('jspdf-autotable', () => ({ default: vi.fn() }))
 
 const makeLog = (overrides: Partial<DailyLog> = {}): DailyLog => ({
   id: '1', user_id: 'u1', date: '2026-06-01',
@@ -71,5 +80,24 @@ describe('buildCsvRows', () => {
     const csv = buildCsvRows([makeLog({ exercised: true })], [], [])
     const [, row] = csv.split('\n')
     expect(row).toContain('yes')
+  })
+
+  it('escapes medication names containing commas in the header row', () => {
+    const med = makeMed('m1', 'Lithium, extended release', '300mg')
+    const csv = buildCsvRows([makeLog()], [med], [])
+    const [header] = csv.split('\n')
+    expect(header).toContain('"Lithium, extended release (300mg)"')
+  })
+})
+
+describe('downloadPdf', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('includes a tonight bedtime column in head and body', async () => {
+    const { default: autoTable } = await import('jspdf-autotable')
+    await downloadPdf([makeLog()], [], [], 'Last 30 days', 'f.pdf')
+    const options = vi.mocked(autoTable).mock.calls[0][1]
+    expect(options.head![0]).toContain('Tonight bed')
+    expect(options.body![0]).toContain('22:00')
   })
 })
