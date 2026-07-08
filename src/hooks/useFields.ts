@@ -83,12 +83,18 @@ export function useFields() {
     const neighbor = sorted[idx + direction]
     if (idx === -1 || !neighbor) return null
     const current = sorted[idx]
-    const [resA, resB] = await Promise.all([
-      supabase.from('custom_fields').update({ sort_order: neighbor.sort_order }).eq('id', current.id),
-      supabase.from('custom_fields').update({ sort_order: current.sort_order }).eq('id', neighbor.id),
-    ])
-    const error = resA.error ?? resB.error
-    if (error) return error.message
+    const first = await supabase
+      .from('custom_fields').update({ sort_order: neighbor.sort_order }).eq('id', current.id)
+    if (first.error) return first.error.message
+    const second = await supabase
+      .from('custom_fields').update({ sort_order: current.sort_order }).eq('id', neighbor.id)
+    if (second.error) {
+      // Best-effort rollback of the first update; its own error is ignored —
+      // a refetch reconciles whatever state the DB ended up in.
+      await supabase
+        .from('custom_fields').update({ sort_order: current.sort_order }).eq('id', current.id)
+      return second.error.message
+    }
     mutate(f => (f ?? [])
       .map(fl => fl.id === current.id
         ? { ...fl, sort_order: neighbor.sort_order }
