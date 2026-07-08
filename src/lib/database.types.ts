@@ -42,3 +42,41 @@ export interface MedicationLog {
 
 export type MedicationInsert = Omit<Medication, 'id' | 'created_at'>
 export type MedicationLogUpsert = Omit<MedicationLog, 'id' | 'created_at'>
+
+export type FieldType = 'slider' | 'number' | 'toggle' | 'text' | 'tags'
+
+export interface FieldConfig {
+  min?: number
+  max?: number
+  lowLabel?: string
+  highLabel?: string
+  unit?: string
+  options?: string[]
+}
+
+export type FieldValueData = number | boolean | string | string[]
+
+export interface CustomField {
+  id: string
+  user_id: string
+  name: string
+  type: FieldType
+  config: FieldConfig
+  sort_order: number
+  active: boolean
+  show_in_charts: boolean
+  created_at: string
+}
+
+export type CustomFieldInsert = Omit<CustomField, 'id' | 'created_at'>
+
+export interface FieldValue {
+  id: string
+  user_id: string
+  field_id: string
+  date: string               // 'YYYY-MM-DD'
+  value: FieldValueData
+  created_at: string
+}
+
+export type FieldValueUpsert = Omit<FieldValue, 'id' | 'created_at'>
