@@ -10,6 +10,7 @@ import { useStreaks } from '../../hooks/useStreaks'
 import type { FieldValue } from '../../lib/database.types'
 import { SleepChart } from './SleepChart'
 import { FieldChart } from './FieldChart'
+import { OverlaySection } from './OverlaySection'
 import { StatsSection } from './StatsSection'
 
 const RANGES = [
@@ -92,6 +93,7 @@ export function ChartsPage() {
             .map(f => (
               <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
             ))}
+          <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
         </>
       )}
 
