@@ -13,8 +13,10 @@ async function fetchFieldsSeedingDefaults() {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return first
   const userId = auth.user.id
-  // Insert errors are ignored: a concurrent tab may have seeded already,
-  // and the refetch below returns whatever won.
+  // Insert errors are ignored: the unique index on (user_id, lower(name))
+  // means a concurrent tab that already seeded will make this whole insert
+  // fail atomically (no partial duplicates), and the refetch below returns
+  // whatever won the race.
   await supabase.from('custom_fields').insert(
     DEFAULT_FIELDS.map((d, i) => ({
       ...d, user_id: userId, sort_order: i, active: true, show_in_charts: true,

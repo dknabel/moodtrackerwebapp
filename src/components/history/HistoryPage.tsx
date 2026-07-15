@@ -14,8 +14,8 @@ export function HistoryPage() {
   const toDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
   const fromDate = useMemo(() => format(subDays(new Date(), 90), 'yyyy-MM-dd'), [])
   const { logs, loading, error } = useLogs(fromDate, toDate)
-  const { fields, loading: fieldsLoading } = useFields()
-  const { values, loading: valuesLoading } = useFieldValuesBulk(fromDate, toDate)
+  const { fields, loading: fieldsLoading, error: fieldsError } = useFields()
+  const { values, loading: valuesLoading, error: valuesError } = useFieldValuesBulk(fromDate, toDate)
 
   const days = useMemo(() => {
     const logByDate = new Map(logs.map(l => [l.date, l]))
@@ -71,8 +71,9 @@ export function HistoryPage() {
     return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
-  if (error) {
-    return <div className="text-center text-red-500 mt-12">{error}</div>
+  const loadError = error ?? fieldsError ?? valuesError
+  if (loadError) {
+    return <div className="text-center text-red-500 mt-12">{loadError}</div>
   }
 
   return (
