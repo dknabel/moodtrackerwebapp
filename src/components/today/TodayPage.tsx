@@ -150,7 +150,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
           <button
             type="button"
             onClick={onManageFields}
-            className="text-sm text-blue-600 font-medium"
+            className="text-sm text-blue-600 dark:text-blue-400 font-medium"
           >
             Manage fields
           </button>

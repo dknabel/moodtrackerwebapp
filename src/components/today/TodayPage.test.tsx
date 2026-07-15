@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { format } from 'date-fns'
 import { TodayPage } from './TodayPage'
 import type { CustomField } from '../../lib/database.types'
 
@@ -32,6 +33,16 @@ vi.mock('./SleepSection', () => ({ SleepSection: () => <div>sleep-section</div> 
 beforeEach(() => vi.clearAllMocks())
 
 const renderPage = () => render(<MemoryRouter><TodayPage /></MemoryRouter>)
+
+const renderAt = (path: string) =>
+  render(
+    <MemoryRouter initialEntries={[path]}>
+      <Routes>
+        <Route path="/" element={<div>HOME</div>} />
+        <Route path="/log/:date" element={<TodayPage />} />
+      </Routes>
+    </MemoryRouter>
+  )
 
 describe('TodayPage', () => {
   it('renders a section per active field in order', () => {
@@ -65,5 +76,27 @@ describe('TodayPage', () => {
     renderPage()
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText('boom')).toBeInTheDocument()
+  })
+})
+
+describe('TodayPage date param validation', () => {
+  it('redirects to home instead of crashing on a malformed date', () => {
+    renderAt('/log/not-a-date')
+    expect(screen.getByText('HOME')).toBeInTheDocument()
+  })
+
+  it('redirects to home on an impossible calendar date', () => {
+    renderAt('/log/2026-13-99')
+    expect(screen.getByText('HOME')).toBeInTheDocument()
+  })
+
+  it('renders the page for a valid date', () => {
+    renderAt('/log/2026-06-15')
+    expect(screen.getByRole('heading', { name: '2026-06-15' })).toBeInTheDocument()
+  })
+
+  it('shows "Today" for the current date', () => {
+    renderAt(`/log/${format(new Date(), 'yyyy-MM-dd')}`)
+    expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument()
   })
 })
