@@ -2,7 +2,7 @@
 
 A daily mood and wellness tracker. Log how you're feeling, track sleep and habits, and spot patterns over time.
 
-**Live app:** [moodtrackerplus.vercel.app](https://moodtrackerplus.vercel.app)
+**Live app:** [moodtracker.plus](https://moodtracker.plus/)
 
 ## Features
 
