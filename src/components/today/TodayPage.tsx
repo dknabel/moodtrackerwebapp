@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { format, subDays, parseISO, isValid } from 'date-fns'
 import { useDailyLog } from '../../hooks/useDailyLog'
-import type { DailyLog, DailyLogUpdate } from '../../lib/database.types'
-import { MoodSection } from './MoodSection'
-import { FoodSection } from './FoodSection'
+import { useFields } from '../../hooks/useFields'
+import { useFieldValues } from '../../hooks/useFieldValues'
+import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
+import { defaultFieldValue } from '../../lib/fields'
+import { FieldSection } from './FieldSection'
 import { MedsSection } from './MedsSection'
 import { SleepSection } from './SleepSection'
-import { ExerciseSection } from './ExerciseSection'
-import { GratitudeSection } from './GratitudeSection'
 
 function todayStr() {
   return format(new Date(), 'yyyy-MM-dd')
@@ -21,59 +21,46 @@ function isValidDateParam(s: string): boolean {
 }
 
 interface FormState {
-  mood_rating: number
-  mood_energy: number
-  mood_anxiety: number
-  meals_count: number
-  exercised: boolean
   bedtime: string
   wake_time: string
   sleep_hours: number | null
   sleep_quality: number
   tonight_bedtime: string
-  gratitude: string
+  fieldValues: Record<string, FieldValueData>
 }
 
-const DEFAULT_FORM: FormState = {
-  mood_rating: 5,
-  mood_energy: 5,
-  mood_anxiety: 5,
-  meals_count: 0,
-  exercised: false,
-  bedtime: '',
-  wake_time: '',
-  sleep_hours: null,
-  sleep_quality: 3,
-  tonight_bedtime: '',
-  gratitude: '',
-}
-
-const toLogData = (f: FormState) => ({
-  ...f,
+const toSleepData = (f: FormState): DailyLogUpdate => ({
   bedtime: f.bedtime || null,
   wake_time: f.wake_time || null,
+  sleep_hours: f.sleep_hours,
+  sleep_quality: f.sleep_quality,
   tonight_bedtime: f.tonight_bedtime || null,
-  gratitude: f.gratitude || null,
 })
 
-function initialForm(log: DailyLog | null, autoBedtime: string): FormState {
-  if (!log) return { ...DEFAULT_FORM, bedtime: autoBedtime }
+function initialForm(
+  log: DailyLog | null,
+  autoBedtime: string,
+  fields: CustomField[],
+  values: Record<string, FieldValueData>
+): FormState {
+  const fieldValues: Record<string, FieldValueData> = {}
+  for (const f of fields) fieldValues[f.id] = values[f.id] ?? defaultFieldValue(f)
   return {
-    mood_rating: log.mood_rating ?? 5,
-    mood_energy: log.mood_energy ?? 5,
-    mood_anxiety: log.mood_anxiety ?? 5,
-    meals_count: log.meals_count ?? 0,
-    exercised: log.exercised ?? false,
-    bedtime: log.bedtime?.slice(0, 5) || autoBedtime,
-    wake_time: log.wake_time?.slice(0, 5) ?? '',
-    sleep_hours: log.sleep_hours,
-    sleep_quality: log.sleep_quality ?? 3,
-    tonight_bedtime: log.tonight_bedtime?.slice(0, 5) ?? '',
-    gratitude: log.gratitude ?? '',
+    bedtime: log?.bedtime?.slice(0, 5) || autoBedtime,
+    wake_time: log?.wake_time?.slice(0, 5) ?? '',
+    sleep_hours: log?.sleep_hours ?? null,
+    sleep_quality: log?.sleep_quality ?? 3,
+    tonight_bedtime: log?.tonight_bedtime?.slice(0, 5) ?? '',
+    fieldValues,
   }
 }
 
-export function TodayPage() {
+interface TodayPageProps {
+  /** Task 7 wires this to the ManageFieldsModal; a no-op default keeps this task self-contained. */
+  onManageFields?: () => void
+}
+
+export function TodayPage({ onManageFields }: TodayPageProps) {
   const { date: dateParam } = useParams<{ date?: string }>()
   const paramValid = dateParam == null || isValidDateParam(dateParam)
   const date = dateParam != null && paramValid ? dateParam : todayStr()
@@ -81,17 +68,20 @@ export function TodayPage() {
 
   const { log, loading, error, save } = useDailyLog(date)
   const { log: yesterdayLog, loading: yesterdayLoading } = useDailyLog(yesterday)
+  const { activeFields, loading: fieldsLoading, error: fieldsError } = useFields()
+  const { values, loading: valuesLoading, error: valuesError, saveAll } = useFieldValues(date)
 
   if (!paramValid) {
     return <Navigate to="/" replace />
   }
 
-  if (loading || yesterdayLoading) {
+  if (loading || yesterdayLoading || fieldsLoading || valuesLoading) {
     return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
-  if (error) {
-    return <div className="text-center text-red-500 mt-12">Could not load this entry: {error}</div>
+  const loadError = error ?? fieldsError ?? valuesError
+  if (loadError) {
+    return <div className="text-center text-red-500 mt-12">Could not load this entry: {loadError}</div>
   }
 
   const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
@@ -100,19 +90,25 @@ export function TodayPage() {
     <LogForm
       key={date}
       date={date}
-      initial={initialForm(log, autoBedtime)}
+      fields={activeFields}
+      initial={initialForm(log, autoBedtime, activeFields, values)}
       save={save}
+      saveValues={saveAll}
+      onManageFields={onManageFields}
     />
   )
 }
 
 interface LogFormProps {
   date: string
+  fields: CustomField[]
   initial: FormState
   save: (values: DailyLogUpdate) => Promise<{ error: string | null }>
+  saveValues: (values: Record<string, FieldValueData>) => Promise<{ error: string | null }>
+  onManageFields?: () => void
 }
 
-function LogForm({ date, initial, save }: LogFormProps) {
+function LogForm({ date, fields, initial, save, saveValues, onManageFields }: LogFormProps) {
   const [form, setForm] = useState<FormState>(initial)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -121,11 +117,17 @@ function LogForm({ date, initial, save }: LogFormProps) {
 
   useEffect(() => () => clearTimeout(savedTimeout.current), [])
 
+  const fieldValue = (f: CustomField) => form.fieldValues[f.id] ?? defaultFieldValue(f)
+
   const handleSave = async () => {
     setSaving(true)
     setSaveError(null)
     setSaved(false)
-    const { error } = await save(toLogData(form))
+    const [logRes, valuesRes] = await Promise.all([
+      save(toSleepData(form)),
+      saveValues(form.fieldValues),
+    ])
+    const error = logRes.error ?? valuesRes.error
     if (error) {
       setSaveError(error)
     } else {
@@ -140,27 +142,20 @@ function LogForm({ date, initial, save }: LogFormProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-        {isToday ? 'Today' : date}
-      </h1>
-
-      <MoodSection
-        values={{ mood_rating: form.mood_rating, mood_energy: form.mood_energy, mood_anxiety: form.mood_anxiety }}
-        onChange={v => setForm(f => ({ ...f, ...v }))}
-      />
-
-      <hr className="border-gray-200 dark:border-gray-700" />
-
-      <FoodSection
-        value={form.meals_count}
-        onChange={v => setForm(f => ({ ...f, meals_count: v }))}
-      />
-
-      <hr className="border-gray-200 dark:border-gray-700" />
-
-      <MedsSection date={date} />
-
-      <hr className="border-gray-200 dark:border-gray-700" />
+      <div className="flex justify-between items-center">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
+          {isToday ? 'Today' : date}
+        </h1>
+        {onManageFields && (
+          <button
+            type="button"
+            onClick={onManageFields}
+            className="text-sm text-blue-600 font-medium"
+          >
+            Manage fields
+          </button>
+        )}
+      </div>
 
       <SleepSection
         values={{
@@ -173,19 +168,22 @@ function LogForm({ date, initial, save }: LogFormProps) {
         onChange={v => setForm(f => ({ ...f, ...v }))}
       />
 
+      {fields.map(field => (
+        <div key={field.id} className="flex flex-col gap-6">
+          <hr className="border-gray-200 dark:border-gray-700" />
+          <FieldSection
+            field={field}
+            value={fieldValue(field)}
+            onChange={v =>
+              setForm(f => ({ ...f, fieldValues: { ...f.fieldValues, [field.id]: v } }))
+            }
+          />
+        </div>
+      ))}
+
       <hr className="border-gray-200 dark:border-gray-700" />
 
-      <ExerciseSection
-        value={form.exercised}
-        onChange={v => setForm(f => ({ ...f, exercised: v }))}
-      />
-
-      <hr className="border-gray-200 dark:border-gray-700" />
-
-      <GratitudeSection
-        value={form.gratitude}
-        onChange={v => setForm(f => ({ ...f, gratitude: v }))}
-      />
+      <MedsSection date={date} />
 
       {saveError && (
         <p className="text-red-600 text-sm">{saveError}</p>
