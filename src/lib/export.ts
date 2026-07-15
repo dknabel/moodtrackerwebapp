@@ -1,4 +1,5 @@
-import type { DailyLog, Medication, MedicationLog } from './database.types'
+import type { ExportData } from './exportData'
+import { displayValue } from './fields'
 
 function escapeCsv(value: unknown): string {
   if (value == null) return ''
@@ -9,47 +10,63 @@ function escapeCsv(value: unknown): string {
   return s
 }
 
-export function buildCsvRows(
-  logs: DailyLog[],
-  medications: Medication[],
-  medicationLogs: MedicationLog[]
-): string {
-  const medLogKey = (date: string, medId: string) => `${date}::${medId}`
+interface ExportRow {
+  date: string
+  fieldCells: string[]
+  medCells: string[]
+  sleepCells: (string | number | null)[]
+}
+
+function buildRows(data: ExportData): ExportRow[] {
+  const { logs, medications, medLogs, fields, fieldValues } = data
+
   const takenMap = new Map<string, boolean>()
-  for (const ml of medicationLogs) {
-    takenMap.set(medLogKey(ml.date, ml.medication_id), ml.taken)
+  for (const ml of medLogs) takenMap.set(`${ml.date}::${ml.medication_id}`, ml.taken)
+
+  const valueMap = new Map<string, string>()
+  const fieldById = new Map(fields.map(f => [f.id, f]))
+  for (const v of fieldValues) {
+    const field = fieldById.get(v.field_id)
+    if (field) valueMap.set(`${v.date}::${v.field_id}`, displayValue(field, v.value))
   }
 
-  const medHeaders = medications.map(m => `${m.name} (${m.dose})`)
-  const headers = [
-    'date', 'mood_rating', 'mood_energy', 'mood_anxiety', 'meals_count',
-    ...medHeaders,
-    'exercised', 'sleep_hours', 'sleep_quality', 'bedtime', 'wake_time',
-    'tonight_bedtime', 'gratitude',
-  ]
+  const logByDate = new Map(logs.map(l => [l.date, l]))
+  const dates = Array.from(
+    new Set([...logs.map(l => l.date), ...fieldValues.map(v => v.date)])
+  ).sort((a, b) => b.localeCompare(a))
 
-  const rows = logs.map(log => {
-    const medValues = medications.map(m => {
-      const taken = takenMap.get(medLogKey(log.date, m.id))
-      return taken === true ? 'yes' : taken === false ? 'no' : ''
-    })
-    return [
-      log.date,
-      log.mood_rating,
-      log.mood_energy,
-      log.mood_anxiety,
-      log.meals_count,
-      ...medValues,
-      log.exercised == null ? '' : log.exercised ? 'yes' : 'no',
-      log.sleep_hours,
-      log.sleep_quality,
-      log.bedtime,
-      log.wake_time,
-      log.tonight_bedtime,
-      log.gratitude,
-    ].map(escapeCsv).join(',')
+  return dates.map(date => {
+    const log = logByDate.get(date)
+    return {
+      date,
+      fieldCells: fields.map(f => valueMap.get(`${date}::${f.id}`) ?? ''),
+      medCells: medications.map(m => {
+        const taken = takenMap.get(`${date}::${m.id}`)
+        return taken === true ? 'yes' : taken === false ? 'no' : ''
+      }),
+      sleepCells: [
+        log?.sleep_hours ?? null,
+        log?.sleep_quality ?? null,
+        log?.bedtime ?? null,
+        log?.wake_time ?? null,
+        log?.tonight_bedtime ?? null,
+      ],
+    }
   })
+}
 
+const SLEEP_HEADERS = ['sleep_hours', 'sleep_quality', 'bedtime', 'wake_time', 'tonight_bedtime']
+
+export function buildCsvRows(data: ExportData): string {
+  const headers = [
+    'date',
+    ...data.fields.map(f => f.name),
+    ...data.medications.map(m => `${m.name} (${m.dose})`),
+    ...SLEEP_HEADERS,
+  ]
+  const rows = buildRows(data).map(r =>
+    [r.date, ...r.fieldCells, ...r.medCells, ...r.sleepCells].map(escapeCsv).join(',')
+  )
   return [headers.map(escapeCsv).join(','), ...rows].join('\n')
 }
 
@@ -64,9 +81,7 @@ export function downloadCsv(content: string, filename: string): void {
 }
 
 export async function downloadPdf(
-  logs: DailyLog[],
-  medications: Medication[],
-  medicationLogs: MedicationLog[],
+  data: ExportData,
   dateRange: string,
   filename: string
 ): Promise<void> {
@@ -79,35 +94,22 @@ export async function downloadPdf(
   doc.setFontSize(10)
   doc.text(dateRange, 14, 24)
 
-  const takenMap = new Map<string, boolean>()
-  for (const ml of medicationLogs) {
-    takenMap.set(`${ml.date}::${ml.medication_id}`, ml.taken)
-  }
-
-  const medHeaders = medications.map(m => `${m.name} (${m.dose})`)
   const head = [[
-    'Date', 'Mood', 'Energy', 'Anxiety', 'Meals',
-    ...medHeaders,
-    'Exercised', 'Sleep h', 'Sleep Q', 'Bedtime', 'Wake', 'Tonight bed', 'Gratitude',
+    'Date',
+    ...data.fields.map(f => f.name),
+    ...data.medications.map(m => `${m.name} (${m.dose})`),
+    'Sleep h', 'Sleep Q', 'Bedtime', 'Wake', 'Tonight bed',
   ]]
 
-  const body = logs.map(log => [
-    log.date,
-    log.mood_rating ?? '',
-    log.mood_energy ?? '',
-    log.mood_anxiety ?? '',
-    log.meals_count ?? '',
-    ...medications.map(m => {
-      const taken = takenMap.get(`${log.date}::${m.id}`)
-      return taken === true ? 'Y' : taken === false ? 'N' : ''
-    }),
-    log.exercised == null ? '' : log.exercised ? 'Y' : 'N',
-    log.sleep_hours ?? '',
-    log.sleep_quality ?? '',
-    log.bedtime?.slice(0, 5) ?? '',
-    log.wake_time?.slice(0, 5) ?? '',
-    log.tonight_bedtime?.slice(0, 5) ?? '',
-    log.gratitude ?? '',
+  const body = buildRows(data).map(r => [
+    r.date,
+    ...r.fieldCells,
+    ...r.medCells.map(c => (c === 'yes' ? 'Y' : c === 'no' ? 'N' : '')),
+    r.sleepCells[0] ?? '',
+    r.sleepCells[1] ?? '',
+    typeof r.sleepCells[2] === 'string' ? r.sleepCells[2].slice(0, 5) : '',
+    typeof r.sleepCells[3] === 'string' ? r.sleepCells[3].slice(0, 5) : '',
+    typeof r.sleepCells[4] === 'string' ? r.sleepCells[4].slice(0, 5) : '',
   ])
 
   autoTable(doc, { head, body, startY: 30, styles: { fontSize: 7 } })

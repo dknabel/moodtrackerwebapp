@@ -32,6 +32,8 @@ beforeEach(() => {
   responses['daily_logs'] = { data: [{ id: 'l1' }], error: null }
   responses['medications'] = { data: [{ id: 'm1' }], error: null }
   responses['medication_logs'] = { data: [{ id: 'ml1' }], error: null }
+  responses['custom_fields'] = { data: [{ id: 'f1' }], error: null }
+  responses['field_values'] = { data: [{ id: 'v1' }], error: null }
 })
 
 describe('fetchExportData', () => {
@@ -40,6 +42,8 @@ describe('fetchExportData', () => {
     expect(result.logs).toEqual([{ id: 'l1' }])
     expect(result.medications).toEqual([{ id: 'm1' }])
     expect(result.medLogs).toEqual([{ id: 'ml1' }])
+    expect(result.fields).toEqual([{ id: 'f1' }])
+    expect(result.fieldValues).toEqual([{ id: 'v1' }])
   })
 
   it('throws when any query fails instead of exporting partial data', async () => {
@@ -51,11 +55,13 @@ describe('fetchExportData', () => {
     await fetchExportData('90')
     expect(queries['daily_logs'].gte).toHaveBeenCalled()
     expect(queries['medication_logs'].gte).toHaveBeenCalled()
+    expect(queries['field_values'].gte).toHaveBeenCalled()
   })
 
   it('applies no lower date bound for the all-time range', async () => {
     await fetchExportData('all')
     expect(queries['daily_logs'].gte).not.toHaveBeenCalled()
     expect(queries['medication_logs'].gte).not.toHaveBeenCalled()
+    expect(queries['field_values'].gte).not.toHaveBeenCalled()
   })
 })

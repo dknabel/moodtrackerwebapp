@@ -47,17 +47,16 @@ export function HistoryPage() {
     setExporting(true)
     setExportError(null)
     try {
-      const { logs: exportLogs, medications, medLogs } = await fetchExportData(exportRange)
+      const exportData = await fetchExportData(exportRange)
 
       const rangeLabel =
         exportRange === 'all' ? 'All time' : `Last ${exportRange} days`
       const filename = `mood-tracker-${format(new Date(), 'yyyy-MM-dd')}`
 
       if (exportFormat === 'csv') {
-        const content = buildCsvRows(exportLogs, medications, medLogs)
-        downloadCsv(content, `${filename}.csv`)
+        downloadCsv(buildCsvRows(exportData), `${filename}.csv`)
       } else {
-        await downloadPdf(exportLogs, medications, medLogs, rangeLabel, `${filename}.pdf`)
+        await downloadPdf(exportData, rangeLabel, `${filename}.pdf`)
       }
 
       setShowExport(false)
