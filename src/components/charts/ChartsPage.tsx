@@ -12,6 +12,7 @@ import { SleepChart } from './SleepChart'
 import { FieldChart } from './FieldChart'
 import { OverlaySection } from './OverlaySection'
 import { StatsSection } from './StatsSection'
+import { CorrelationsSection } from './CorrelationsSection'
 
 const RANGES = [
   { label: '7 days', days: 7 },
@@ -98,6 +99,15 @@ export function ChartsPage() {
       )}
 
       <StatsSection {...streaks} />
+
+      {!loading && hasData && (
+        <CorrelationsSection
+          fields={activeFields}
+          valuesByField={valuesByField}
+          logs={chronologicalLogs}
+          isDark={isDark}
+        />
+      )}
     </div>
   )
 }

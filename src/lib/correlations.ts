@@ -1,35 +1,34 @@
-import type { DailyLog } from './database.types'
+export interface Point {
+  x: number
+  y: number
+}
 
-export interface CorrelationResult {
+export interface ComparisonResult {
   groupA: { label: string; avg: number; count: number }
   groupB: { label: string; avg: number; count: number }
   hasEnoughData: boolean
 }
 
-export interface CorrelationOptions {
-  /** Split variable — logs where this is null are excluded from both groups. */
-  xKey?: keyof DailyLog
-  minPoints?: number
+export function median(nums: number[]): number {
+  const sorted = [...nums].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2
 }
 
-export function computeCorrelation(
-  logs: DailyLog[],
-  yKey: keyof DailyLog,
-  splitFn: (log: DailyLog) => boolean,
+export function compareGroups(
+  points: Point[],
+  splitFn: (p: Point) => boolean,
   labelA: string,
   labelB: string,
-  { xKey, minPoints = 3 }: CorrelationOptions = {}
-): CorrelationResult {
-  const eligible = logs.filter(l => l[yKey] != null && (xKey == null || l[xKey] != null))
-  const groupA = eligible.filter(splitFn)
-  const groupB = eligible.filter(l => !splitFn(l))
+  minPoints = 3
+): ComparisonResult {
+  const groupA = points.filter(splitFn)
+  const groupB = points.filter(p => !splitFn(p))
 
-  const avg = (arr: DailyLog[]) =>
+  const avg = (arr: Point[]) =>
     arr.length === 0
       ? 0
-      : parseFloat(
-          (arr.reduce((sum, l) => sum + (l[yKey] as number), 0) / arr.length).toFixed(1)
-        )
+      : parseFloat((arr.reduce((sum, p) => sum + p.y, 0) / arr.length).toFixed(1))
 
   return {
     groupA: { label: labelA, avg: avg(groupA), count: groupA.length },
