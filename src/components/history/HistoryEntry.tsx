@@ -1,39 +1,49 @@
 import { useNavigate } from 'react-router-dom'
-import type { DailyLog } from '../../lib/database.types'
+import type { CustomField, FieldValueData } from '../../lib/database.types'
+import { displayValue } from '../../lib/fields'
 
 function truncate(text: string, max: number): string {
   return text.length <= max ? text : text.slice(0, max) + '…'
 }
 
-interface HistoryEntryProps {
-  log: DailyLog
+export interface HistoryItem {
+  field: CustomField
+  value: FieldValueData
 }
 
-export function HistoryEntry({ log }: HistoryEntryProps) {
+interface HistoryEntryProps {
+  date: string
+  sleepHours: number | null
+  items: HistoryItem[]
+}
+
+export function HistoryEntry({ date, sleepHours, items }: HistoryEntryProps) {
   const navigate = useNavigate()
+  const textItems = items.filter(i => i.field.type === 'text' && displayValue(i.field, i.value))
+  const chipItems = items.filter(i => i.field.type !== 'text' && displayValue(i.field, i.value))
 
   return (
     <button
       type="button"
-      onClick={() => navigate(`/log/${log.date}`)}
+      onClick={() => navigate(`/log/${date}`)}
       className="w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1"
     >
-      <span className="text-sm font-semibold text-gray-900 dark:text-white">{log.date}</span>
+      <span className="text-sm font-semibold text-gray-900 dark:text-white">{date}</span>
       <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
-        {log.mood_rating !== null && <span>Mood {log.mood_rating}/10</span>}
-        {log.mood_energy !== null && <span>Energy {log.mood_energy}/10</span>}
-        {log.mood_anxiety !== null && <span>Anxiety {log.mood_anxiety}/10</span>}
-        {log.sleep_hours !== null && <span>Sleep {log.sleep_hours}h</span>}
-        {log.meals_count !== null && <span>{log.meals_count} meals</span>}
-        {log.exercised !== null && (
-          <span>{log.exercised ? '✓ Exercised' : '✗ No exercise'}</span>
-        )}
+        {sleepHours !== null && <span>Sleep {sleepHours}h</span>}
+        {chipItems.map(({ field, value }) => (
+          <span key={field.id}>
+            {field.type === 'slider'
+              ? `${field.name} ${displayValue(field, value)}`
+              : `${field.name}: ${displayValue(field, value)}`}
+          </span>
+        ))}
       </div>
-      {log.gratitude && (
-        <blockquote className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
-          "{truncate(log.gratitude, 80)}"
+      {textItems.map(({ field, value }) => (
+        <blockquote key={field.id} className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
+          "{truncate(displayValue(field, value), 80)}"
         </blockquote>
-      )}
+      ))}
     </button>
   )
 }

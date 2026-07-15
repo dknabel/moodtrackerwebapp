@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { format, subDays, parseISO } from 'date-fns'
-import type { DailyLog, MedicationLog, Medication } from '../lib/database.types'
+import type { CustomField, DailyLog, FieldValue, Medication, MedicationLog } from '../lib/database.types'
 
 interface StreakResult {
   current: number
@@ -36,16 +36,28 @@ function computeStreak(dateSet: Set<string>): StreakResult {
 
 export function useStreaks(
   logs: DailyLog[],
+  fields: CustomField[],
+  fieldValues: FieldValue[],
   medicationLogs: MedicationLog[],
   medications: Medication[]
-): { logging: StreakResult; exercise: StreakResult; meds: StreakResult } {
+): { logging: StreakResult; meds: StreakResult; toggles: Array<{ name: string; streak: StreakResult }> } {
   return useMemo(() => {
-    const loggingDates = new Set(logs.map(l => l.date))
-    const exerciseDates = new Set(logs.filter(l => l.exercised === true).map(l => l.date))
+    const loggingDates = new Set([
+      ...logs.map(l => l.date),
+      ...fieldValues.map(v => v.date),
+    ])
+
+    const toggles = fields
+      .filter(f => f.active && f.type === 'toggle')
+      .map(f => ({
+        name: f.name,
+        streak: computeStreak(
+          new Set(fieldValues.filter(v => v.field_id === f.id && v.value === true).map(v => v.date))
+        ),
+      }))
 
     const medIds = medications.map(m => m.id)
     const medsDates = new Set<string>()
-
     if (medIds.length > 0) {
       const byDate = new Map<string, Map<string, boolean>>()
       for (const ml of medicationLogs) {
@@ -59,8 +71,8 @@ export function useStreaks(
 
     return {
       logging: computeStreak(loggingDates),
-      exercise: computeStreak(exerciseDates),
+      toggles,
       meds: medIds.length === 0 ? { current: 0, longest: 0 } : computeStreak(medsDates),
     }
-  }, [logs, medicationLogs, medications])
+  }, [logs, fields, fieldValues, medicationLogs, medications])
 }

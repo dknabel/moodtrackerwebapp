@@ -15,20 +15,30 @@ function StreakCard({ label, current, longest }: StreakCardProps) {
   )
 }
 
-interface Props {
-  logging: { current: number; longest: number }
-  exercise: { current: number; longest: number }
-  meds: { current: number; longest: number }
+interface StreakResult {
+  current: number
+  longest: number
 }
 
-export function StatsSection({ logging, exercise, meds }: Props) {
+interface Props {
+  logging: StreakResult
+  meds: StreakResult
+  toggles: Array<{ name: string; streak: StreakResult }>
+}
+
+export function StatsSection({ logging, meds, toggles }: Props) {
+  const items = [
+    { label: 'Logging', ...logging },
+    ...toggles.map(t => ({ label: t.name, ...t.streak })),
+    { label: 'Medications', ...meds },
+  ]
   return (
     <div className="flex flex-col gap-3">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Streaks</h2>
-      <div className="flex gap-3">
-        <StreakCard label="Logging" current={logging.current} longest={logging.longest} />
-        <StreakCard label="Exercise" current={exercise.current} longest={exercise.longest} />
-        <StreakCard label="Medications" current={meds.current} longest={meds.longest} />
+      <div className="flex gap-3 flex-wrap">
+        {items.map(item => (
+          <StreakCard key={item.label} label={item.label} current={item.current} longest={item.longest} />
+        ))}
       </div>
     </div>
   )

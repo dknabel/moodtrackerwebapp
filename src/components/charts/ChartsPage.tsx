@@ -1,14 +1,16 @@
 import { useState, useMemo } from 'react'
 import { format, subDays } from 'date-fns'
 import { useLogs } from '../../hooks/useLogs'
+import { useFields } from '../../hooks/useFields'
+import { useFieldValuesBulk } from '../../hooks/useFieldValuesBulk'
 import { useMedications } from '../../hooks/useMedications'
 import { useMedicationLogsBulk } from '../../hooks/useMedicationLogsBulk'
 import { useTheme } from '../../hooks/useTheme'
 import { useStreaks } from '../../hooks/useStreaks'
-import { MoodChart } from './MoodChart'
+import type { FieldValue } from '../../lib/database.types'
 import { SleepChart } from './SleepChart'
-import { MealsChart } from './MealsChart'
-import { ExerciseChart } from './ExerciseChart'
+import { FieldChart } from './FieldChart'
+import { OverlaySection } from './OverlaySection'
 import { StatsSection } from './StatsSection'
 import { CorrelationsSection } from './CorrelationsSection'
 
@@ -30,13 +32,29 @@ export function ChartsPage() {
   }, [rangeDays])
 
   // One fetch covers both the charts (sliced to the selected range) and streaks.
-  const { logs: logs365, loading } = useLogs(from365, toDate)
+  const { logs: logs365, loading: logsLoading } = useLogs(from365, toDate)
+  const { fields, activeFields, loading: fieldsLoading } = useFields()
+  const { values: values365, loading: valuesLoading } = useFieldValuesBulk(from365, toDate)
   const { medications } = useMedications()
   const { logs: medLogs365 } = useMedicationLogsBulk(from365, toDate)
+
+  const loading = logsLoading || fieldsLoading || valuesLoading
   const logs = useMemo(() => logs365.filter(l => l.date >= fromDate), [logs365, fromDate])
   const chronologicalLogs = useMemo(() => [...logs].reverse(), [logs])
+  const rangeValues = useMemo(() => values365.filter(v => v.date >= fromDate), [values365, fromDate])
+  const valuesByField = useMemo(() => {
+    const map = new Map<string, FieldValue[]>()
+    for (const v of [...rangeValues].sort((a, b) => a.date.localeCompare(b.date))) {
+      const list = map.get(v.field_id)
+      if (list) list.push(v)
+      else map.set(v.field_id, [v])
+    }
+    return map
+  }, [rangeValues])
   const { isDark } = useTheme()
-  const streaks = useStreaks(logs365, medLogs365, medications)
+  const streaks = useStreaks(logs365, fields, values365, medLogs365, medications)
+
+  const hasData = chronologicalLogs.length > 0 || rangeValues.length > 0
 
   return (
     <div className="flex flex-col gap-6">
@@ -62,25 +80,33 @@ export function ChartsPage() {
 
       {loading && <div className="text-center text-gray-400 dark:text-gray-500 mt-8">Loading…</div>}
 
-      {!loading && logs.length === 0 && (
+      {!loading && !hasData && (
         <div className="text-center text-gray-400 dark:text-gray-500 mt-8">
           No entries for this period.
         </div>
       )}
 
-      {!loading && chronologicalLogs.length > 0 && (
+      {!loading && hasData && (
         <>
-          <MoodChart logs={chronologicalLogs} isDark={isDark} />
-          <SleepChart logs={chronologicalLogs} isDark={isDark} />
-          <MealsChart logs={chronologicalLogs} isDark={isDark} />
-          <ExerciseChart logs={chronologicalLogs} isDark={isDark} />
+          {chronologicalLogs.length > 0 && <SleepChart logs={chronologicalLogs} isDark={isDark} />}
+          {activeFields
+            .filter(f => f.show_in_charts)
+            .map(f => (
+              <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
+            ))}
+          <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
         </>
       )}
 
       <StatsSection {...streaks} />
 
-      {chronologicalLogs.length > 0 && (
-        <CorrelationsSection logs={chronologicalLogs} isDark={isDark} />
+      {!loading && hasData && (
+        <CorrelationsSection
+          fields={activeFields}
+          valuesByField={valuesByField}
+          logs={chronologicalLogs}
+          isDark={isDark}
+        />
       )}
     </div>
   )

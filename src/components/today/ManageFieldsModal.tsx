@@ -1,0 +1,349 @@
+import { useEffect, useState } from 'react'
+import type { CustomField, FieldConfig, FieldType } from '../../lib/database.types'
+import { isCompatibleTypeChange, validateField, type FieldData } from '../../lib/fields'
+
+interface Props {
+  fields: CustomField[]
+  onAdd: (data: FieldData) => Promise<string | null>
+  onUpdate: (id: string, data: FieldData & { show_in_charts?: boolean }) => Promise<string | null>
+  onArchive: (id: string) => Promise<string | null>
+  onReactivate: (id: string) => Promise<string | null>
+  onDelete: (id: string) => Promise<string | null>
+  onMove: (id: string, direction: -1 | 1) => Promise<string | null>
+  onClose: () => void
+}
+
+interface FormValues {
+  name: string
+  type: FieldType
+  min: string
+  max: string
+  lowLabel: string
+  highLabel: string
+  unit: string
+  options: string
+  show_in_charts: boolean
+}
+
+const EMPTY: FormValues = {
+  name: '', type: 'slider', min: '1', max: '10',
+  lowLabel: '', highLabel: '', unit: '', options: '', show_in_charts: true,
+}
+
+function toConfig(v: FormValues): FieldConfig {
+  switch (v.type) {
+    case 'slider':
+      return {
+        min: Number(v.min), max: Number(v.max),
+        lowLabel: v.lowLabel, highLabel: v.highLabel,
+      }
+    case 'number':
+      return v.unit ? { unit: v.unit } : {}
+    case 'tags':
+      return { options: v.options.split(',').map(s => s.trim()).filter(Boolean) }
+    default:
+      return {}
+  }
+}
+
+function toFormValues(f: CustomField): FormValues {
+  return {
+    name: f.name,
+    type: f.type,
+    min: String(f.config.min ?? 1),
+    max: String(f.config.max ?? 10),
+    lowLabel: f.config.lowLabel ?? '',
+    highLabel: f.config.highLabel ?? '',
+    unit: f.config.unit ?? '',
+    options: (f.config.options ?? []).join(', '),
+    show_in_charts: f.show_in_charts,
+  }
+}
+
+const TYPE_LABELS: Record<FieldType, string> = {
+  slider: 'Slider (rate 1–10)',
+  number: 'Number',
+  toggle: 'Yes / No',
+  text: 'Text',
+  tags: 'Tags',
+}
+
+const inputClass =
+  'border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white'
+
+function ConfigInputs({ values, setValues }: {
+  values: FormValues
+  setValues: (updater: (v: FormValues) => FormValues) => void
+}) {
+  return (
+    <>
+      {values.type === 'slider' && (
+        <div className="flex gap-2">
+          <input
+            type="number" aria-label="Min" className={`${inputClass} w-16`} value={values.min}
+            onChange={e => setValues(v => ({ ...v, min: e.target.value }))}
+          />
+          <input
+            type="number" aria-label="Max" className={`${inputClass} w-16`} value={values.max}
+            onChange={e => setValues(v => ({ ...v, max: e.target.value }))}
+          />
+          <input
+            className={`${inputClass} flex-1 min-w-0`} placeholder="Low label" value={values.lowLabel}
+            onChange={e => setValues(v => ({ ...v, lowLabel: e.target.value }))}
+          />
+          <input
+            className={`${inputClass} flex-1 min-w-0`} placeholder="High label" value={values.highLabel}
+            onChange={e => setValues(v => ({ ...v, highLabel: e.target.value }))}
+          />
+        </div>
+      )}
+      {values.type === 'number' && (
+        <input
+          className={inputClass} placeholder="Unit (optional, e.g. cups)" value={values.unit}
+          onChange={e => setValues(v => ({ ...v, unit: e.target.value }))}
+        />
+      )}
+      {values.type === 'tags' && (
+        <input
+          className={inputClass} placeholder="Options, comma-separated" value={values.options}
+          onChange={e => setValues(v => ({ ...v, options: e.target.value }))}
+        />
+      )}
+    </>
+  )
+}
+
+export function ManageFieldsModal({
+  fields, onAdd, onUpdate, onArchive, onReactivate, onDelete, onMove, onClose,
+}: Props) {
+  const [addForm, setAddForm] = useState(EMPTY)
+  const [editId, setEditId] = useState<string | null>(null)
+  const [editForm, setEditForm] = useState(EMPTY)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
+  const [listError, setListError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
+  const active = fields.filter(f => f.active)
+  const archived = fields.filter(f => !f.active)
+  const namesExcept = (id: string | null) =>
+    fields.filter(f => f.id !== id).map(f => f.name)
+
+  const handleAdd = async () => {
+    const data: FieldData = { name: addForm.name.trim(), type: addForm.type, config: toConfig(addForm) }
+    const invalid = validateField(data, namesExcept(null))
+    if (invalid) { setAddError(invalid); return }
+    setAddError(null)
+    const error = await onAdd(data)
+    if (error) { setAddError(error); return }
+    setAddForm(EMPTY)
+  }
+
+  const startEdit = (f: CustomField) => {
+    setEditId(f.id)
+    setEditForm(toFormValues(f))
+    setEditError(null)
+  }
+
+  const handleSaveEdit = async () => {
+    if (!editId) return
+    const original = fields.find(f => f.id === editId)
+    if (!original) return
+    const data: FieldData = { name: editForm.name.trim(), type: editForm.type, config: toConfig(editForm) }
+    const invalid = validateField(data, namesExcept(editId))
+    if (invalid) { setEditError(invalid); return }
+    if (
+      original.type !== data.type &&
+      !isCompatibleTypeChange(original.type, data.type) &&
+      !window.confirm(
+        "Past values that don't match the new type will be hidden from charts (they stay in History). Continue?"
+      )
+    ) return
+    setEditError(null)
+    const error = await onUpdate(editId, { ...data, show_in_charts: editForm.show_in_charts })
+    if (error) { setEditError(error); return }
+    setEditId(null)
+  }
+
+  const handleArchive = async (f: CustomField) => {
+    if (!window.confirm(`Archive ${f.name}? Its history is kept and it can be restored.`)) return
+    setListError(null)
+    const error = await onArchive(f.id)
+    if (error) setListError(error)
+  }
+
+  const handleDelete = async (f: CustomField) => {
+    const typed = window.prompt(
+      `Permanently delete "${f.name}" and ALL of its logged values? Type DELETE to confirm.`
+    )
+    if (typed !== 'DELETE') return
+    setListError(null)
+    const error = await onDelete(f.id)
+    if (error) setListError(error)
+  }
+
+  const handleMove = async (f: CustomField, direction: -1 | 1) => {
+    setListError(null)
+    const error = await onMove(f.id, direction)
+    if (error) setListError(error)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl p-6 flex flex-col gap-4 overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Fields</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="text-gray-500 dark:text-gray-400 text-2xl leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {active.map((f, i) =>
+            editId === f.id ? (
+              <div key={f.id} className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <input
+                  className={inputClass}
+                  value={editForm.name}
+                  onChange={e => setEditForm(v => ({ ...v, name: e.target.value }))}
+                  placeholder="Name"
+                />
+                <label htmlFor="edit-type" className="text-xs text-gray-500 dark:text-gray-400 flex flex-col gap-1">
+                  Type
+                  <select
+                    id="edit-type"
+                    className={inputClass}
+                    value={editForm.type}
+                    onChange={e => setEditForm(v => ({ ...v, type: e.target.value as FieldType }))}
+                  >
+                    {(Object.keys(TYPE_LABELS) as FieldType[]).map(t => (
+                      <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                    ))}
+                  </select>
+                </label>
+                <ConfigInputs values={editForm} setValues={setEditForm} />
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    checked={editForm.show_in_charts}
+                    onChange={e => setEditForm(v => ({ ...v, show_in_charts: e.target.checked }))}
+                    className="w-4 h-4 accent-blue-600"
+                  />
+                  Show in charts
+                </label>
+                {editError && <p className="text-red-500 text-xs">{editError}</p>}
+                <div className="flex gap-2">
+                  <button onClick={handleSaveEdit} className="flex-1 bg-blue-600 text-white rounded p-2 text-sm">
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditId(null)}
+                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded p-2 text-sm text-gray-700 dark:text-gray-300"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div key={f.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">{f.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
+                </div>
+                <div className="flex gap-3 items-center">
+                  <button
+                    onClick={() => handleMove(f, -1)}
+                    disabled={i === 0}
+                    aria-label={`Move ${f.name} up`}
+                    className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    onClick={() => handleMove(f, 1)}
+                    disabled={i === active.length - 1}
+                    aria-label={`Move ${f.name} down`}
+                    className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                  >
+                    ↓
+                  </button>
+                  <button onClick={() => startEdit(f)} className="text-blue-600 text-sm">Edit</button>
+                  <button onClick={() => handleArchive(f)} className="text-red-500 text-sm">Archive</button>
+                </div>
+              </div>
+            )
+          )}
+          {listError && <p className="text-red-500 text-xs">{listError}</p>}
+        </div>
+
+        {archived.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Archived</p>
+            {archived.map(f => (
+              <div key={f.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg opacity-70">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">{f.name}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => onReactivate(f.id)} className="text-blue-600 text-sm">Restore</button>
+                  <button onClick={() => handleDelete(f)} className="text-red-500 text-sm">Delete forever</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!editId && (
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex flex-col gap-2">
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Add field</p>
+          <input
+            className={inputClass}
+            value={addForm.name}
+            onChange={e => setAddForm(v => ({ ...v, name: e.target.value }))}
+            placeholder="Name (required)"
+          />
+          <label htmlFor="add-type" className="text-xs text-gray-500 dark:text-gray-400 flex flex-col gap-1">
+            Type
+            <select
+              id="add-type"
+              className={inputClass}
+              value={addForm.type}
+              onChange={e => setAddForm(v => ({ ...v, type: e.target.value as FieldType }))}
+            >
+              {(Object.keys(TYPE_LABELS) as FieldType[]).map(t => (
+                <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+              ))}
+            </select>
+          </label>
+          <ConfigInputs values={addForm} setValues={setAddForm} />
+          {addError && <p className="text-red-500 text-xs">{addError}</p>}
+          <button
+            onClick={handleAdd}
+            disabled={!addForm.name.trim()}
+            className="bg-blue-600 text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+          >
+            Add
+          </button>
+        </div>
+        )}
+      </div>
+    </div>
+  )
+}
