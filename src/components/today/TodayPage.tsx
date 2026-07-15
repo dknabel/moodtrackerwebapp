@@ -7,6 +7,7 @@ import { useFieldValues } from '../../hooks/useFieldValues'
 import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
 import { defaultFieldValue } from '../../lib/fields'
 import { FieldSection } from './FieldSection'
+import { ManageFieldsModal } from './ManageFieldsModal'
 import { MedsSection } from './MedsSection'
 import { SleepSection } from './SleepSection'
 
@@ -55,12 +56,7 @@ function initialForm(
   }
 }
 
-interface TodayPageProps {
-  /** Task 7 wires this to the ManageFieldsModal; a no-op default keeps this task self-contained. */
-  onManageFields?: () => void
-}
-
-export function TodayPage({ onManageFields }: TodayPageProps) {
+export function TodayPage() {
   const { date: dateParam } = useParams<{ date?: string }>()
   const paramValid = dateParam == null || isValidDateParam(dateParam)
   const date = dateParam != null && paramValid ? dateParam : todayStr()
@@ -68,8 +64,12 @@ export function TodayPage({ onManageFields }: TodayPageProps) {
 
   const { log, loading, error, save } = useDailyLog(date)
   const { log: yesterdayLog, loading: yesterdayLoading } = useDailyLog(yesterday)
-  const { activeFields, loading: fieldsLoading, error: fieldsError } = useFields()
+  const {
+    fields, activeFields, loading: fieldsLoading, error: fieldsError,
+    addField, updateField, archiveField, reactivateField, deleteField, moveField,
+  } = useFields()
   const { values, loading: valuesLoading, error: valuesError, saveAll } = useFieldValues(date)
+  const [showManage, setShowManage] = useState(false)
 
   if (!paramValid) {
     return <Navigate to="/" replace />
@@ -87,15 +87,29 @@ export function TodayPage({ onManageFields }: TodayPageProps) {
   const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
 
   return (
-    <LogForm
-      key={date}
-      date={date}
-      fields={activeFields}
-      initial={initialForm(log, autoBedtime, activeFields, values)}
-      save={save}
-      saveValues={saveAll}
-      onManageFields={onManageFields}
-    />
+    <>
+      <LogForm
+        key={date}
+        date={date}
+        fields={activeFields}
+        initial={initialForm(log, autoBedtime, activeFields, values)}
+        save={save}
+        saveValues={saveAll}
+        onManageFields={() => setShowManage(true)}
+      />
+      {showManage && (
+        <ManageFieldsModal
+          fields={fields}
+          onAdd={addField}
+          onUpdate={updateField}
+          onArchive={archiveField}
+          onReactivate={reactivateField}
+          onDelete={deleteField}
+          onMove={moveField}
+          onClose={() => setShowManage(false)}
+        />
+      )}
+    </>
   )
 }
 
@@ -105,7 +119,7 @@ interface LogFormProps {
   initial: FormState
   save: (values: DailyLogUpdate) => Promise<{ error: string | null }>
   saveValues: (values: Record<string, FieldValueData>) => Promise<{ error: string | null }>
-  onManageFields?: () => void
+  onManageFields: () => void
 }
 
 function LogForm({ date, fields, initial, save, saveValues, onManageFields }: LogFormProps) {
@@ -146,15 +160,13 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           {isToday ? 'Today' : date}
         </h1>
-        {onManageFields && (
-          <button
-            type="button"
-            onClick={onManageFields}
-            className="text-sm text-blue-600 dark:text-blue-400 font-medium"
-          >
-            Manage fields
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onManageFields}
+          className="text-sm text-blue-600 dark:text-blue-400 font-medium"
+        >
+          Manage fields
+        </button>
       </div>
 
       <SleepSection
