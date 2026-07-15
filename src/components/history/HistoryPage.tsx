@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react'
 import { format, subDays } from 'date-fns'
 import { useLogs } from '../../hooks/useLogs'
+import { useFields } from '../../hooks/useFields'
+import { useFieldValuesBulk } from '../../hooks/useFieldValuesBulk'
 import { buildCsvRows, downloadCsv, downloadPdf } from '../../lib/export'
 import { fetchExportData, type ExportRange } from '../../lib/exportData'
 import { HistoryEntry } from './HistoryEntry'
+import type { HistoryItem } from './HistoryEntry'
 
 type ExportFormat = 'csv' | 'pdf'
 
@@ -11,6 +14,28 @@ export function HistoryPage() {
   const toDate = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
   const fromDate = useMemo(() => format(subDays(new Date(), 90), 'yyyy-MM-dd'), [])
   const { logs, loading, error } = useLogs(fromDate, toDate)
+  const { fields, loading: fieldsLoading } = useFields()
+  const { values, loading: valuesLoading } = useFieldValuesBulk(fromDate, toDate)
+
+  const days = useMemo(() => {
+    const logByDate = new Map(logs.map(l => [l.date, l]))
+    const itemsByDate = new Map<string, HistoryItem[]>()
+    const fieldById = new Map(fields.map(f => [f.id, f]))
+    for (const v of values) {
+      const field = fieldById.get(v.field_id)
+      if (!field) continue
+      const list = itemsByDate.get(v.date) ?? []
+      list.push({ field, value: v.value })
+      itemsByDate.set(v.date, list)
+    }
+    const dates = Array.from(new Set([...logByDate.keys(), ...itemsByDate.keys()]))
+      .sort((a, b) => b.localeCompare(a))
+    return dates.map(date => ({
+      date,
+      sleepHours: logByDate.get(date)?.sleep_hours ?? null,
+      items: (itemsByDate.get(date) ?? []).sort((a, b) => a.field.sort_order - b.field.sort_order),
+    }))
+  }, [logs, fields, values])
 
   const [showExport, setShowExport] = useState(false)
   const [exportRange, setExportRange] = useState<ExportRange>('90')
@@ -43,7 +68,7 @@ export function HistoryPage() {
     }
   }
 
-  if (loading) {
+  if (loading || fieldsLoading || valuesLoading) {
     return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
   }
 
@@ -116,13 +141,13 @@ export function HistoryPage() {
         </div>
       )}
 
-      {logs.length === 0 ? (
+      {days.length === 0 ? (
         <div className="text-center text-gray-400 dark:text-gray-500 mt-12">
           <p>No entries yet.</p>
           <p className="text-sm mt-1">Log your first day on the Today tab.</p>
         </div>
       ) : (
-        logs.map(log => <HistoryEntry key={log.id} log={log} />)
+        days.map(day => <HistoryEntry key={day.date} {...day} />)
       )}
     </div>
   )
