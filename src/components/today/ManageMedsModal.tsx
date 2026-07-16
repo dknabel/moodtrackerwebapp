@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { Medication } from '../../lib/database.types'
+import { useModal } from '../../hooks/useModal'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
 
 interface MedData {
   name: string
@@ -25,14 +27,8 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
   const [addError, setAddError] = useState<string | null>(null)
   const [editError, setEditError] = useState<string | null>(null)
   const [listError, setListError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [onClose])
+  const [confirmMed, setConfirmMed] = useState<Medication | null>(null)
+  const dialogRef = useModal(onClose)
 
   const handleAdd = async () => {
     if (!addForm.name.trim() || !addForm.dose.trim()) return
@@ -70,8 +66,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
     setEditId(null)
   }
 
-  const handleDeactivate = async (med: Medication) => {
-    if (!window.confirm(`Remove ${med.name}? Past history is kept.`)) return
+  const confirmDeactivate = async (med: Medication) => {
     setListError(null)
     const error = await onDeactivate(med.id)
     if (error) setListError(error)
@@ -83,13 +78,15 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="manage-meds-title"
         className="bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Medications</h2>
+          <h2 id="manage-meds-title" className="text-lg font-semibold text-gray-900 dark:text-white">Manage Medications</h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -156,7 +153,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDeactivate(med)}
+                    onClick={() => setConfirmMed(med)}
                     className="text-red-500 text-sm"
                   >
                     Delete
@@ -201,6 +198,20 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
             Add
           </button>
         </div>
+
+        {confirmMed && (
+          <ConfirmDialog
+            title={`Remove ${confirmMed.name}?`}
+            message="Past history is kept."
+            confirmLabel="Remove"
+            onConfirm={() => {
+              const med = confirmMed
+              setConfirmMed(null)
+              void confirmDeactivate(med)
+            }}
+            onCancel={() => setConfirmMed(null)}
+          />
+        )}
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ManageMedsModal } from './ManageMedsModal'
 import type { Medication } from '../../lib/database.types'
@@ -17,11 +17,7 @@ const defaultProps = {
   onClose: vi.fn(),
 }
 
-beforeEach(() => {
-  vi.clearAllMocks()
-  vi.restoreAllMocks()
-  vi.spyOn(window, 'confirm').mockReturnValue(true)
-})
+beforeEach(() => vi.clearAllMocks())
 
 describe('ManageMedsModal', () => {
   it('renders a list of medications', () => {
@@ -49,18 +45,20 @@ describe('ManageMedsModal', () => {
     expect(onAdd).not.toHaveBeenCalled()
   })
 
-  it('calls onDeactivate when Delete button is clicked and confirmed', async () => {
+  it('calls onDeactivate after confirming the dialog', async () => {
     const onDeactivate = vi.fn().mockResolvedValue(null)
     render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    expect(onDeactivate).not.toHaveBeenCalled()
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' }))
     expect(onDeactivate).toHaveBeenCalledWith('m1')
   })
 
-  it('does not deactivate when the confirmation is declined', async () => {
-    vi.mocked(window.confirm).mockReturnValue(false)
+  it('does not deactivate when the dialog is cancelled', async () => {
     const onDeactivate = vi.fn().mockResolvedValue(null)
     render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }))
     expect(onDeactivate).not.toHaveBeenCalled()
   })
 
@@ -68,6 +66,7 @@ describe('ManageMedsModal', () => {
     const onDeactivate = vi.fn().mockResolvedValue('RLS violation')
     render(<ManageMedsModal {...defaultProps} medications={[med]} onDeactivate={onDeactivate} />)
     await userEvent.click(screen.getByRole('button', { name: 'Delete' }))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Remove' }))
     expect(await screen.findByText(/RLS violation/)).toBeInTheDocument()
     expect(screen.getByText('Lithium')).toBeInTheDocument()
   })
