@@ -5,15 +5,13 @@ import { useDailyLog } from './useDailyLog'
 const mockMaybeSingle = vi.fn()
 const mockSingle = vi.fn()
 const mockSelect = vi.fn(() => ({ eq: vi.fn(() => ({ maybeSingle: mockMaybeSingle })) }))
-const mockUpdate = vi.fn(() => ({ eq: vi.fn(() => ({ select: vi.fn(() => ({ single: mockSingle })) })) }))
-const mockInsert = vi.fn(() => ({ select: vi.fn(() => ({ single: mockSingle })) }))
+const mockUpsert = vi.fn(() => ({ select: vi.fn(() => ({ single: mockSingle })) }))
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
       select: mockSelect,
-      update: mockUpdate,
-      insert: mockInsert,
+      upsert: mockUpsert,
     })),
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: 'user-123' } } }),
@@ -53,7 +51,7 @@ describe('useDailyLog', () => {
     expect(result.current.log).toBeNull()
   })
 
-  it('updates an existing log', async () => {
+  it('upserts changes to an existing log', async () => {
     const existingLog = { id: '1', date: '2026-06-20', mood_rating: 5 }
     mockMaybeSingle.mockResolvedValue({ data: existingLog, error: null })
     const updatedLog = { id: '1', date: '2026-06-20', mood_rating: 9 }
@@ -66,16 +64,14 @@ describe('useDailyLog', () => {
       await result.current.save({ mood_rating: 9 })
     })
 
-    expect(mockUpdate).toHaveBeenCalledWith(
-      expect.objectContaining({ mood_rating: 9 })
-    )
-    expect(mockUpdate).toHaveBeenCalledWith(
-      expect.not.objectContaining({ user_id: 'user-123', date: '2026-06-20' })
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ mood_rating: 9, user_id: 'user-123', date: '2026-06-20' }),
+      { onConflict: 'user_id,date' }
     )
     expect(result.current.log).toEqual(updatedLog)
   })
 
-  it('inserts a new log when none exists', async () => {
+  it('upserts a new log when none exists, avoiding a double-insert race', async () => {
     mockMaybeSingle.mockResolvedValue({ data: null, error: null })
     const newLog = { id: '2', date: '2026-06-20', mood_rating: 8 }
     mockSingle.mockResolvedValue({ data: newLog, error: null })
@@ -89,10 +85,27 @@ describe('useDailyLog', () => {
         bedtime: null, wake_time: null })
     })
 
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ mood_rating: 8, user_id: 'user-123', date: '2026-06-20' })
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ mood_rating: 8, user_id: 'user-123', date: '2026-06-20' }),
+      { onConflict: 'user_id,date' }
     )
     expect(result.current.log).toEqual(newLog)
+  })
+
+  it('surfaces an error from a failed upsert', async () => {
+    mockMaybeSingle.mockResolvedValue({ data: null, error: null })
+    mockSingle.mockResolvedValue({ data: null, error: { message: 'duplicate key value' } })
+
+    const { result } = renderHook(() => useDailyLog('2026-06-20'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    let saveResult: { error: string | null } | undefined
+    await act(async () => {
+      saveResult = await result.current.save({ mood_rating: 8 })
+    })
+
+    expect(saveResult).toEqual({ error: 'duplicate key value' })
+    expect(result.current.log).toBeNull()
   })
 
   it('ignores a stale response that resolves after the date changed', async () => {

@@ -174,6 +174,9 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         clearTimeout(savedRef.current)
         savedRef.current = setTimeout(() => setStatus(s => (s === 'saved' ? 'idle' : s)), 2000)
       }
+    }).catch(err => {
+      setSaveError(err instanceof Error ? err.message : String(err))
+      setStatus('error')
     })
   }
   const runSaveRef = useRef(runSave)
@@ -218,7 +221,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="relative">
+          <div className="relative rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
               {formatDay(date)}
             </h1>
