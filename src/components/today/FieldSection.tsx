@@ -18,15 +18,15 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
       const min = field.config.min ?? 1
       const max = field.config.max ?? 10
       return (
-        <div className="flex flex-col gap-1">
-          <Slider label={field.name} value={safe as number} min={min} max={max} onChange={onChange} />
-          {(field.config.lowLabel || field.config.highLabel) && (
-            <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
-              <span>{field.config.lowLabel}</span>
-              <span>{field.config.highLabel}</span>
-            </div>
-          )}
-        </div>
+        <Slider
+          label={field.name}
+          value={safe as number}
+          min={min}
+          max={max}
+          lowLabel={field.config.lowLabel}
+          highLabel={field.config.highLabel}
+          onChange={onChange}
+        />
       )
     }
     case 'number':

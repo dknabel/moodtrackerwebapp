@@ -45,6 +45,8 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
           value={values.sleep_quality}
           min={1}
           max={5}
+          lowLabel="Poor"
+          highLabel="Great"
           onChange={v => onChange({ ...values, sleep_quality: v })}
         />
       </div>

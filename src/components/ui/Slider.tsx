@@ -3,15 +3,17 @@ interface SliderProps {
   value: number
   min?: number
   max?: number
+  lowLabel?: string
+  highLabel?: string
   onChange: (value: number) => void
 }
 
-export function Slider({ label, value, min = 1, max = 10, onChange }: SliderProps) {
+export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, onChange }: SliderProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between text-sm">
         <span className="text-gray-700 dark:text-gray-300">{label}</span>
-        <span className="font-semibold text-blue-600">{value}</span>
+        <span className="font-semibold text-blue-600 dark:text-blue-400">{value}</span>
       </div>
       <input
         type="range"
@@ -30,6 +32,12 @@ export function Slider({ label, value, min = 1, max = 10, onChange }: SliderProp
         }}
         className="w-full accent-blue-600 h-2 cursor-pointer"
       />
+      {(lowLabel || highLabel) && (
+        <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+          <span>{lowLabel}</span>
+          <span>{highLabel}</span>
+        </div>
+      )}
     </div>
   )
 }

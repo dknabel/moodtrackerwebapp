@@ -41,4 +41,10 @@ describe('SleepSection', () => {
     expect(last.tonight_bedtime).toBe('23:00')
     expect(last.sleep_hours).toBeNull()
   })
+
+  it('shows Poor/Great endpoint labels on sleep quality', () => {
+    render(<SleepSection values={defaults} onChange={vi.fn()} />)
+    expect(screen.getByText('Poor')).toBeInTheDocument()
+    expect(screen.getByText('Great')).toBeInTheDocument()
+  })
 })
