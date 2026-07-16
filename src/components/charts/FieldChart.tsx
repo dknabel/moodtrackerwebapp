@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import type { CustomField, FieldValue } from '../../lib/database.types'
 import { numericValue } from '../../lib/fields'
+import { Card } from '../ui/Card'
 
 interface FieldChartProps {
   field: CustomField
@@ -12,19 +13,19 @@ interface FieldChartProps {
   isDark?: boolean
 }
 
-function Card({ title, right, children }: {
+function ChartCard({ title, right, children }: {
   title: string
   right?: ReactNode
   children: ReactNode
 }) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+    <Card>
       <div className="flex justify-between items-baseline mb-3">
         <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h2>
         {right}
       </div>
       {children}
-    </div>
+    </Card>
   )
 }
 
@@ -44,7 +45,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
     const max = sorted[0][1]
     return (
-      <Card title={field.name}>
+      <ChartCard title={field.name}>
         <div className="flex flex-col gap-2">
           {sorted.map(([tag, count]) => (
             <div key={tag} className="flex items-center gap-2 text-sm">
@@ -59,7 +60,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
             </div>
           ))}
         </div>
-      </Card>
+      </ChartCard>
     )
   }
 
@@ -72,7 +73,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
     const yesDays = data.filter(d => d.value === 1).length
     const inactiveBarColor = isDark ? '#4b5563' : '#e5e7eb'
     return (
-      <Card
+      <ChartCard
         title={field.name}
         right={
           <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -93,7 +94,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </Card>
+      </ChartCard>
     )
   }
 
@@ -104,7 +105,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
       : [0, 'auto']
 
   return (
-    <Card title={field.name}>
+    <ChartCard title={field.name}>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -114,6 +115,6 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
           <Line type="monotone" dataKey="value" name={field.name} stroke="#2563eb" dot={false} connectNulls />
         </LineChart>
       </ResponsiveContainer>
-    </Card>
+    </ChartCard>
   )
 }

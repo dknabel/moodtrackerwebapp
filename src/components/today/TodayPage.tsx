@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useParams, Navigate } from 'react-router-dom'
 import { format, subDays, parseISO, isValid } from 'date-fns'
+import { Check } from 'lucide-react'
 import { useDailyLog } from '../../hooks/useDailyLog'
 import { useFields } from '../../hooks/useFields'
 import { useFieldValues } from '../../hooks/useFieldValues'
 import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
 import { defaultFieldValue } from '../../lib/fields'
+import { Card } from '../ui/Card'
 import { FieldSection } from './FieldSection'
 import { ManageFieldsModal } from './ManageFieldsModal'
 import { MedsSection } from './MedsSection'
@@ -169,20 +171,21 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         </button>
       </div>
 
-      <SleepSection
-        values={{
-          bedtime: form.bedtime,
-          wake_time: form.wake_time,
-          sleep_hours: form.sleep_hours,
-          sleep_quality: form.sleep_quality,
-          tonight_bedtime: form.tonight_bedtime,
-        }}
-        onChange={v => setForm(f => ({ ...f, ...v }))}
-      />
+      <Card>
+        <SleepSection
+          values={{
+            bedtime: form.bedtime,
+            wake_time: form.wake_time,
+            sleep_hours: form.sleep_hours,
+            sleep_quality: form.sleep_quality,
+            tonight_bedtime: form.tonight_bedtime,
+          }}
+          onChange={v => setForm(f => ({ ...f, ...v }))}
+        />
+      </Card>
 
       {fields.map(field => (
-        <div key={field.id} className="flex flex-col gap-6">
-          <hr className="border-gray-200 dark:border-gray-700" />
+        <Card key={field.id}>
           <FieldSection
             field={field}
             value={fieldValue(field)}
@@ -190,12 +193,12 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
               setForm(f => ({ ...f, fieldValues: { ...f.fieldValues, [field.id]: v } }))
             }
           />
-        </div>
+        </Card>
       ))}
 
-      <hr className="border-gray-200 dark:border-gray-700" />
-
-      <MedsSection date={date} />
+      <Card>
+        <MedsSection date={date} />
+      </Card>
 
       {saveError && (
         <p className="text-red-600 text-sm">{saveError}</p>
@@ -205,9 +208,14 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         type="button"
         onClick={handleSave}
         disabled={saving}
-        className="w-full bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50"
+        className="w-full bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
       >
-        {saving ? 'Saving…' : saved ? 'Saved ✓' : 'Save'}
+        {saving ? 'Saving…' : saved ? (
+          <>
+            <Check className="w-4 h-4" />
+            Saved
+          </>
+        ) : 'Save'}
       </button>
     </div>
   )

@@ -77,7 +77,7 @@ export function HistoryPage() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">History</h1>
         <button
@@ -88,67 +88,69 @@ export function HistoryPage() {
         </button>
       </div>
 
-      {showExport && (
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-3">
-          <div className="flex flex-col gap-1">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date range</p>
-            <div className="flex gap-2">
-              {(['30', '90', 'all'] as ExportRange[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => setExportRange(r)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium border ${
-                    exportRange === r
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {r === 'all' ? 'All time' : `Last ${r} days`}
-                </button>
-              ))}
+      <div className="flex flex-col gap-3">
+        {showExport && (
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-3">
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Date range</p>
+              <div className="flex gap-2">
+                {(['30', '90', 'all'] as ExportRange[]).map(r => (
+                  <button
+                    key={r}
+                    onClick={() => setExportRange(r)}
+                    className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                      exportRange === r
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {r === 'all' ? 'All time' : `Last ${r} days`}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col gap-1">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Format</p>
-            <div className="flex gap-2">
-              {(['csv', 'pdf'] as ExportFormat[]).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setExportFormat(f)}
-                  className={`px-3 py-1 rounded-md text-xs font-medium border uppercase ${
-                    exportFormat === f
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  {f}
-                </button>
-              ))}
+            <div className="flex flex-col gap-1">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Format</p>
+              <div className="flex gap-2">
+                {(['csv', 'pdf'] as ExportFormat[]).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setExportFormat(f)}
+                    className={`px-3 py-1 rounded-md text-xs font-medium border uppercase ${
+                      exportFormat === f
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {exportError && (
+              <p className="text-red-600 text-xs">Export failed: {exportError}</p>
+            )}
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="w-full bg-blue-600 text-white rounded-lg p-2 text-sm font-medium disabled:opacity-50"
+            >
+              {exporting ? 'Exporting…' : 'Download'}
+            </button>
           </div>
+        )}
 
-          {exportError && (
-            <p className="text-red-600 text-xs">Export failed: {exportError}</p>
-          )}
-          <button
-            onClick={handleExport}
-            disabled={exporting}
-            className="w-full bg-blue-600 text-white rounded-lg p-2 text-sm font-medium disabled:opacity-50"
-          >
-            {exporting ? 'Exporting…' : 'Download'}
-          </button>
-        </div>
-      )}
-
-      {days.length === 0 ? (
-        <div className="text-center text-gray-400 dark:text-gray-500 mt-12">
-          <p>No entries yet.</p>
-          <p className="text-sm mt-1">Log your first day on the Today tab.</p>
-        </div>
-      ) : (
-        days.map(day => <HistoryEntry key={day.date} {...day} />)
-      )}
+        {days.length === 0 ? (
+          <div className="text-center text-gray-400 dark:text-gray-500 mt-12">
+            <p>No entries yet.</p>
+            <p className="text-sm mt-1">Log your first day on the Today tab.</p>
+          </div>
+        ) : (
+          days.map(day => <HistoryEntry key={day.date} {...day} />)
+        )}
+      </div>
     </div>
   )
 }

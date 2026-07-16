@@ -1,27 +1,28 @@
 import { NavLink } from 'react-router-dom'
+import { CalendarDays, ClipboardList, LineChart } from 'lucide-react'
 
 const tabs = [
-  { to: '/', label: 'Today', icon: '📅' },
-  { to: '/history', label: 'History', icon: '📋' },
-  { to: '/charts', label: 'Charts', icon: '📈' },
+  { to: '/', label: 'Today', Icon: CalendarDays },
+  { to: '/history', label: 'History', Icon: ClipboardList },
+  { to: '/charts', label: 'Charts', Icon: LineChart },
 ]
 
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex">
-      {tabs.map(tab => (
+      {tabs.map(({ to, label, Icon }) => (
         <NavLink
-          key={tab.to}
-          to={tab.to}
-          end={tab.to === '/'}
+          key={to}
+          to={to}
+          end={to === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-3 gap-1 text-xs font-medium ${
+            `flex-1 flex flex-col items-center py-2.5 gap-1 text-xs font-medium ${
               isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'
             }`
           }
         >
-          <span className="text-xl leading-none">{tab.icon}</span>
-          {tab.label}
+          <Icon className="w-6 h-6" strokeWidth={2} />
+          {label}
         </NavLink>
       ))}
     </nav>

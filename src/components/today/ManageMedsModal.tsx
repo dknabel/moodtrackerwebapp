@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { X } from 'lucide-react'
 import type { Medication } from '../../lib/database.types'
 
 interface MedData {
@@ -92,9 +93,9 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 dark:text-gray-400 text-2xl leading-none"
+            className="text-gray-500 dark:text-gray-400"
           >
-            ×
+            <X className="w-6 h-6" />
           </button>
         </div>
 

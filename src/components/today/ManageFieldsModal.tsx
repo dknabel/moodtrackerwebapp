@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import type { CustomField, FieldConfig, FieldType } from '../../lib/database.types'
 import { isCompatibleTypeChange, validateField, type FieldData } from '../../lib/fields'
 
@@ -208,9 +209,9 @@ export function ManageFieldsModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 dark:text-gray-400 text-2xl leading-none"
+            className="text-gray-500 dark:text-gray-400"
           >
-            ×
+            <X className="w-6 h-6" />
           </button>
         </div>
 
@@ -266,23 +267,25 @@ export function ManageFieldsModal({
                   <p className="font-medium text-gray-900 dark:text-white text-sm">{f.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
                 </div>
-                <div className="flex gap-3 items-center">
-                  <button
-                    onClick={() => handleMove(f, -1)}
-                    disabled={i === 0}
-                    aria-label={`Move ${f.name} up`}
-                    className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
-                  >
-                    ↑
-                  </button>
-                  <button
-                    onClick={() => handleMove(f, 1)}
-                    disabled={i === active.length - 1}
-                    aria-label={`Move ${f.name} down`}
-                    className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
-                  >
-                    ↓
-                  </button>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-0.5">
+                    <button
+                      onClick={() => handleMove(f, -1)}
+                      disabled={i === 0}
+                      aria-label={`Move ${f.name} up`}
+                      className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleMove(f, 1)}
+                      disabled={i === active.length - 1}
+                      aria-label={`Move ${f.name} down`}
+                      className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
                   <button onClick={() => startEdit(f)} className="text-blue-600 text-sm">Edit</button>
                   <button onClick={() => handleArchive(f)} className="text-red-500 text-sm">Archive</button>
                 </div>

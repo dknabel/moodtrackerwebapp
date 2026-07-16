@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Settings } from 'lucide-react'
 import { useMedications } from '../../hooks/useMedications'
 import { useMedicationLogs } from '../../hooks/useMedicationLogs'
 import { ManageMedsModal } from './ManageMedsModal'
@@ -38,7 +39,7 @@ export function MedsSection({ date }: Props) {
             aria-label="Manage medications"
             className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
           >
-            ⚙
+            <Settings className="w-5 h-5" />
           </button>
         </div>
 
