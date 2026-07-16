@@ -1,7 +1,20 @@
+// src/components/auth/GoogleButton.tsx
+import { Browser } from '@capacitor/browser'
+import { isNativePlatform } from '../../lib/notifications'
 import { supabase } from '../../lib/supabase'
 
+const NATIVE_REDIRECT = 'moodtrackerplus://auth/callback'
+
 export function GoogleButton() {
-  const handleClick = () => {
+  const handleClick = async () => {
+    if (isNativePlatform()) {
+      const { data } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: NATIVE_REDIRECT, skipBrowserRedirect: true },
+      })
+      if (data.url) await Browser.open({ url: data.url })
+      return
+    }
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
@@ -11,7 +24,7 @@ export function GoogleButton() {
   return (
     <button
       type="button"
-      onClick={handleClick}
+      onClick={() => void handleClick()}
       className="w-full max-w-sm border border-gray-300 dark:border-gray-600 rounded-lg p-3 font-medium flex items-center justify-center gap-2 bg-white dark:bg-gray-800 dark:text-white"
     >
       <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
