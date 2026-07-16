@@ -14,6 +14,7 @@ alter table custom_fields enable row level security;
 create policy "Users manage own custom fields"
   on custom_fields for all
   using (auth.uid() = user_id);
+grant select, insert, update, delete on table custom_fields to anon, authenticated;
 
 -- Case-insensitive uniqueness per user, matching the app's validation rule.
 -- Also guards against concurrent seed attempts creating duplicate defaults.
@@ -36,6 +37,7 @@ alter table field_values enable row level security;
 create policy "Users manage own field values"
   on field_values for all
   using (auth.uid() = user_id);
+grant select, insert, update, delete on table field_values to anon, authenticated;
 
 -- Seed the six default fields for every existing user.
 with defaults(name, type, config, sort_order) as (
