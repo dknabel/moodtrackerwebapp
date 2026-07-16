@@ -13,9 +13,9 @@ vi.mock('@capacitor/browser', () => ({
   Browser: { close: (...args: unknown[]) => mockBrowserClose(...args) },
 }))
 
-const mockExchangeCodeForSession = vi.fn().mockResolvedValue({ data: {}, error: null })
+const mockSetSession = vi.fn().mockResolvedValue({ data: {}, error: null })
 vi.mock('../lib/supabase', () => ({
-  supabase: { auth: { exchangeCodeForSession: (...args: unknown[]) => mockExchangeCodeForSession(...args) } },
+  supabase: { auth: { setSession: (...args: unknown[]) => mockSetSession(...args) } },
 }))
 
 const mockIsNativePlatform = vi.fn(() => true)
@@ -42,13 +42,13 @@ describe('useOAuthDeepLink', () => {
     expect(mockAddListener).toHaveBeenCalledWith('appUrlOpen', expect.any(Function))
   })
 
-  it('closes the browser and exchanges the extracted code (not the full URL) when the callback URL is opened', () => {
+  it('closes the browser and sets the session from the access/refresh tokens in the callback URL fragment', () => {
     renderHook(() => useOAuthDeepLink())
     const handler = mockAddListener.mock.calls[0][1] as (data: { url: string }) => void
-    handler({ url: 'moodtrackerplus://auth/callback?code=abc123' })
+    handler({ url: 'moodtrackerplus://auth/callback#access_token=tok123&refresh_token=ref456&expires_in=3600&token_type=bearer' })
 
     expect(mockBrowserClose).toHaveBeenCalled()
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('abc123')
+    expect(mockSetSession).toHaveBeenCalledWith({ access_token: 'tok123', refresh_token: 'ref456' })
   })
 
   it('ignores URLs that do not match the callback prefix', () => {
@@ -57,15 +57,15 @@ describe('useOAuthDeepLink', () => {
     handler({ url: 'someotherapp://something' })
 
     expect(mockBrowserClose).not.toHaveBeenCalled()
-    expect(mockExchangeCodeForSession).not.toHaveBeenCalled()
+    expect(mockSetSession).not.toHaveBeenCalled()
   })
 
-  it('closes the browser but does not exchange when the callback URL has no code (e.g. a denied/cancelled login)', () => {
+  it('closes the browser but does not set a session when the callback has no tokens (e.g. a denied/cancelled login)', () => {
     renderHook(() => useOAuthDeepLink())
     const handler = mockAddListener.mock.calls[0][1] as (data: { url: string }) => void
     handler({ url: 'moodtrackerplus://auth/callback?error=access_denied' })
 
     expect(mockBrowserClose).toHaveBeenCalled()
-    expect(mockExchangeCodeForSession).not.toHaveBeenCalled()
+    expect(mockSetSession).not.toHaveBeenCalled()
   })
 })
