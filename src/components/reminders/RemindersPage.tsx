@@ -30,8 +30,10 @@ export function RemindersPage() {
 
   const handleAddDailyReminder = async () => {
     if (!newTime) return
-    const granted = await requestNotificationPermission()
-    if (!granted) return
+    if (native) {
+      const granted = await requestNotificationPermission()
+      if (!granted) return
+    }
     await addReminder({ kind: 'daily_log', medication_id: null, time: newTime, label: newLabel || null })
     setNewLabel('')
   }

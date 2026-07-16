@@ -69,6 +69,18 @@ describe('RemindersPage', () => {
     }))
   })
 
+  it('adds a daily reminder on web without requesting notification permission', async () => {
+    mockIsNativePlatform.mockReturnValue(false)
+    render(<RemindersPage />)
+    fireEvent.change(screen.getByLabelText('New reminder time'), { target: { value: '09:00' } })
+    fireEvent.click(screen.getByText('Add reminder'))
+
+    await waitFor(() => expect(mockAddReminder).toHaveBeenCalledWith({
+      kind: 'daily_log', medication_id: null, time: '09:00', label: null,
+    }))
+    expect(mockRequestPermission).not.toHaveBeenCalled()
+  })
+
   it('deletes a daily log reminder', async () => {
     render(<RemindersPage />)
     fireEvent.click(screen.getByLabelText('Delete Evening check-in reminder'))
