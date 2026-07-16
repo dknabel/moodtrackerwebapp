@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Analytics } from '@vercel/analytics/react'
 import { useAuth } from './hooks/useAuth'
 import { useNotificationSync } from './hooks/useNotificationSync'
+import { useOAuthDeepLink } from './hooks/useOAuthDeepLink'
 import { AuthPage } from './components/auth/AuthPage'
 import { AppShell } from './components/layout/AppShell'
 import { ErrorBoundary } from './components/ErrorBoundary'
@@ -11,6 +12,7 @@ import { ChartsPage } from './components/charts/ChartsPage'
 import { RemindersPage } from './components/reminders/RemindersPage'
 
 export function App() {
+  useOAuthDeepLink()
   const { session, loading, isPasswordRecovery, signOut } = useAuth()
 
   if (loading) {

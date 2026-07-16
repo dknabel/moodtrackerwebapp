@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 
-const mockAddListener = vi.fn(() => Promise.resolve({ remove: vi.fn() }))
+const mockAddListener = vi.fn<(...args: unknown[]) => Promise<{ remove: () => void }>>(() =>
+  Promise.resolve({ remove: vi.fn() })
+)
 vi.mock('@capacitor/app', () => ({
   App: { addListener: (...args: unknown[]) => mockAddListener(...args) },
 }))
