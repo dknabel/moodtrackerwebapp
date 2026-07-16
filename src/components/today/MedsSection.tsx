@@ -3,6 +3,7 @@ import { Settings } from 'lucide-react'
 import { useMedications } from '../../hooks/useMedications'
 import { useMedicationLogs } from '../../hooks/useMedicationLogs'
 import { ManageMedsModal } from './ManageMedsModal'
+import { formatTime } from '../../lib/dates'
 
 interface Props {
   date: string
@@ -73,7 +74,7 @@ export function MedsSection({ date }: Props) {
                     {med.name} — {med.dose}
                     {med.scheduled_time && (
                       <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
-                        @ {med.scheduled_time.slice(0, 5)}
+                        @ {formatTime(med.scheduled_time)}
                       </span>
                     )}
                   </span>

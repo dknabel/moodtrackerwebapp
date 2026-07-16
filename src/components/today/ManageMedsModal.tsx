@@ -4,6 +4,7 @@ import type { Medication } from '../../lib/database.types'
 import { useModal } from '../../hooks/useModal'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { focusRing } from '../../lib/styles'
+import { formatTime } from '../../lib/dates'
 
 interface MedData {
   name: string
@@ -143,7 +144,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                   <p className="font-medium text-gray-900 dark:text-white text-sm">{med.name}</p>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     <span>{med.dose}</span>
-                    {med.scheduled_time && <span> @ {med.scheduled_time.slice(0, 5)}</span>}
+                    {med.scheduled_time && <span> @ {formatTime(med.scheduled_time)}</span>}
                   </p>
                 </div>
                 <div className="flex gap-3">
