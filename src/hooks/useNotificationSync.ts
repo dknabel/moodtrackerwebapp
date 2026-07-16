@@ -38,10 +38,13 @@ export function useNotificationSync(): void {
 
   useEffect(() => {
     if (!isNativePlatform()) return
-    const listenerPromise = CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+    let listener: { remove: () => void } | null = null
+    void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
       if (!isActive) return
       void syncScheduledNotifications(buildScheduledReminders(reminders, medications))
+    }).then(handle => {
+      listener = handle
     })
-    return () => { void listenerPromise.remove() }
+    return () => { listener?.remove() }
   }, [reminders, medications])
 }

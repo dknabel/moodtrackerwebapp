@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook } from '@testing-library/react'
 import type { Reminder, Medication } from '../lib/database.types'
 
-const mockAddListener = vi.fn(() => ({ remove: vi.fn() }))
+const mockAddListener = vi.fn(() => Promise.resolve({ remove: vi.fn() }))
 vi.mock('@capacitor/app', () => ({
-  App: { addListener: (...args: unknown[]) => mockAddListener(...args) },
+  App: { addListener: mockAddListener },
 }))
 
 const mockIsNativePlatform = vi.fn(() => true)

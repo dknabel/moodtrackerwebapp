@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { CalendarDays, ClipboardList, LineChart } from 'lucide-react'
+import { CalendarDays, ClipboardList, LineChart, Bell } from 'lucide-react'
 import { focusRing } from '../../lib/styles'
 
 const tabs = [
   { to: '/', label: 'Today', Icon: CalendarDays },
   { to: '/history', label: 'History', Icon: ClipboardList },
   { to: '/charts', label: 'Charts', Icon: LineChart },
+  { to: '/reminders', label: 'Reminders', Icon: Bell },
 ]
 
 export function BottomNav() {
