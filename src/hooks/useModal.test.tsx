@@ -47,6 +47,15 @@ describe('useModal', () => {
     expect(closeOuter).not.toHaveBeenCalled()
   })
 
+  it('restores the original body overflow when modals close out of order', () => {
+    const outer = render(<TestModal onClose={() => {}} label="outer" />)
+    const inner = render(<TestModal onClose={() => {}} label="inner" />)
+    outer.unmount()
+    expect(document.body.style.overflow).toBe('hidden')
+    inner.unmount()
+    expect(document.body.style.overflow).toBe('')
+  })
+
   it('wraps Tab focus from last back to first', async () => {
     render(<TestModal onClose={() => {}} label="m" />)
     screen.getByRole('button', { name: 'm-last' }).focus()
