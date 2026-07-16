@@ -8,6 +8,7 @@ import { useMedicationLogsBulk } from '../../hooks/useMedicationLogsBulk'
 import { useTheme } from '../../hooks/useTheme'
 import { useStreaks } from '../../hooks/useStreaks'
 import type { FieldValue } from '../../lib/database.types'
+import { Skeleton } from '../ui/Skeleton'
 import { SleepChart } from './SleepChart'
 import { FieldChart } from './FieldChart'
 import { OverlaySection } from './OverlaySection'
@@ -78,7 +79,12 @@ export function ChartsPage() {
         </div>
       </div>
 
-      {loading && <div className="text-center text-gray-400 dark:text-gray-500 mt-8">Loading…</div>}
+      {loading && (
+        <div role="status" aria-label="Loading" className="flex flex-col gap-6">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-40" />
+        </div>
+      )}
 
       {!loading && !hasData && (
         <div className="text-center text-gray-400 dark:text-gray-500 mt-8">

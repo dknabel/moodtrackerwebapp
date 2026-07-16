@@ -5,6 +5,7 @@ import { useFields } from '../../hooks/useFields'
 import { useFieldValuesBulk } from '../../hooks/useFieldValuesBulk'
 import { buildCsvRows, downloadCsv, downloadPdf } from '../../lib/export'
 import { fetchExportData, type ExportRange } from '../../lib/exportData'
+import { Skeleton } from '../ui/Skeleton'
 import { HistoryEntry } from './HistoryEntry'
 import type { HistoryItem } from './HistoryEntry'
 
@@ -68,7 +69,15 @@ export function HistoryPage() {
   }
 
   if (loading || fieldsLoading || valuesLoading) {
-    return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
+    return (
+      <div role="status" aria-label="Loading" className="flex flex-col gap-4">
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-20" />
+        <Skeleton className="h-20" />
+        <Skeleton className="h-20" />
+        <Skeleton className="h-20" />
+      </div>
+    )
   }
 
   const loadError = error ?? fieldsError ?? valuesError

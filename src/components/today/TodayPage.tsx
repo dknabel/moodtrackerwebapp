@@ -9,6 +9,7 @@ import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../.
 import { defaultFieldValue } from '../../lib/fields'
 import { formatDay } from '../../lib/dates'
 import { Card } from '../ui/Card'
+import { Skeleton } from '../ui/Skeleton'
 import { FieldSection } from './FieldSection'
 import { ManageFieldsModal } from './ManageFieldsModal'
 import { MedsSection } from './MedsSection'
@@ -79,7 +80,14 @@ export function TodayPage() {
   }
 
   if (loading || yesterdayLoading || fieldsLoading || valuesLoading) {
-    return <div className="text-center text-gray-400 dark:text-gray-500 mt-12">Loading…</div>
+    return (
+      <div role="status" aria-label="Loading" className="flex flex-col gap-6">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-56" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+    )
   }
 
   const loadError = error ?? fieldsError ?? valuesError
