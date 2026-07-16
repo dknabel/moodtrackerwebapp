@@ -43,6 +43,22 @@ export interface MedicationLog {
 export type MedicationInsert = Omit<Medication, 'id' | 'created_at'>
 export type MedicationLogUpsert = Omit<MedicationLog, 'id' | 'created_at'>
 
+export type ReminderKind = 'daily_log' | 'medication'
+
+export interface Reminder {
+  id: string
+  user_id: string
+  kind: ReminderKind
+  medication_id: string | null
+  time: string                   // 'HH:MM'
+  label: string | null
+  enabled: boolean
+  created_at: string
+}
+
+export type ReminderInsert = Omit<Reminder, 'id' | 'created_at'>
+export type ReminderUpdate = Partial<Pick<Reminder, 'time' | 'label' | 'enabled'>>
+
 export type FieldType = 'slider' | 'number' | 'toggle' | 'text' | 'tags'
 
 export interface FieldConfig {
