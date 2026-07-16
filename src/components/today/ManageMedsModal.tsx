@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 import type { Medication } from '../../lib/database.types'
 import { useModal } from '../../hooks/useModal'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
+import { focusRing } from '../../lib/styles'
 
 interface MedData {
   name: string
@@ -90,7 +91,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 dark:text-gray-400"
+            className={`p-2 -m-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
           >
             <X className="w-6 h-6" />
           </button>
@@ -119,7 +120,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                   onChange={e => setEditForm(f => ({ ...f, scheduled_time: e.target.value }))}
                 />
                 {editError && (
-                  <p className="text-red-500 text-xs">{editError}</p>
+                  <p className="text-red-500 dark:text-red-400 text-xs">{editError}</p>
                 )}
                 <div className="flex gap-2">
                   <button
@@ -148,13 +149,13 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-3">
                   <button
                     onClick={() => startEdit(med)}
-                    className="text-blue-600 text-sm"
+                    className="text-blue-600 dark:text-blue-400 text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setConfirmMed(med)}
-                    className="text-red-500 text-sm"
+                    className="text-red-500 dark:text-red-400 text-sm"
                   >
                     Delete
                   </button>
@@ -163,7 +164,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
             )
           )}
           {listError && (
-            <p className="text-red-500 text-xs">{listError}</p>
+            <p className="text-red-500 dark:text-red-400 text-xs">{listError}</p>
           )}
         </div>
 
@@ -188,7 +189,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
             onChange={e => setAddForm(f => ({ ...f, scheduled_time: e.target.value }))}
           />
           {addError && (
-            <p className="text-red-500 text-xs">{addError}</p>
+            <p className="text-red-500 dark:text-red-400 text-xs">{addError}</p>
           )}
           <button
             onClick={handleAdd}

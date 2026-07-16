@@ -46,11 +46,11 @@ export function MedsSection({ date }: Props) {
         {loading ? (
           <p className="text-sm text-gray-400 dark:text-gray-500">Loading…</p>
         ) : fetchError ? (
-          <p className="text-sm text-red-500">Could not load medications: {fetchError}</p>
+          <p className="text-sm text-red-500 dark:text-red-400">Could not load medications: {fetchError}</p>
         ) : medications.length === 0 ? (
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No medications added.{' '}
-            <button onClick={() => setShowModal(true)} className="text-blue-600 underline">
+            <button onClick={() => setShowModal(true)} className="text-blue-600 dark:text-blue-400 underline">
               Add yours
             </button>
           </p>
@@ -92,7 +92,7 @@ export function MedsSection({ date }: Props) {
         )}
 
         {takenError && (
-          <p className="text-sm text-red-500">Could not save: {takenError}</p>
+          <p className="text-sm text-red-500 dark:text-red-400">Could not save: {takenError}</p>
         )}
       </div>
 

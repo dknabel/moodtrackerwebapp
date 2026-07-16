@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { CalendarDays, ClipboardList, LineChart } from 'lucide-react'
+import { focusRing } from '../../lib/styles'
 
 const tabs = [
   { to: '/', label: 'Today', Icon: CalendarDays },
@@ -16,8 +17,8 @@ export function BottomNav() {
           to={to}
           end={to === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-2.5 gap-1 text-xs font-medium ${
-              isActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'
+            `flex-1 flex flex-col items-center py-2.5 gap-1 text-xs font-medium ${focusRing} ${
+              isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
             }`
           }
         >

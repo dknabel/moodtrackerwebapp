@@ -4,6 +4,7 @@ import type { CustomField, FieldConfig, FieldType } from '../../lib/database.typ
 import { isCompatibleTypeChange, validateField, type FieldData } from '../../lib/fields'
 import { useModal } from '../../hooks/useModal'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
+import { focusRing } from '../../lib/styles'
 
 interface Props {
   fields: CustomField[]
@@ -230,7 +231,7 @@ export function ManageFieldsModal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="text-gray-500 dark:text-gray-400"
+            className={`p-2 -m-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
           >
             <X className="w-6 h-6" />
           </button>
@@ -269,7 +270,7 @@ export function ManageFieldsModal({
                   />
                   Show in charts
                 </label>
-                {editError && <p className="text-red-500 text-xs">{editError}</p>}
+                {editError && <p className="text-red-500 dark:text-red-400 text-xs">{editError}</p>}
                 <div className="flex gap-2">
                   <button onClick={handleSaveEdit} className="flex-1 bg-blue-600 text-white rounded p-2 text-sm">
                     Save
@@ -294,7 +295,7 @@ export function ManageFieldsModal({
                       onClick={() => handleMove(f, -1)}
                       disabled={i === 0}
                       aria-label={`Move ${f.name} up`}
-                      className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                      className={`p-2 -m-1 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded ${focusRing}`}
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
@@ -302,18 +303,18 @@ export function ManageFieldsModal({
                       onClick={() => handleMove(f, 1)}
                       disabled={i === active.length - 1}
                       aria-label={`Move ${f.name} down`}
-                      className="text-gray-500 dark:text-gray-400 disabled:opacity-30"
+                      className={`p-2 -m-1 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded ${focusRing}`}
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <button onClick={() => startEdit(f)} className="text-blue-600 text-sm">Edit</button>
-                  <button onClick={() => handleArchive(f)} className="text-red-500 text-sm">Archive</button>
+                  <button onClick={() => startEdit(f)} className="text-blue-600 dark:text-blue-400 text-sm">Edit</button>
+                  <button onClick={() => handleArchive(f)} className="text-red-500 dark:text-red-400 text-sm">Archive</button>
                 </div>
               </div>
             )
           )}
-          {listError && <p className="text-red-500 text-xs">{listError}</p>}
+          {listError && <p className="text-red-500 dark:text-red-400 text-xs">{listError}</p>}
         </div>
 
         {archived.length > 0 && (
@@ -326,8 +327,8 @@ export function ManageFieldsModal({
                   <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => onReactivate(f.id)} className="text-blue-600 text-sm">Restore</button>
-                  <button onClick={() => handleDelete(f)} className="text-red-500 text-sm">Delete forever</button>
+                  <button onClick={() => onReactivate(f.id)} className="text-blue-600 dark:text-blue-400 text-sm">Restore</button>
+                  <button onClick={() => handleDelete(f)} className="text-red-500 dark:text-red-400 text-sm">Delete forever</button>
                 </div>
               </div>
             ))}
@@ -357,7 +358,7 @@ export function ManageFieldsModal({
             </select>
           </label>
           <ConfigInputs values={addForm} setValues={setAddForm} />
-          {addError && <p className="text-red-500 text-xs">{addError}</p>}
+          {addError && <p className="text-red-500 dark:text-red-400 text-xs">{addError}</p>}
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim()}

@@ -8,6 +8,7 @@ import { useFieldValues } from '../../hooks/useFieldValues'
 import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
 import { defaultFieldValue } from '../../lib/fields'
 import { formatDay } from '../../lib/dates'
+import { focusRing } from '../../lib/styles'
 import { Card } from '../ui/Card'
 import { Skeleton } from '../ui/Skeleton'
 import { FieldSection } from './FieldSection'
@@ -92,7 +93,7 @@ export function TodayPage() {
 
   const loadError = error ?? fieldsError ?? valuesError
   if (loadError) {
-    return <div className="text-center text-red-500 mt-12">Could not load this entry: {loadError}</div>
+    return <div className="text-center text-red-500 dark:text-red-400 mt-12">Could not load this entry: {loadError}</div>
   }
 
   const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
@@ -213,7 +214,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             type="button"
             onClick={() => goTo(prevDay)}
             aria-label="Previous day"
-            className="p-2 -ml-2 text-gray-500 dark:text-gray-400"
+            className={`p-2 -ml-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -235,7 +236,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             onClick={() => goTo(nextDay)}
             aria-label="Next day"
             disabled={isToday}
-            className="p-2 text-gray-500 dark:text-gray-400 disabled:opacity-30"
+            className={`p-2 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded-lg ${focusRing}`}
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -243,7 +244,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             <button
               type="button"
               onClick={() => goTo(todayStr())}
-              className="text-sm text-blue-600 dark:text-blue-400 font-medium"
+              className={`text-sm text-blue-600 dark:text-blue-400 font-medium rounded-lg ${focusRing}`}
             >
               Today
             </button>
@@ -254,7 +255,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
           <button
             type="button"
             onClick={onManageFields}
-            className="text-sm text-blue-600 dark:text-blue-400 font-medium"
+            className={`text-sm text-blue-600 dark:text-blue-400 font-medium rounded-lg ${focusRing}`}
           >
             Manage fields
           </button>

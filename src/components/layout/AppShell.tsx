@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { Moon, Sun } from 'lucide-react'
 import { BottomNav } from './BottomNav'
 import { useTheme } from '../../hooks/useTheme'
+import { focusRing } from '../../lib/styles'
 
 interface Props {
   children: ReactNode
@@ -19,7 +20,7 @@ export function AppShell({ children, signOut }: Props) {
           <button
             type="button"
             onClick={toggle}
-            className="text-gray-500 dark:text-gray-400"
+            className={`p-2 -m-1 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
             aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -27,7 +28,7 @@ export function AppShell({ children, signOut }: Props) {
           <button
             type="button"
             onClick={signOut}
-            className="text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            className={`p-2 -m-1 text-xs text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg ${focusRing}`}
           >
             Sign out
           </button>

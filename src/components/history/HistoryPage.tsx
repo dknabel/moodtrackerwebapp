@@ -82,7 +82,7 @@ export function HistoryPage() {
 
   const loadError = error ?? fieldsError ?? valuesError
   if (loadError) {
-    return <div className="text-center text-red-500 mt-12">{loadError}</div>
+    return <div className="text-center text-red-500 dark:text-red-400 mt-12">{loadError}</div>
   }
 
   return (
@@ -91,7 +91,7 @@ export function HistoryPage() {
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">History</h1>
         <button
           onClick={() => setShowExport(v => !v)}
-          className="text-sm text-blue-600 font-medium"
+          className="text-sm text-blue-600 dark:text-blue-400 font-medium"
         >
           Export
         </button>
@@ -139,7 +139,7 @@ export function HistoryPage() {
             </div>
 
             {exportError && (
-              <p className="text-red-600 text-xs">Export failed: {exportError}</p>
+              <p className="text-red-600 dark:text-red-400 text-xs">Export failed: {exportError}</p>
             )}
             <button
               onClick={handleExport}
