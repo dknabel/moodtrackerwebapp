@@ -1,6 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { format } from 'date-fns'
 import { TodayPage } from './TodayPage'
@@ -31,6 +30,7 @@ vi.mock('./MedsSection', () => ({ MedsSection: () => <div>meds-section</div> }))
 vi.mock('./SleepSection', () => ({ SleepSection: () => <div>sleep-section</div> }))
 
 beforeEach(() => vi.clearAllMocks())
+afterEach(() => vi.useRealTimers())
 
 const renderPage = () => render(<MemoryRouter><TodayPage /></MemoryRouter>)
 
@@ -58,24 +58,50 @@ describe('TodayPage', () => {
     expect(screen.getByRole('slider')).toHaveValue('7')
   })
 
-  it('save writes sleep columns to daily_logs and field values to saveAll', async () => {
+  it('autosaves sleep columns and field values after edits settle', async () => {
+    vi.useFakeTimers()
     renderPage()
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-    await waitFor(() => expect(mockSaveAll).toHaveBeenCalled())
-    expect(mockSaveAll).toHaveBeenCalledWith({ f1: 7, f2: false })
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '9' } })
+    expect(mockSave).not.toHaveBeenCalled()
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(mockSaveAll).toHaveBeenCalledWith({ f1: 9, f2: false })
     const sleepPayload = mockSave.mock.calls[0][0]
     expect(sleepPayload).toEqual({
       bedtime: null, wake_time: null, sleep_hours: null, sleep_quality: 3, tonight_bedtime: null,
     })
     expect(sleepPayload).not.toHaveProperty('mood_rating')
-    expect(sleepPayload).not.toHaveProperty('gratitude')
   })
 
-  it('shows the save error when field values fail to save', async () => {
+  it('flushes a pending save on unmount', async () => {
+    // Real timers: unmount happens well before the 1s debounce fires, so a
+    // save here proves the unmount flush ran.
+    const { unmount } = renderPage()
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '9' } })
+    unmount()
+    await waitFor(() => expect(mockSaveAll).toHaveBeenCalledWith({ f1: 9, f2: false }))
+  })
+
+  it('does not save when nothing has been edited', async () => {
+    vi.useFakeTimers()
+    const { unmount } = renderPage()
+    await act(async () => { await vi.advanceTimersByTimeAsync(3000) })
+    unmount()
+    await act(async () => { await Promise.resolve() })
+    expect(mockSave).not.toHaveBeenCalled()
+    expect(mockSaveAll).not.toHaveBeenCalled()
+  })
+
+  it('shows the save error with a Retry button when saving fails', async () => {
+    vi.useFakeTimers()
     mockSaveAll.mockResolvedValueOnce({ error: 'boom' })
     renderPage()
-    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await screen.findByText('boom')).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '9' } })
+    await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+    expect(screen.getByText(/boom/)).toBeInTheDocument()
+    vi.useRealTimers()
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    await waitFor(() => expect(screen.queryByText(/boom/)).not.toBeInTheDocument())
+    expect(mockSaveAll).toHaveBeenCalledTimes(2)
   })
 })
 

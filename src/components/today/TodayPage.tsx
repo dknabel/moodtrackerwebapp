@@ -124,36 +124,71 @@ interface LogFormProps {
   onManageFields: () => void
 }
 
+type SaveStatusKind = 'idle' | 'saving' | 'saved' | 'error'
+
 function LogForm({ date, fields, initial, save, saveValues, onManageFields }: LogFormProps) {
   const [form, setForm] = useState<FormState>(initial)
-  const [saving, setSaving] = useState(false)
+  const [status, setStatus] = useState<SaveStatusKind>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
-  const savedTimeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  useEffect(() => () => clearTimeout(savedTimeout.current), [])
+  const formRef = useRef(form)
+  const dirtyRef = useRef(false)
+  const chainRef = useRef<Promise<void>>(Promise.resolve())
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const savedRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  const fieldValue = (f: CustomField) => form.fieldValues[f.id] ?? defaultFieldValue(f)
+  // Keep refs in sync with the latest render's values. Assigning during
+  // render itself is disallowed (react-hooks/refs), so this runs as an
+  // effect after each commit instead; nothing reads these refs
+  // synchronously within the same render.
+  useEffect(() => {
+    formRef.current = form
+  })
 
-  const handleSave = async () => {
-    setSaving(true)
-    setSaveError(null)
-    setSaved(false)
-    const [logRes, valuesRes] = await Promise.all([
-      save(toSleepData(form)),
-      saveValues(form.fieldValues),
-    ])
-    const error = logRes.error ?? valuesRes.error
-    if (error) {
-      setSaveError(error)
-    } else {
-      setSaved(true)
-      clearTimeout(savedTimeout.current)
-      savedTimeout.current = setTimeout(() => setSaved(false), 2000)
-    }
-    setSaving(false)
+  const runSave = () => {
+    dirtyRef.current = false
+    chainRef.current = chainRef.current.then(async () => {
+      setStatus('saving')
+      setSaveError(null)
+      const snapshot = formRef.current
+      const [logRes, valuesRes] = await Promise.all([
+        save(toSleepData(snapshot)),
+        saveValues(snapshot.fieldValues),
+      ])
+      const error = logRes.error ?? valuesRes.error
+      if (error) {
+        setSaveError(error)
+        setStatus('error')
+      } else {
+        setStatus('saved')
+        clearTimeout(savedRef.current)
+        savedRef.current = setTimeout(() => setStatus(s => (s === 'saved' ? 'idle' : s)), 2000)
+      }
+    })
+  }
+  const runSaveRef = useRef(runSave)
+  useEffect(() => {
+    runSaveRef.current = runSave
+  })
+
+  const update = (updater: (f: FormState) => FormState) => {
+    setForm(updater)
+    dirtyRef.current = true
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => runSaveRef.current(), 1000)
   }
 
+  // Flush any pending save when the form unmounts (navigation, date switch).
+  useEffect(
+    () => () => {
+      clearTimeout(debounceRef.current)
+      clearTimeout(savedRef.current)
+      if (dirtyRef.current) runSaveRef.current()
+    },
+    []
+  )
+
+  const fieldValue = (f: CustomField) => form.fieldValues[f.id] ?? defaultFieldValue(f)
   const isToday = date === todayStr()
 
   return (
@@ -162,13 +197,16 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">
           {isToday ? 'Today' : date}
         </h1>
-        <button
-          type="button"
-          onClick={onManageFields}
-          className="text-sm text-blue-600 dark:text-blue-400 font-medium"
-        >
-          Manage fields
-        </button>
+        <div className="flex items-center gap-3">
+          <SaveStatus status={status} error={saveError} onRetry={runSave} />
+          <button
+            type="button"
+            onClick={onManageFields}
+            className="text-sm text-blue-600 dark:text-blue-400 font-medium"
+          >
+            Manage fields
+          </button>
+        </div>
       </div>
 
       <Card>
@@ -180,7 +218,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             sleep_quality: form.sleep_quality,
             tonight_bedtime: form.tonight_bedtime,
           }}
-          onChange={v => setForm(f => ({ ...f, ...v }))}
+          onChange={v => update(f => ({ ...f, ...v }))}
         />
       </Card>
 
@@ -190,7 +228,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             field={field}
             value={fieldValue(field)}
             onChange={v =>
-              setForm(f => ({ ...f, fieldValues: { ...f.fieldValues, [field.id]: v } }))
+              update(f => ({ ...f, fieldValues: { ...f.fieldValues, [field.id]: v } }))
             }
           />
         </Card>
@@ -199,24 +237,35 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
       <Card>
         <MedsSection date={date} />
       </Card>
-
-      {saveError && (
-        <p className="text-red-600 text-sm">{saveError}</p>
-      )}
-
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={saving}
-        className="w-full bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50 flex items-center justify-center gap-2"
-      >
-        {saving ? 'Saving…' : saved ? (
-          <>
-            <Check className="w-4 h-4" />
-            Saved
-          </>
-        ) : 'Save'}
-      </button>
     </div>
   )
+}
+
+function SaveStatus({ status, error, onRetry }: {
+  status: SaveStatusKind
+  error: string | null
+  onRetry: () => void
+}) {
+  if (status === 'saving') {
+    return <span className="text-xs text-gray-400 dark:text-gray-500">Saving…</span>
+  }
+  if (status === 'saved') {
+    return (
+      <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+        <Check className="w-3.5 h-3.5" />
+        Saved
+      </span>
+    )
+  }
+  if (status === 'error') {
+    return (
+      <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+        <span className="max-w-40 truncate">{error}</span>
+        <button type="button" onClick={onRetry} className="underline font-medium shrink-0">
+          Retry
+        </button>
+      </span>
+    )
+  }
+  return null
 }
