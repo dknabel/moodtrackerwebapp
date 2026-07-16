@@ -6,11 +6,14 @@ A daily mood and wellness tracker. Log how you're feeling, track sleep and habit
 
 ## Features
 
-- **Daily logging** — rate mood, energy, and anxiety on a 1–10 scale
-- **Sleep tracking** — log bedtime, wake time, hours slept, and sleep quality
-- **Food & exercise** — track meals eaten and whether you exercised
-- **History** — browse all past daily logs
-- **Charts** — visualize trends in mood, sleep, meals, and exercise over time
+- **Daily logging with custom fields** — track anything with sliders, numbers, yes/no toggles, text notes, and tags; reorder, archive, and chart fields as you like
+- **Autosave** — entries save automatically as you type, no Save button to remember
+- **Sleep tracking** — wake time, sleep quality, and tonight's planned bedtime, with hours calculated for you
+- **Medications** — manage your med list and check off daily doses
+- **Day navigation** — step back through past days or jump to any date to backfill an entry
+- **History** — browse past logs and export them to CSV or PDF
+- **Charts** — trends, overlays, correlations, and streaks across any tracked field
+- **Dark mode** — follows your preference, with a manual toggle
 - **PWA** — installable on mobile as a native-feeling app
 - **Authentication** — email/password and Google sign-in via Supabase Auth
 
