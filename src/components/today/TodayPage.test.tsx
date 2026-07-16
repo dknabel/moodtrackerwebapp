@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { format } from 'date-fns'
 import { TodayPage } from './TodayPage'
@@ -116,13 +117,49 @@ describe('TodayPage date param validation', () => {
     expect(screen.getByText('HOME')).toBeInTheDocument()
   })
 
-  it('renders the page for a valid date', () => {
+  it('renders a friendly heading for a valid past date', () => {
     renderAt('/log/2026-06-15')
-    expect(screen.getByRole('heading', { name: '2026-06-15' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Jun 15/ })).toBeInTheDocument()
   })
 
   it('shows "Today" for the current date', () => {
     renderAt(`/log/${format(new Date(), 'yyyy-MM-dd')}`)
     expect(screen.getByRole('heading', { name: 'Today' })).toBeInTheDocument()
+  })
+})
+
+describe('TodayPage date navigation', () => {
+  it('steps back one day with the previous arrow', async () => {
+    renderAt('/log/2026-06-15')
+    await userEvent.click(screen.getByRole('button', { name: 'Previous day' }))
+    expect(screen.getByRole('heading', { name: /Jun 14/ })).toBeInTheDocument()
+  })
+
+  it('steps forward one day with the next arrow', async () => {
+    renderAt('/log/2026-06-15')
+    await userEvent.click(screen.getByRole('button', { name: 'Next day' }))
+    expect(screen.getByRole('heading', { name: /Jun 16/ })).toBeInTheDocument()
+  })
+
+  it('disables the next arrow on today', () => {
+    renderPage()
+    expect(screen.getByRole('button', { name: 'Next day' })).toBeDisabled()
+  })
+
+  it('returns to today via the Today link', async () => {
+    renderAt('/log/2026-06-15')
+    await userEvent.click(screen.getByRole('button', { name: 'Today' }))
+    expect(screen.getByText('HOME')).toBeInTheDocument()
+  })
+
+  it('hides the Today link when already on today', () => {
+    renderPage()
+    expect(screen.queryByRole('button', { name: 'Today' })).not.toBeInTheDocument()
+  })
+
+  it('jumps to a chosen date with the date picker', async () => {
+    renderAt('/log/2026-06-15')
+    fireEvent.change(screen.getByLabelText('Choose date'), { target: { value: '2026-06-10' } })
+    expect(await screen.findByRole('heading', { name: /Jun 10/ })).toBeInTheDocument()
   })
 })

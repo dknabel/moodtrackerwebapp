@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { useParams, Navigate } from 'react-router-dom'
-import { format, subDays, parseISO, isValid } from 'date-fns'
-import { Check } from 'lucide-react'
+import { useParams, Navigate, useNavigate } from 'react-router-dom'
+import { format, subDays, addDays, parseISO, isValid } from 'date-fns'
+import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useDailyLog } from '../../hooks/useDailyLog'
 import { useFields } from '../../hooks/useFields'
 import { useFieldValues } from '../../hooks/useFieldValues'
 import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
 import { defaultFieldValue } from '../../lib/fields'
+import { formatDay } from '../../lib/dates'
 import { Card } from '../ui/Card'
 import { FieldSection } from './FieldSection'
 import { ManageFieldsModal } from './ManageFieldsModal'
@@ -171,6 +172,11 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
     runSaveRef.current = runSave
   })
 
+  const navigate = useNavigate()
+  const goTo = (d: string) => navigate(d === todayStr() ? '/' : `/log/${d}`)
+  const prevDay = format(subDays(parseISO(date), 1), 'yyyy-MM-dd')
+  const nextDay = format(addDays(parseISO(date), 1), 'yyyy-MM-dd')
+
   const update = (updater: (f: FormState) => FormState) => {
     setForm(updater)
     dirtyRef.current = true
@@ -194,9 +200,47 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-          {isToday ? 'Today' : date}
-        </h1>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => goTo(prevDay)}
+            aria-label="Previous day"
+            className="p-2 -ml-2 text-gray-500 dark:text-gray-400"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="relative">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
+              {formatDay(date)}
+            </h1>
+            <input
+              type="date"
+              aria-label="Choose date"
+              value={date}
+              max={todayStr()}
+              onChange={e => { if (e.target.value) goTo(e.target.value) }}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => goTo(nextDay)}
+            aria-label="Next day"
+            disabled={isToday}
+            className="p-2 text-gray-500 dark:text-gray-400 disabled:opacity-30"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          {!isToday && (
+            <button
+              type="button"
+              onClick={() => goTo(todayStr())}
+              className="text-sm text-blue-600 dark:text-blue-400 font-medium"
+            >
+              Today
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <SaveStatus status={status} error={saveError} onRetry={runSave} />
           <button
