@@ -79,6 +79,14 @@ describe('ManageFieldsModal', () => {
     expect(handlers.onArchive).toHaveBeenCalledWith('f1')
   })
 
+  it('does not archive when the dialog is cancelled', async () => {
+    renderModal()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Archive' })[0])
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }))
+    expect(handlers.onArchive).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
+  })
+
   it('hard delete requires confirming the dialog', async () => {
     renderModal()
     await userEvent.click(screen.getByRole('button', { name: 'Delete forever' }))
