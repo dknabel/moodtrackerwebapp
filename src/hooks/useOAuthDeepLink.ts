@@ -14,7 +14,9 @@ export function useOAuthDeepLink(): void {
     void CapacitorApp.addListener('appUrlOpen', ({ url }) => {
       if (!url.startsWith(CALLBACK_PREFIX)) return
       void Browser.close()
-      void supabase.auth.exchangeCodeForSession(url)
+      const code = new URL(url).searchParams.get('code')
+      if (!code) return
+      void supabase.auth.exchangeCodeForSession(code)
     }).then(handle => {
       listener = handle
     })

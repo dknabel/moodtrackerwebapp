@@ -42,13 +42,13 @@ describe('useOAuthDeepLink', () => {
     expect(mockAddListener).toHaveBeenCalledWith('appUrlOpen', expect.any(Function))
   })
 
-  it('closes the browser and exchanges the code when the callback URL is opened', () => {
+  it('closes the browser and exchanges the extracted code (not the full URL) when the callback URL is opened', () => {
     renderHook(() => useOAuthDeepLink())
     const handler = mockAddListener.mock.calls[0][1] as (data: { url: string }) => void
     handler({ url: 'moodtrackerplus://auth/callback?code=abc123' })
 
     expect(mockBrowserClose).toHaveBeenCalled()
-    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('moodtrackerplus://auth/callback?code=abc123')
+    expect(mockExchangeCodeForSession).toHaveBeenCalledWith('abc123')
   })
 
   it('ignores URLs that do not match the callback prefix', () => {
@@ -57,6 +57,15 @@ describe('useOAuthDeepLink', () => {
     handler({ url: 'someotherapp://something' })
 
     expect(mockBrowserClose).not.toHaveBeenCalled()
+    expect(mockExchangeCodeForSession).not.toHaveBeenCalled()
+  })
+
+  it('closes the browser but does not exchange when the callback URL has no code (e.g. a denied/cancelled login)', () => {
+    renderHook(() => useOAuthDeepLink())
+    const handler = mockAddListener.mock.calls[0][1] as (data: { url: string }) => void
+    handler({ url: 'moodtrackerplus://auth/callback?error=access_denied' })
+
+    expect(mockBrowserClose).toHaveBeenCalled()
     expect(mockExchangeCodeForSession).not.toHaveBeenCalled()
   })
 })
