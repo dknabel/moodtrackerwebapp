@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import type { CustomField, FieldValueData } from '../../lib/database.types'
 import { displayValue } from '../../lib/fields'
+import { formatDay } from '../../lib/dates'
 
 function truncate(text: string, max: number): string {
   return text.length <= max ? text : text.slice(0, max) + '…'
@@ -28,7 +29,7 @@ export function HistoryEntry({ date, sleepHours, items }: HistoryEntryProps) {
       onClick={() => navigate(`/log/${date}`)}
       className="w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1"
     >
-      <span className="text-sm font-semibold text-gray-900 dark:text-white">{date}</span>
+      <span className="text-sm font-semibold text-gray-900 dark:text-white">{formatDay(date)}</span>
       <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
         {sleepHours !== null && <span>Sleep {sleepHours}h</span>}
         {chipItems.map(({ field, value }) => (
