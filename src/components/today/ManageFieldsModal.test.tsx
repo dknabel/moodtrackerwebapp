@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { ManageFieldsModal } from './ManageFieldsModal'
 import type { CustomField } from '../../lib/database.types'
@@ -52,30 +52,46 @@ describe('ManageFieldsModal', () => {
     expect(screen.getByText('A field with this name already exists')).toBeInTheDocument()
   })
 
-  it('warns before an incompatible type change', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false)
+  it('warns before an incompatible type change and cancels cleanly', async () => {
     renderModal()
     await userEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
     await userEvent.selectOptions(screen.getByLabelText('Type'), 'text')
     await userEvent.click(screen.getByRole('button', { name: 'Save' }))
-    expect(window.confirm).toHaveBeenCalled()
+    const dialog = screen.getByRole('alertdialog')
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
     expect(handlers.onUpdate).not.toHaveBeenCalled()
   })
 
-  it('archives with confirmation', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true)
+  it('applies an incompatible type change after confirming', async () => {
+    renderModal()
+    await userEvent.click(screen.getAllByRole('button', { name: 'Edit' })[0])
+    await userEvent.selectOptions(screen.getByLabelText('Type'), 'text')
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Change type' }))
+    expect(handlers.onUpdate).toHaveBeenCalledWith('f1', expect.objectContaining({ type: 'text' }))
+  })
+
+  it('archives only after confirming the dialog', async () => {
     renderModal()
     await userEvent.click(screen.getAllByRole('button', { name: 'Archive' })[0])
+    expect(handlers.onArchive).not.toHaveBeenCalled()
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Archive' }))
     expect(handlers.onArchive).toHaveBeenCalledWith('f1')
   })
 
-  it('hard delete requires typing DELETE', async () => {
-    vi.spyOn(window, 'prompt').mockReturnValue('nope')
+  it('hard delete requires confirming the dialog', async () => {
     renderModal()
     await userEvent.click(screen.getByRole('button', { name: 'Delete forever' }))
     expect(handlers.onDelete).not.toHaveBeenCalled()
-    vi.spyOn(window, 'prompt').mockReturnValue('DELETE')
-    await userEvent.click(screen.getByRole('button', { name: 'Delete forever' }))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Delete forever' }))
     expect(handlers.onDelete).toHaveBeenCalledWith('f3')
+  })
+
+  it('does not delete when the dialog is cancelled', async () => {
+    renderModal()
+    await userEvent.click(screen.getByRole('button', { name: 'Delete forever' }))
+    await userEvent.click(within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Cancel' }))
+    expect(handlers.onDelete).not.toHaveBeenCalled()
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument()
   })
 })

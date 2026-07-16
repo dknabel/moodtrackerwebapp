@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ChevronDown, ChevronUp, X } from 'lucide-react'
 import type { CustomField, FieldConfig, FieldType } from '../../lib/database.types'
 import { isCompatibleTypeChange, validateField, type FieldData } from '../../lib/fields'
+import { useModal } from '../../hooks/useModal'
+import { ConfirmDialog } from '../ui/ConfirmDialog'
 
 interface Props {
   fields: CustomField[]
@@ -12,6 +14,13 @@ interface Props {
   onDelete: (id: string) => Promise<string | null>
   onMove: (id: string, direction: -1 | 1) => Promise<string | null>
   onClose: () => void
+}
+
+interface ConfirmState {
+  title: string
+  message: string
+  confirmLabel: string
+  action: () => void | Promise<void>
 }
 
 interface FormValues {
@@ -123,14 +132,8 @@ export function ManageFieldsModal({
   const [addError, setAddError] = useState<string | null>(null)
   const [editError, setEditError] = useState<string | null>(null)
   const [listError, setListError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
-  }, [onClose])
+  const [confirm, setConfirm] = useState<ConfirmState | null>(null)
+  const dialogRef = useModal(onClose)
 
   const active = fields.filter(f => f.active)
   const archived = fields.filter(f => !f.active)
@@ -153,41 +156,57 @@ export function ManageFieldsModal({
     setEditError(null)
   }
 
-  const handleSaveEdit = async () => {
+  const applyEdit = async (data: FieldData) => {
+    if (!editId) return
+    const error = await onUpdate(editId, { ...data, show_in_charts: editForm.show_in_charts })
+    if (error) { setEditError(error); return }
+    setEditId(null)
+  }
+
+  const handleSaveEdit = () => {
     if (!editId) return
     const original = fields.find(f => f.id === editId)
     if (!original) return
     const data: FieldData = { name: editForm.name.trim(), type: editForm.type, config: toConfig(editForm) }
     const invalid = validateField(data, namesExcept(editId))
     if (invalid) { setEditError(invalid); return }
-    if (
-      original.type !== data.type &&
-      !isCompatibleTypeChange(original.type, data.type) &&
-      !window.confirm(
-        "Past values that don't match the new type will be hidden from charts (they stay in History). Continue?"
-      )
-    ) return
     setEditError(null)
-    const error = await onUpdate(editId, { ...data, show_in_charts: editForm.show_in_charts })
-    if (error) { setEditError(error); return }
-    setEditId(null)
+    if (original.type !== data.type && !isCompatibleTypeChange(original.type, data.type)) {
+      setConfirm({
+        title: `Change ${original.name} to ${TYPE_LABELS[data.type]}?`,
+        message: "Past values that don't match the new type will be hidden from charts (they stay in History).",
+        confirmLabel: 'Change type',
+        action: () => applyEdit(data),
+      })
+      return
+    }
+    void applyEdit(data)
   }
 
-  const handleArchive = async (f: CustomField) => {
-    if (!window.confirm(`Archive ${f.name}? Its history is kept and it can be restored.`)) return
-    setListError(null)
-    const error = await onArchive(f.id)
-    if (error) setListError(error)
+  const handleArchive = (f: CustomField) => {
+    setConfirm({
+      title: `Archive ${f.name}?`,
+      message: 'Its history is kept and it can be restored later.',
+      confirmLabel: 'Archive',
+      action: async () => {
+        setListError(null)
+        const error = await onArchive(f.id)
+        if (error) setListError(error)
+      },
+    })
   }
 
-  const handleDelete = async (f: CustomField) => {
-    const typed = window.prompt(
-      `Permanently delete "${f.name}" and ALL of its logged values? Type DELETE to confirm.`
-    )
-    if (typed !== 'DELETE') return
-    setListError(null)
-    const error = await onDelete(f.id)
-    if (error) setListError(error)
+  const handleDelete = (f: CustomField) => {
+    setConfirm({
+      title: `Delete ${f.name} forever?`,
+      message: 'This permanently deletes the field and all of its logged values. This cannot be undone.',
+      confirmLabel: 'Delete forever',
+      action: async () => {
+        setListError(null)
+        const error = await onDelete(f.id)
+        if (error) setListError(error)
+      },
+    })
   }
 
   const handleMove = async (f: CustomField, direction: -1 | 1) => {
@@ -199,13 +218,15 @@ export function ManageFieldsModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={onClose}>
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby="manage-fields-title"
         className="bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Manage Fields</h2>
+          <h2 id="manage-fields-title" className="text-lg font-semibold text-gray-900 dark:text-white">Manage Fields</h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -345,6 +366,20 @@ export function ManageFieldsModal({
             Add
           </button>
         </div>
+        )}
+
+        {confirm && (
+          <ConfirmDialog
+            title={confirm.title}
+            message={confirm.message}
+            confirmLabel={confirm.confirmLabel}
+            onConfirm={() => {
+              const { action } = confirm
+              setConfirm(null)
+              void action()
+            }}
+            onCancel={() => setConfirm(null)}
+          />
         )}
       </div>
     </div>
