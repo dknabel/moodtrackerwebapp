@@ -13,3 +13,4 @@ alter table reminders enable row level security;
 create policy "Users manage own reminders"
   on reminders for all
   using (auth.uid() = user_id);
+grant select, insert, update, delete on table reminders to anon, authenticated;
