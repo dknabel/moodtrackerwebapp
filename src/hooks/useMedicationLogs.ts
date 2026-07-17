@@ -10,15 +10,14 @@ export function useMedicationLogs(date: string) {
 
   const setTaken = async (
     medicationId: string,
-    taken: boolean,
-    takenAt: string | null
+    taken: boolean
   ): Promise<string | null> => {
     const { data: auth } = await supabase.auth.getUser()
     if (!auth.user) return 'Not authenticated'
     const { data: upserted, error } = await supabase
       .from('medication_logs')
       .upsert(
-        { user_id: auth.user.id, date, medication_id: medicationId, taken, taken_at: takenAt },
+        { user_id: auth.user.id, date, medication_id: medicationId, taken, taken_at: null },
         { onConflict: 'user_id,date,medication_id' }
       )
       .select()

@@ -24,9 +24,9 @@ export function MedsSection({ date }: Props) {
   const getLog = (medicationId: string) =>
     logs.find(l => l.medication_id === medicationId)
 
-  const handleSetTaken = async (medicationId: string, taken: boolean, takenAt: string | null) => {
+  const handleSetTaken = async (medicationId: string, taken: boolean) => {
     setTakenError(null)
-    const error = await setTaken(medicationId, taken, takenAt)
+    const error = await setTaken(medicationId, taken)
     if (error) setTakenError(error)
   }
 
@@ -60,14 +60,13 @@ export function MedsSection({ date }: Props) {
             {medications.map(med => {
               const log = getLog(med.id)
               const taken = log?.taken ?? false
-              const takenAt = log?.taken_at?.slice(0, 5) ?? ''
 
               return (
                 <div key={med.id} className="flex items-center gap-3">
                   <input
                     type="checkbox"
                     checked={taken}
-                    onChange={e => handleSetTaken(med.id, e.target.checked, taken ? null : takenAt || null)}
+                    onChange={e => handleSetTaken(med.id, e.target.checked)}
                     className="w-5 h-5 accent-blue-600 cursor-pointer"
                   />
                   <span className="flex-1 text-sm text-gray-900 dark:text-white">
@@ -78,14 +77,6 @@ export function MedsSection({ date }: Props) {
                       </span>
                     )}
                   </span>
-                  {taken && (
-                    <input
-                      type="time"
-                      value={takenAt}
-                      onChange={e => handleSetTaken(med.id, true, e.target.value || null)}
-                      className="text-xs border border-gray-200 dark:border-gray-700 rounded p-1 dark:bg-gray-800 dark:text-white"
-                    />
-                  )}
                 </div>
               )
             })}

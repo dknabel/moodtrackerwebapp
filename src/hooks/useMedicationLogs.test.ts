@@ -6,7 +6,7 @@ const log1: import('../lib/database.types').MedicationLog = {
   id: 'l1', user_id: 'u1', date: '2026-06-24',
   medication_id: 'm1', taken: false, taken_at: null, created_at: '',
 }
-const log1Taken = { ...log1, taken: true, taken_at: '08:30' }
+const log1Taken = { ...log1, taken: true }
 
 const mockSingle = vi.fn()
 const mockSelectAfterUpsert = vi.fn(() => ({ single: mockSingle }))
@@ -60,11 +60,11 @@ describe('useMedicationLogs', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     await act(async () => {
-      await result.current.setTaken('m1', true, '08:30')
+      await result.current.setTaken('m1', true)
     })
 
     expect(mockUpsert).toHaveBeenCalledWith(
-      expect.objectContaining({ medication_id: 'm1', taken: true, taken_at: '08:30', date: '2026-06-24' }),
+      expect.objectContaining({ medication_id: 'm1', taken: true, taken_at: null, date: '2026-06-24' }),
       expect.objectContaining({ onConflict: 'user_id,date,medication_id' })
     )
     expect(result.current.logs[0].taken).toBe(true)
@@ -81,7 +81,7 @@ describe('useMedicationLogs', () => {
 
     let returned: string | null = null
     await act(async () => {
-      returned = await result.current.setTaken('m1', true, '08:30')
+      returned = await result.current.setTaken('m1', true)
     })
 
     expect(returned).toBe('upsert failed')

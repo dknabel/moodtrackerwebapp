@@ -56,38 +56,38 @@ describe('MedsSection', () => {
     expect(screen.getByText(/300mg/)).toBeInTheDocument()
   })
 
-  it('calls setTaken(id, true, null) when unchecked checkbox is toggled', async () => {
+  it('calls setTaken(id, true) when unchecked checkbox is toggled', async () => {
     mockUseMedications.mockReturnValue({
       medications: [med],
       loading: false,
-    error: null,
+      error: null,
       addMedication: vi.fn(),
       updateMedication: vi.fn(),
       deactivateMedication: vi.fn(),
     })
     render(<MedsSection date="2026-06-24" />)
     await userEvent.click(screen.getByRole('checkbox'))
-    expect(mockSetTaken).toHaveBeenCalledWith('m1', true, null)
+    expect(mockSetTaken).toHaveBeenCalledWith('m1', true)
   })
 
-  it('shows time input when medication is marked taken', () => {
+  it('does not render a time input when medication is marked taken', () => {
     mockUseMedications.mockReturnValue({
       medications: [med],
       loading: false,
-    error: null,
+      error: null,
       addMedication: vi.fn(),
       updateMedication: vi.fn(),
       deactivateMedication: vi.fn(),
     })
     mockUseMedicationLogs.mockReturnValue({
-      logs: [{ id: 'l1', user_id: 'u1', date: '2026-06-24', medication_id: 'm1', taken: true, taken_at: '08:00', created_at: '' }],
+      logs: [{ id: 'l1', user_id: 'u1', date: '2026-06-24', medication_id: 'm1', taken: true, taken_at: null, created_at: '' }],
       loading: false,
-    error: null,
+      error: null,
       setTaken: mockSetTaken,
     })
-    render(<MedsSection date="2026-06-24" />)
+    const { container } = render(<MedsSection date="2026-06-24" />)
     expect(screen.getByRole('checkbox')).toBeChecked()
-    expect(screen.getByDisplayValue('08:00')).toBeInTheDocument()
+    expect(container.querySelectorAll('input').length).toBe(1)
   })
 
   it('keeps the section heading visible while loading', () => {
