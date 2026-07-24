@@ -3,7 +3,7 @@ import { Trash2 } from 'lucide-react'
 import { useReminders } from '../../hooks/useReminders'
 import { useMedications } from '../../hooks/useMedications'
 import { isNativePlatform, requestNotificationPermission } from '../../lib/notifications'
-import { focusRing } from '../../lib/styles'
+import { btnPrimary, eyebrow, focusRing } from '../../lib/styles'
 
 export function RemindersPage() {
   const { reminders, addReminder, updateReminder, deleteReminder } = useReminders()
@@ -40,18 +40,18 @@ export function RemindersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-lg font-semibold text-gray-900 dark:text-white">Reminders</h1>
+      <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink">Reminders</h1>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Daily check-ins</h2>
+        <h2 className={eyebrow}>Daily check-ins</h2>
         {dailyReminders.map(reminder => (
-          <div key={reminder.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div key={reminder.id} className="flex items-center gap-3 p-3 bg-surface border border-line rounded-lg">
             <input
               type="time"
               aria-label={`${reminder.label ?? 'Daily reminder'} time`}
               value={reminder.time}
               onChange={e => void updateReminder(reminder.id, { time: e.target.value })}
-              className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+              className="border border-line bg-bg text-ink rounded p-2 text-sm"
             />
             <input
               type="text"
@@ -59,7 +59,7 @@ export function RemindersPage() {
               value={reminder.label ?? ''}
               placeholder="Label"
               onChange={e => void updateReminder(reminder.id, { label: e.target.value || null })}
-              className="flex-1 border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+              className="flex-1 border border-line bg-bg text-ink rounded p-2 text-sm"
             />
             <label className="flex items-center gap-2 cursor-pointer">
               <input
@@ -68,27 +68,27 @@ export function RemindersPage() {
                 checked={reminder.enabled}
                 disabled={!native}
                 onChange={e => void (e.target.checked ? enableReminder(reminder, reminder.time, null) : disableReminder(reminder.id))}
-                className="w-5 h-5 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                className="w-5 h-5 accent-clay cursor-pointer disabled:cursor-not-allowed"
               />
             </label>
             <button
               type="button"
               aria-label={`Delete ${reminder.label ?? 'reminder'} reminder`}
               onClick={() => void deleteReminder(reminder.id)}
-              className={`p-2 -m-1 text-red-500 dark:text-red-400 rounded-lg ${focusRing}`}
+              className={`p-2 -m-1 text-danger rounded-lg ${focusRing}`}
             >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
         ))}
 
-        <div className="flex items-center gap-3 p-3 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+        <div className="flex items-center gap-3 p-3 border border-dashed border-line rounded-lg">
           <input
             type="time"
             aria-label="New reminder time"
             value={newTime}
             onChange={e => setNewTime(e.target.value)}
-            className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+            className="border border-line bg-bg text-ink rounded p-2 text-sm"
           />
           <input
             type="text"
@@ -96,12 +96,12 @@ export function RemindersPage() {
             value={newLabel}
             placeholder="Label (optional)"
             onChange={e => setNewLabel(e.target.value)}
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+            className="flex-1 border border-line bg-bg text-ink rounded p-2 text-sm"
           />
           <button
             type="button"
             onClick={() => void handleAddDailyReminder()}
-            className={`bg-blue-600 text-white rounded p-2 text-sm font-medium ${focusRing}`}
+            className={`${btnPrimary} ${focusRing}`}
           >
             Add reminder
           </button>
@@ -109,15 +109,15 @@ export function RemindersPage() {
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-gray-900 dark:text-white">Medications</h2>
+        <h2 className={eyebrow}>Medications</h2>
         {medications.map(med => {
           const existing = reminders.find(r => r.kind === 'medication' && r.medication_id === med.id)
           const time = existing?.time ?? med.scheduled_time ?? '08:00'
           return (
-            <div key={med.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div key={med.id} className="flex items-center gap-3 p-3 bg-surface border border-line rounded-lg">
               <div className="flex-1">
-                <p className="font-medium text-gray-900 dark:text-white text-sm">{med.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{med.dose}</p>
+                <p className="font-medium text-ink text-sm">{med.name}</p>
+                <p className="text-xs text-faint">{med.dose}</p>
               </div>
               <input
                 type="time"
@@ -125,7 +125,7 @@ export function RemindersPage() {
                 value={time}
                 disabled={!existing}
                 onChange={e => existing && void updateReminder(existing.id, { time: e.target.value })}
-                className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white disabled:opacity-50"
+                className="border border-line bg-bg text-ink rounded p-2 text-sm disabled:opacity-50"
               />
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -134,7 +134,7 @@ export function RemindersPage() {
                   checked={existing?.enabled ?? false}
                   disabled={!native}
                   onChange={e => void (e.target.checked ? enableReminder(existing, time, med.id) : existing && disableReminder(existing.id))}
-                  className="w-5 h-5 accent-blue-600 cursor-pointer disabled:cursor-not-allowed"
+                  className="w-5 h-5 accent-clay cursor-pointer disabled:cursor-not-allowed"
                 />
               </label>
             </div>
@@ -143,7 +143,7 @@ export function RemindersPage() {
       </section>
 
       {!native && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-faint">
           Notification scheduling is only available in the iOS/Android app.
         </p>
       )}

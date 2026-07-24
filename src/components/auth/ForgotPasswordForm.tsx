@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { btnPrimary } from '../../lib/styles'
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState('')
@@ -24,7 +25,7 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <p className="text-gray-700 dark:text-gray-300 text-sm text-center max-w-sm">
+      <p className="text-ink text-sm text-center max-w-sm">
         Password reset email sent. Check your inbox and click the link.
       </p>
     )
@@ -38,13 +39,13 @@ export function ForgotPasswordForm() {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       {error && <p className="text-red-600 text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}
-        className="bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50"
+        className={`${btnPrimary} w-full`}
       >
         {loading ? 'Sending…' : 'Send reset link'}
       </button>

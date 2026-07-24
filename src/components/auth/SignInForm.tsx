@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { btnPrimary, linkText } from '../../lib/styles'
 
 interface Props {
   onForgotPassword: () => void
@@ -28,7 +29,7 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -36,13 +37,13 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
         required
-        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       {error && (
         <>
           <p className="text-red-600 text-sm">{error}</p>
           {error === 'Invalid login credentials' && (
-            <p className="text-gray-500 dark:text-gray-400 text-xs text-center">
+            <p className="text-muted text-xs text-center">
               Signed up with Google? Use the button above.
             </p>
           )}
@@ -51,14 +52,14 @@ export function SignInForm({ onForgotPassword }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50"
+        className={`${btnPrimary} w-full`}
       >
         {loading ? 'Signing in…' : 'Sign in'}
       </button>
       <button
         type="button"
         onClick={onForgotPassword}
-        className="text-sm text-blue-600 text-center"
+        className={`${linkText} text-sm text-center`}
       >
         Forgot password?
       </button>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { btnPrimary } from '../../lib/styles'
 
 interface Props {
   onExpiredLink: () => void
@@ -37,13 +38,13 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
   if (done) {
     return (
       <div className="flex flex-col items-center gap-3 max-w-sm text-center">
-        <p className="text-gray-700 dark:text-gray-300 text-sm">
+        <p className="text-ink text-sm">
           Password updated. You're now signed in.
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="bg-blue-600 text-white rounded-lg p-3 font-medium w-full"
+          className={`${btnPrimary} w-full`}
         >
           Continue to app
         </button>
@@ -53,14 +54,14 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3 w-full max-w-sm">
-      <p className="text-gray-500 dark:text-gray-400 text-sm text-center">Choose a new password</p>
+      <p className="text-muted text-sm text-center">Choose a new password</p>
       <input
         type="password"
         value={password}
         onChange={e => setPassword(e.target.value)}
         placeholder="New password"
         required
-        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       <input
         type="password"
@@ -68,7 +69,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
         onChange={e => setConfirm(e.target.value)}
         placeholder="Confirm new password"
         required
-        className="border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       {error === 'link-expired' ? (
         <p className="text-red-600 text-sm text-center">
@@ -83,7 +84,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
       <button
         type="submit"
         disabled={loading}
-        className="bg-blue-600 text-white rounded-lg p-3 font-medium disabled:opacity-50"
+        className={`${btnPrimary} w-full`}
       >
         {loading ? 'Updating…' : 'Update password'}
       </button>
