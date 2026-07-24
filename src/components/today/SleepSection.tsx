@@ -22,16 +22,15 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
     onChange({ ...values, wake_time, sleep_hours: hours })
   }
 
-  const inputClass = "border border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg p-2 text-base"
+  const inputClass = "border border-line bg-surface text-ink rounded-lg p-2 text-base"
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="text-base font-semibold text-gray-900 dark:text-white">Sleep</h2>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Last night's sleep</h3>
+        <h3 className="text-sm font-medium text-ink">Last night's sleep</h3>
         <div className="flex flex-col gap-1">
-          <label htmlFor="wake_time" className="text-sm text-gray-600 dark:text-gray-400">Wake time</label>
+          <label htmlFor="wake_time" className="text-sm text-muted">Wake time</label>
           <input
             id="wake_time"
             type="time"
@@ -52,9 +51,9 @@ export function SleepSection({ values, onChange }: SleepSectionProps) {
       </div>
 
       <div className="flex flex-col gap-3">
-        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Tonight</h3>
+        <h3 className="text-sm font-medium text-ink">Tonight</h3>
         <div className="flex flex-col gap-1">
-          <label htmlFor="tonight_bedtime" className="text-sm text-gray-600 dark:text-gray-400">Tonight's bedtime</label>
+          <label htmlFor="tonight_bedtime" className="text-sm text-muted">Tonight's bedtime</label>
           <input
             id="tonight_bedtime"
             type="time"

@@ -26,7 +26,7 @@ describe('FieldSection', () => {
     render(<FieldSection field={field} value={2} onChange={onChange} />)
     await userEvent.click(screen.getByRole('button', { name: 'Increase Coffee' }))
     expect(onChange).toHaveBeenCalledWith(3)
-    expect(screen.getAllByText('Coffee')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Decrease Coffee' })).toBeInTheDocument()
   })
 
   it('renders a checkbox for toggle fields', async () => {

@@ -90,7 +90,7 @@ describe('MedsSection', () => {
     expect(container.querySelectorAll('input').length).toBe(1)
   })
 
-  it('keeps the section heading visible while loading', () => {
+  it('keeps the settings button and loading hint visible while loading', () => {
     mockUseMedications.mockReturnValue({
       medications: [],
       loading: true,
@@ -100,7 +100,8 @@ describe('MedsSection', () => {
       deactivateMedication: vi.fn(),
     })
     render(<MedsSection date="2026-06-24" />)
-    expect(screen.getByRole('heading', { name: 'Medications' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Manage medications' })).toBeInTheDocument()
+    expect(screen.getByText('Loading…')).toBeInTheDocument()
   })
 
   it('shows a fetch error instead of the empty state', () => {

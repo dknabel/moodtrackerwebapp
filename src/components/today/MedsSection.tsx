@@ -33,25 +33,24 @@ export function MedsSection({ date }: Props) {
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex justify-between items-center">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">Medications</h2>
+        <div className="flex justify-end">
           <button
             onClick={() => setShowModal(true)}
             aria-label="Manage medications"
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            className="text-faint hover:text-muted"
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-5 h-5" strokeWidth={1.5} />
           </button>
         </div>
 
         {loading ? (
-          <p className="text-sm text-gray-400 dark:text-gray-500">Loading…</p>
+          <p className="text-sm text-faint">Loading…</p>
         ) : fetchError ? (
-          <p className="text-sm text-red-500 dark:text-red-400">Could not load medications: {fetchError}</p>
+          <p className="text-sm text-danger">Could not load medications: {fetchError}</p>
         ) : medications.length === 0 ? (
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-muted">
             No medications added.{' '}
-            <button onClick={() => setShowModal(true)} className="text-blue-600 dark:text-blue-400 underline">
+            <button onClick={() => setShowModal(true)} className="text-clay underline">
               Add yours
             </button>
           </p>
@@ -67,12 +66,12 @@ export function MedsSection({ date }: Props) {
                     type="checkbox"
                     checked={taken}
                     onChange={e => handleSetTaken(med.id, e.target.checked)}
-                    className="w-5 h-5 accent-blue-600 cursor-pointer"
+                    className="w-5 h-5 accent-clay cursor-pointer"
                   />
-                  <span className="flex-1 text-sm text-gray-900 dark:text-white">
+                  <span className={`flex-1 text-sm text-ink ${taken ? 'line-through text-faint' : ''}`}>
                     {med.name} — {med.dose}
                     {med.scheduled_time && (
-                      <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
+                      <span className="text-xs text-faint ml-1">
                         @ {formatTime(med.scheduled_time)}
                       </span>
                     )}
@@ -84,7 +83,7 @@ export function MedsSection({ date }: Props) {
         )}
 
         {takenError && (
-          <p className="text-sm text-red-500 dark:text-red-400">Could not save: {takenError}</p>
+          <p className="text-sm text-danger">Could not save: {takenError}</p>
         )}
       </div>
 

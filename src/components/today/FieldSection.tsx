@@ -32,37 +32,33 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
     case 'number':
       return (
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{field.name}</h2>
           <Stepper label={field.name} value={safe as number} unit={field.config.unit} onChange={onChange} />
         </div>
       )
     case 'toggle':
       return (
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{field.name}</h2>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={safe as boolean}
               onChange={e => onChange(e.target.checked)}
-              className="w-5 h-5 accent-blue-600 cursor-pointer"
+              className="w-5 h-5 accent-clay cursor-pointer"
             />
-            <span className="text-sm text-gray-700 dark:text-gray-300">Yes</span>
+            <span className="text-sm text-ink">Yes</span>
           </label>
         </div>
       )
     case 'text':
       return (
         <div className="flex flex-col gap-3">
-          <label htmlFor={`field-${field.id}`} className="text-base font-semibold text-gray-900 dark:text-white">
-            {field.name}
-          </label>
+          <label htmlFor={`field-${field.id}`} className="sr-only">{field.name}</label>
           <textarea
             id={`field-${field.id}`}
             rows={4}
             value={safe as string}
             onChange={e => onChange(e.target.value)}
-            className="w-full rounded-lg border border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400 p-3 text-sm text-gray-700 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-lg border border-line bg-surface text-ink placeholder:text-faint p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-clay"
           />
         </div>
       )
@@ -72,7 +68,6 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
         onChange(selected.includes(tag) ? selected.filter(t => t !== tag) : [...selected, tag])
       return (
         <div className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-gray-900 dark:text-white">{field.name}</h2>
           <div className="flex flex-wrap gap-2">
             {(field.config.options ?? []).map(opt => {
               const isOn = selected.includes(opt)
@@ -84,8 +79,8 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
                   onClick={() => toggleTag(opt)}
                   className={`px-3 py-1.5 rounded-full text-sm border ${
                     isOn
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                      ? 'bg-clay text-white border-clay'
+                      : 'border-line text-ink'
                   }`}
                 >
                   {opt}
