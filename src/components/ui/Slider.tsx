@@ -12,8 +12,8 @@ export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, o
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between text-sm">
-        <span className="text-gray-700 dark:text-gray-300">{label}</span>
-        <span className="font-semibold text-blue-600 dark:text-blue-400">{value}</span>
+        <span className="text-sm text-ink">{label}</span>
+        <span className="font-serif text-lg text-clay">{value}</span>
       </div>
       <input
         type="range"
@@ -30,10 +30,10 @@ export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, o
             onChange(Math.max(min, value - 1))
           }
         }}
-        className="w-full accent-blue-600 h-2 cursor-pointer"
+        className="w-full accent-clay h-2 cursor-pointer"
       />
       {(lowLabel || highLabel) && (
-        <div className="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+        <div className="flex justify-between text-xs text-faint">
           <span>{lowLabel}</span>
           <span>{highLabel}</span>
         </div>

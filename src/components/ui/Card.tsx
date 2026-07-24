@@ -1,14 +1,6 @@
 import type { ReactNode } from 'react'
 
-interface CardProps {
-  children: ReactNode
-  className?: string
-}
-
-export function Card({ children, className = '' }: CardProps) {
-  return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 ${className}`}>
-      {children}
-    </div>
-  )
+/** @deprecated Use Section for flat editorial layout. Kept until Task 4 removes the last uses. */
+export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
+  return <div className={`bg-surface rounded-xl p-4 border border-line ${className}`}>{children}</div>
 }
