@@ -25,6 +25,7 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
           max={max}
           lowLabel={field.config.lowLabel}
           highLabel={field.config.highLabel}
+          hideLabel
           onChange={onChange}
         />
       )

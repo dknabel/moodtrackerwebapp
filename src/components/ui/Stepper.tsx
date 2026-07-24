@@ -22,7 +22,7 @@ export function Stepper({ label, value, unit, onChange }: StepperProps) {
         type="button"
         onClick={() => onChange(value + 1)}
         aria-label={`Increase ${label}`}
-        className="w-9 h-9 rounded-full border border-line text-lg font-medium text-ink transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-40"
+        className="w-9 h-9 rounded-full border border-line text-lg font-medium text-ink transition-all duration-150 hover:-translate-y-0.5"
       >
         +
       </button>

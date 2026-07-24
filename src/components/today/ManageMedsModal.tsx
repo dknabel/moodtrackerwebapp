@@ -3,7 +3,7 @@ import { X } from 'lucide-react'
 import type { Medication } from '../../lib/database.types'
 import { useModal } from '../../hooks/useModal'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
-import { focusRing } from '../../lib/styles'
+import { focusRing, btnPrimary } from '../../lib/styles'
 import { formatTime } from '../../lib/dates'
 
 interface MedData {
@@ -126,7 +126,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveEdit}
-                    className="flex-1 bg-clay-deep text-white rounded p-2 text-sm"
+                    className={`flex-1 ${btnPrimary}`}
                   >
                     Save
                   </button>
@@ -150,13 +150,13 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-3">
                   <button
                     onClick={() => startEdit(med)}
-                    className="text-clay-deep text-sm"
+                    className={`text-clay-deep text-sm rounded ${focusRing}`}
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setConfirmMed(med)}
-                    className="text-danger text-sm"
+                    className={`text-danger text-sm rounded ${focusRing}`}
                   >
                     Delete
                   </button>
@@ -195,7 +195,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim() || !addForm.dose.trim()}
-            className="bg-clay-deep text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+            className={`w-full ${btnPrimary}`}
           >
             Add
           </button>

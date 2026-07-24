@@ -256,7 +256,9 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             )}
           </div>
           <div className="flex items-center gap-3">
-            <SaveStatus status={status} error={saveError} onRetry={runSave} />
+            <div aria-live="polite">
+              <SaveStatus status={status} error={saveError} onRetry={runSave} />
+            </div>
             <button
               type="button"
               onClick={onManageFields}

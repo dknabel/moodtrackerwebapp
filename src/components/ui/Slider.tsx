@@ -5,14 +5,16 @@ interface SliderProps {
   max?: number
   lowLabel?: string
   highLabel?: string
+  /** Visually hide the label (kept sr-only for screen readers). */
+  hideLabel?: boolean
   onChange: (value: number) => void
 }
 
-export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, onChange }: SliderProps) {
+export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, hideLabel = false, onChange }: SliderProps) {
   return (
     <div className="flex flex-col gap-2">
       <div className="flex justify-between text-sm">
-        <span className="text-sm text-ink">{label}</span>
+        <span className={hideLabel ? 'sr-only' : 'text-ink'}>{label}</span>
         <span className="font-serif text-lg text-clay">{value}</span>
       </div>
       <input
