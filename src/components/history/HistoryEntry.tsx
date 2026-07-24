@@ -27,10 +27,10 @@ export function HistoryEntry({ date, sleepHours, items }: HistoryEntryProps) {
     <button
       type="button"
       onClick={() => navigate(`/log/${date}`)}
-      className="w-full text-left bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col gap-1"
+      className="w-full text-left flex flex-col gap-1 py-4 border-b border-line"
     >
-      <span className="text-sm font-semibold text-gray-900 dark:text-white">{formatDay(date)}</span>
-      <div className="flex flex-wrap gap-3 text-xs text-gray-500 dark:text-gray-400">
+      <span className="font-serif text-lg tracking-[-0.02em] text-ink">{formatDay(date)}</span>
+      <div className="flex flex-wrap gap-3 text-xs text-muted">
         {sleepHours !== null && <span>Sleep {sleepHours}h</span>}
         {chipItems.map(({ field, value }) => (
           <span key={field.id}>
@@ -41,7 +41,7 @@ export function HistoryEntry({ date, sleepHours, items }: HistoryEntryProps) {
         ))}
       </div>
       {textItems.map(({ field, value }) => (
-        <blockquote key={field.id} className="text-xs text-gray-500 dark:text-gray-400 italic mt-1">
+        <blockquote key={field.id} className="font-serif text-sm text-muted italic mt-1">
           "{truncate(displayValue(field, value), 80)}"
         </blockquote>
       ))}
