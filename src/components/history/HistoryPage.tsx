@@ -55,7 +55,7 @@ export function HistoryPage() {
       const filename = `mood-tracker-${format(new Date(), 'yyyy-MM-dd')}`
 
       if (exportFormat === 'csv') {
-        downloadCsv(buildCsvRows(exportData), `${filename}.csv`)
+        await downloadCsv(buildCsvRows(exportData), `${filename}.csv`)
       } else {
         await downloadPdf(exportData, rangeLabel, `${filename}.pdf`)
       }

@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core'
+import { Directory, Filesystem } from '@capacitor/filesystem'
+import { Share } from '@capacitor/share'
 import type { ExportData } from './exportData'
 import { displayValue } from './fields'
 
@@ -70,7 +73,23 @@ export function buildCsvRows(data: ExportData): string {
   return [headers.map(escapeCsv).join(','), ...rows].join('\n')
 }
 
-export function downloadCsv(content: string, filename: string): void {
+// WKWebView (the native iOS shell) doesn't support `<a download>` blob links,
+// so on native platforms we write the file to disk and hand it to the share sheet instead.
+async function saveAndShare(filename: string, base64Data: string): Promise<void> {
+  const { uri } = await Filesystem.writeFile({
+    path: filename,
+    data: base64Data,
+    directory: Directory.Cache,
+  })
+  await Share.share({ url: uri })
+}
+
+export async function downloadCsv(content: string, filename: string): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    const base64 = btoa(unescape(encodeURIComponent(content)))
+    await saveAndShare(filename, base64)
+    return
+  }
   const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
@@ -113,5 +132,12 @@ export async function downloadPdf(
   ])
 
   autoTable(doc, { head, body, startY: 30, styles: { fontSize: 7 } })
+
+  if (Capacitor.isNativePlatform()) {
+    const dataUri = doc.output('datauristring')
+    const base64 = dataUri.slice(dataUri.indexOf(',') + 1)
+    await saveAndShare(filename, base64)
+    return
+  }
   doc.save(filename)
 }
