@@ -11,19 +11,19 @@ const tabs = [
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 bg-surface border-t border-line flex pb-[env(safe-area-inset-bottom)]">
       {tabs.map(({ to, label, Icon }) => (
         <NavLink
           key={to}
           to={to}
           end={to === '/'}
           className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-2.5 gap-1 text-xs font-medium ${focusRing} ${
-              isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+            `flex-1 flex flex-col items-center py-2.5 gap-1 font-mono text-[10px] uppercase tracking-[0.08em] ${focusRing} ${
+              isActive ? 'text-clay' : 'text-faint'
             }`
           }
         >
-          <Icon className="w-6 h-6" strokeWidth={2} />
+          <Icon className="w-5 h-5" strokeWidth={1.5} />
           {label}
         </NavLink>
       ))}
