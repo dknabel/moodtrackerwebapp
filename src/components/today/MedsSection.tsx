@@ -68,7 +68,7 @@ export function MedsSection({ date }: Props) {
                     onChange={e => handleSetTaken(med.id, e.target.checked)}
                     className="w-5 h-5 accent-clay cursor-pointer"
                   />
-                  <span className={`flex-1 text-sm text-ink ${taken ? 'line-through text-faint' : ''}`}>
+                  <span className={`flex-1 text-sm ${taken ? 'line-through text-faint' : 'text-ink'}`}>
                     {med.name} — {med.dose}
                     {med.scheduled_time && (
                       <span className="text-xs text-faint ml-1">

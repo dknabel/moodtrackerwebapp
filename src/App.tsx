@@ -17,7 +17,7 @@ export function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-400 dark:bg-gray-900 dark:text-gray-500">
+      <div className="min-h-screen flex items-center justify-center bg-bg text-faint">
         Loading…
       </div>
     )

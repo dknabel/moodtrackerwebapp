@@ -71,14 +71,14 @@ export function SignUpForm({ onSuccess, onSwitchToSignIn }: Props) {
         className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       {error === 'already-exists' ? (
-        <p className="text-red-600 text-sm">
+        <p className="text-danger text-sm">
           An account with this email already exists.{' '}
           <button type="button" onClick={onSwitchToSignIn} className="underline">
             Sign in instead?
           </button>
         </p>
       ) : error ? (
-        <p className="text-red-600 text-sm">{error}</p>
+        <p className="text-danger text-sm">{error}</p>
       ) : null}
       <button
         type="submit"

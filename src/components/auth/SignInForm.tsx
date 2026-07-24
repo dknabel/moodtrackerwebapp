@@ -41,7 +41,7 @@ export function SignInForm({ onForgotPassword }: Props) {
       />
       {error && (
         <>
-          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-danger text-sm">{error}</p>
           {error === 'Invalid login credentials' && (
             <p className="text-muted text-xs text-center">
               Signed up with Google? Use the button above.

@@ -84,15 +84,15 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
         role="dialog"
         aria-modal="true"
         aria-labelledby="manage-meds-title"
-        className="bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl p-6 flex flex-col gap-4 overflow-y-auto"
+        className="bg-surface w-full max-h-[80vh] rounded-t-2xl shadow-[0_20px_48px_rgba(27,25,22,0.12)] p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 id="manage-meds-title" className="text-lg font-semibold text-gray-900 dark:text-white">Manage Medications</h2>
+          <h2 id="manage-meds-title" className="font-serif text-lg text-ink">Manage Medications</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className={`p-2 -m-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
+            className={`p-2 -m-2 text-faint rounded-lg ${focusRing}`}
           >
             <X className="w-6 h-6" />
           </button>
@@ -101,48 +101,48 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
         <div className="flex flex-col gap-2">
           {medications.map(med =>
             editId === med.id ? (
-              <div key={med.id} className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={med.id} className="flex flex-col gap-2 p-3 bg-surface border border-line rounded-lg">
                 <input
-                  className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+                  className="border border-line bg-surface text-ink rounded p-2 text-sm"
                   value={editForm.name}
                   onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Name"
                 />
                 <input
-                  className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+                  className="border border-line bg-surface text-ink rounded p-2 text-sm"
                   value={editForm.dose}
                   onChange={e => setEditForm(f => ({ ...f, dose: e.target.value }))}
                   placeholder="Dose"
                 />
                 <input
                   type="time"
-                  className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+                  className="border border-line bg-surface text-ink rounded p-2 text-sm"
                   value={editForm.scheduled_time}
                   onChange={e => setEditForm(f => ({ ...f, scheduled_time: e.target.value }))}
                 />
                 {editError && (
-                  <p className="text-red-500 dark:text-red-400 text-xs">{editError}</p>
+                  <p className="text-danger text-xs">{editError}</p>
                 )}
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveEdit}
-                    className="flex-1 bg-blue-600 text-white rounded p-2 text-sm"
+                    className="flex-1 bg-clay text-white rounded p-2 text-sm"
                   >
                     Save
                   </button>
                   <button
                     onClick={() => setEditId(null)}
-                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded p-2 text-sm text-gray-700 dark:text-gray-300"
+                    className="flex-1 border border-line rounded p-2 text-sm text-muted"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div key={med.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={med.id} className="flex items-center justify-between p-3 bg-surface border border-line rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">{med.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="font-medium text-ink text-sm">{med.name}</p>
+                  <p className="text-xs text-faint">
                     <span>{med.dose}</span>
                     {med.scheduled_time && <span> @ {formatTime(med.scheduled_time)}</span>}
                   </p>
@@ -150,13 +150,13 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-3">
                   <button
                     onClick={() => startEdit(med)}
-                    className="text-blue-600 dark:text-blue-400 text-sm"
+                    className="text-clay text-sm"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setConfirmMed(med)}
-                    className="text-red-500 dark:text-red-400 text-sm"
+                    className="text-danger text-sm"
                   >
                     Delete
                   </button>
@@ -165,37 +165,37 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
             )
           )}
           {listError && (
-            <p className="text-red-500 dark:text-red-400 text-xs">{listError}</p>
+            <p className="text-danger text-xs">{listError}</p>
           )}
         </div>
 
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Add medication</p>
+        <div className="border-t border-line pt-4 flex flex-col gap-2">
+          <p className="text-sm font-medium text-muted">Add medication</p>
           <input
-            className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+            className="border border-line bg-surface text-ink rounded p-2 text-sm"
             value={addForm.name}
             onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
             placeholder="Name (required)"
           />
           <input
-            className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+            className="border border-line bg-surface text-ink rounded p-2 text-sm"
             value={addForm.dose}
             onChange={e => setAddForm(f => ({ ...f, dose: e.target.value }))}
             placeholder="Dose (required)"
           />
           <input
             type="time"
-            className="border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white"
+            className="border border-line bg-surface text-ink rounded p-2 text-sm"
             value={addForm.scheduled_time}
             onChange={e => setAddForm(f => ({ ...f, scheduled_time: e.target.value }))}
           />
           {addError && (
-            <p className="text-red-500 dark:text-red-400 text-xs">{addError}</p>
+            <p className="text-danger text-xs">{addError}</p>
           )}
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim() || !addForm.dose.trim()}
-            className="bg-blue-600 text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+            className="bg-clay text-white rounded p-2 text-sm font-medium disabled:opacity-50"
           >
             Add
           </button>

@@ -72,14 +72,14 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
         className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
       {error === 'link-expired' ? (
-        <p className="text-red-600 text-sm text-center">
+        <p className="text-danger text-sm text-center">
           This link has expired.{' '}
           <button type="button" onClick={onExpiredLink} className="underline">
             Request a new one
           </button>
         </p>
       ) : error ? (
-        <p className="text-red-600 text-sm">{error}</p>
+        <p className="text-danger text-sm">{error}</p>
       ) : null}
       <button
         type="submit"

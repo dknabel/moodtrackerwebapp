@@ -41,7 +41,7 @@ export function ForgotPasswordForm() {
         required
         className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
       />
-      {error && <p className="text-red-600 text-sm">{error}</p>}
+      {error && <p className="text-danger text-sm">{error}</p>}
       <button
         type="submit"
         disabled={loading}

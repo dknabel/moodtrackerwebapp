@@ -80,7 +80,7 @@ const TYPE_LABELS: Record<FieldType, string> = {
 }
 
 const inputClass =
-  'border border-gray-300 dark:border-gray-600 rounded p-2 text-sm dark:bg-gray-700 dark:text-white'
+  'border border-line bg-surface text-ink rounded p-2 text-sm'
 
 function ConfigInputs({ values, setValues }: {
   values: FormValues
@@ -223,15 +223,15 @@ export function ManageFieldsModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="manage-fields-title"
-        className="bg-white dark:bg-gray-900 w-full max-h-[80vh] rounded-t-2xl p-6 flex flex-col gap-4 overflow-y-auto"
+        className="bg-surface w-full max-h-[80vh] rounded-t-2xl shadow-[0_20px_48px_rgba(27,25,22,0.12)] p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 id="manage-fields-title" className="text-lg font-semibold text-gray-900 dark:text-white">Manage Fields</h2>
+          <h2 id="manage-fields-title" className="font-serif text-lg text-ink">Manage Fields</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className={`p-2 -m-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
+            className={`p-2 -m-2 text-faint rounded-lg ${focusRing}`}
           >
             <X className="w-6 h-6" />
           </button>
@@ -240,14 +240,14 @@ export function ManageFieldsModal({
         <div className="flex flex-col gap-2">
           {active.map((f, i) =>
             editId === f.id ? (
-              <div key={f.id} className="flex flex-col gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={f.id} className="flex flex-col gap-2 p-3 bg-surface border border-line rounded-lg">
                 <input
                   className={inputClass}
                   value={editForm.name}
                   onChange={e => setEditForm(v => ({ ...v, name: e.target.value }))}
                   placeholder="Name"
                 />
-                <label htmlFor="edit-type" className="text-xs text-gray-500 dark:text-gray-400 flex flex-col gap-1">
+                <label htmlFor="edit-type" className="text-xs text-faint flex flex-col gap-1">
                   Type
                   <select
                     id="edit-type"
@@ -261,33 +261,33 @@ export function ManageFieldsModal({
                   </select>
                 </label>
                 <ConfigInputs values={editForm} setValues={setEditForm} />
-                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <label className="flex items-center gap-2 text-sm text-muted">
                   <input
                     type="checkbox"
                     checked={editForm.show_in_charts}
                     onChange={e => setEditForm(v => ({ ...v, show_in_charts: e.target.checked }))}
-                    className="w-4 h-4 accent-blue-600"
+                    className="w-4 h-4 accent-clay"
                   />
                   Show in charts
                 </label>
-                {editError && <p className="text-red-500 dark:text-red-400 text-xs">{editError}</p>}
+                {editError && <p className="text-danger text-xs">{editError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={handleSaveEdit} className="flex-1 bg-blue-600 text-white rounded p-2 text-sm">
+                  <button onClick={handleSaveEdit} className="flex-1 bg-clay text-white rounded p-2 text-sm">
                     Save
                   </button>
                   <button
                     onClick={() => setEditId(null)}
-                    className="flex-1 border border-gray-300 dark:border-gray-600 rounded p-2 text-sm text-gray-700 dark:text-gray-300"
+                    className="flex-1 border border-line rounded p-2 text-sm text-muted"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div key={f.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <div key={f.id} className="flex items-center justify-between p-3 bg-surface border border-line rounded-lg">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">{f.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
+                  <p className="font-medium text-ink text-sm">{f.name}</p>
+                  <p className="text-xs text-faint">{TYPE_LABELS[f.type]}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-0.5">
@@ -295,7 +295,7 @@ export function ManageFieldsModal({
                       onClick={() => handleMove(f, -1)}
                       disabled={i === 0}
                       aria-label={`Move ${f.name} up`}
-                      className={`p-2 -m-1 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded ${focusRing}`}
+                      className={`p-2 -m-1 text-faint disabled:opacity-30 rounded ${focusRing}`}
                     >
                       <ChevronUp className="w-4 h-4" />
                     </button>
@@ -303,32 +303,32 @@ export function ManageFieldsModal({
                       onClick={() => handleMove(f, 1)}
                       disabled={i === active.length - 1}
                       aria-label={`Move ${f.name} down`}
-                      className={`p-2 -m-1 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded ${focusRing}`}
+                      className={`p-2 -m-1 text-faint disabled:opacity-30 rounded ${focusRing}`}
                     >
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <button onClick={() => startEdit(f)} className="text-blue-600 dark:text-blue-400 text-sm">Edit</button>
-                  <button onClick={() => handleArchive(f)} className="text-red-500 dark:text-red-400 text-sm">Archive</button>
+                  <button onClick={() => startEdit(f)} className="text-clay text-sm">Edit</button>
+                  <button onClick={() => handleArchive(f)} className="text-danger text-sm">Archive</button>
                 </div>
               </div>
             )
           )}
-          {listError && <p className="text-red-500 dark:text-red-400 text-xs">{listError}</p>}
+          {listError && <p className="text-danger text-xs">{listError}</p>}
         </div>
 
         {archived.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Archived</p>
+            <p className="text-sm font-medium text-muted">Archived</p>
             {archived.map(f => (
-              <div key={f.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg opacity-70">
+              <div key={f.id} className="flex items-center justify-between p-3 bg-surface border border-line rounded-lg opacity-70">
                 <div>
-                  <p className="font-medium text-gray-900 dark:text-white text-sm">{f.name}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">{TYPE_LABELS[f.type]}</p>
+                  <p className="font-medium text-ink text-sm">{f.name}</p>
+                  <p className="text-xs text-faint">{TYPE_LABELS[f.type]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => onReactivate(f.id)} className="text-blue-600 dark:text-blue-400 text-sm">Restore</button>
-                  <button onClick={() => handleDelete(f)} className="text-red-500 dark:text-red-400 text-sm">Delete forever</button>
+                  <button onClick={() => onReactivate(f.id)} className="text-clay text-sm">Restore</button>
+                  <button onClick={() => handleDelete(f)} className="text-danger text-sm">Delete forever</button>
                 </div>
               </div>
             ))}
@@ -336,15 +336,15 @@ export function ManageFieldsModal({
         )}
 
         {!editId && (
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-4 flex flex-col gap-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Add field</p>
+        <div className="border-t border-line pt-4 flex flex-col gap-2">
+          <p className="text-sm font-medium text-muted">Add field</p>
           <input
             className={inputClass}
             value={addForm.name}
             onChange={e => setAddForm(v => ({ ...v, name: e.target.value }))}
             placeholder="Name (required)"
           />
-          <label htmlFor="add-type" className="text-xs text-gray-500 dark:text-gray-400 flex flex-col gap-1">
+          <label htmlFor="add-type" className="text-xs text-faint flex flex-col gap-1">
             Type
             <select
               id="add-type"
@@ -358,11 +358,11 @@ export function ManageFieldsModal({
             </select>
           </label>
           <ConfigInputs values={addForm} setValues={setAddForm} />
-          {addError && <p className="text-red-500 dark:text-red-400 text-xs">{addError}</p>}
+          {addError && <p className="text-danger text-xs">{addError}</p>}
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim()}
-            className="bg-blue-600 text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+            className="bg-clay text-white rounded p-2 text-sm font-medium disabled:opacity-50"
           >
             Add
           </button>
