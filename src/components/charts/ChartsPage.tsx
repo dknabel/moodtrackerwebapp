@@ -60,8 +60,8 @@ export function ChartsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Charts</h1>
-        <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+        <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink">Insights</h1>
+        <div className="flex gap-1 bg-surface border border-line rounded-full p-1">
           {RANGES.map(r => (
             <button
               key={r.days}
@@ -69,8 +69,8 @@ export function ChartsPage() {
               onClick={() => setRangeDays(r.days)}
               className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                 rangeDays === r.days
-                  ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400'
+                  ? 'bg-clay-tint text-clay'
+                  : 'text-faint'
               }`}
             >
               {r.label}
@@ -87,7 +87,7 @@ export function ChartsPage() {
       )}
 
       {!loading && !hasData && (
-        <div className="text-center text-gray-400 dark:text-gray-500 mt-8">
+        <div className="text-center text-faint mt-8">
           No entries for this period.
         </div>
       )}

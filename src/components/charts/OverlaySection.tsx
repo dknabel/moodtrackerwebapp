@@ -5,6 +5,7 @@ import {
 import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types'
 import { numericValue } from '../../lib/fields'
 import { buildOverlayData, type OverlaySeries } from '../../lib/overlay'
+import { CHART_COLORS } from '../../lib/chartColors'
 import { Section } from '../ui/Section'
 
 interface Props {
@@ -14,7 +15,7 @@ interface Props {
   isDark: boolean
 }
 
-const COLORS = ['#2563eb', '#16a34a', '#f59e0b']
+const COLORS = CHART_COLORS.series
 const MAX_SERIES = 3
 
 export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
@@ -60,8 +61,8 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
 
   const chosen = available.filter(s => selected.includes(s.key))
   const data = buildOverlayData(chosen)
-  const gridColor = isDark ? '#374151' : '#f0f0f0'
-  const tickColor = isDark ? '#9ca3af' : '#666'
+  const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
+  const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   return (
     <Section title="Compare">
@@ -76,8 +77,8 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
               onClick={() => toggle(s.key)}
               className={`px-3 py-1.5 rounded-full text-xs border ${
                 isOn
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+                  ? 'bg-clay text-white border-clay'
+                  : 'border-line text-ink'
               }`}
             >
               {s.label}
@@ -86,7 +87,7 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
         })}
       </div>
       {chosen.length < 2 ? (
-        <p className="text-xs text-gray-400 dark:text-gray-500">
+        <p className="text-xs text-faint">
           Pick 2–{MAX_SERIES} series to compare (scaled to each one's own range).
         </p>
       ) : (

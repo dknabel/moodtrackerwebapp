@@ -3,6 +3,7 @@ import {
   Legend, ResponsiveContainer,
 } from 'recharts'
 import type { DailyLog } from '../../lib/database.types'
+import { CHART_COLORS } from '../../lib/chartColors'
 import { Section } from '../ui/Section'
 
 interface SleepChartProps {
@@ -17,8 +18,8 @@ export function SleepChart({ logs, isDark }: SleepChartProps) {
     Quality: l.sleep_quality,
   }))
 
-  const gridColor = isDark ? '#374151' : '#f0f0f0'
-  const tickColor = isDark ? '#9ca3af' : '#666'
+  const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
+  const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   return (
     <Section title="Sleep">
@@ -30,8 +31,8 @@ export function SleepChart({ logs, isDark }: SleepChartProps) {
           <YAxis yAxisId="quality" orientation="right" domain={[1, 5]} tick={{ fontSize: 11, fill: tickColor }} />
           <Tooltip />
           <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Line yAxisId="hours" type="monotone" dataKey="Hours" stroke="#7c3aed" dot={false} connectNulls />
-          <Line yAxisId="quality" type="monotone" dataKey="Quality" stroke="#0891b2" dot={false} connectNulls />
+          <Line yAxisId="hours" type="monotone" dataKey="Hours" stroke={CHART_COLORS.sleepHours} dot={false} connectNulls />
+          <Line yAxisId="quality" type="monotone" dataKey="Quality" stroke={CHART_COLORS.sleepQuality} dot={false} connectNulls />
         </LineChart>
       </ResponsiveContainer>
     </Section>

@@ -6,11 +6,11 @@ interface StreakCardProps {
 
 function StreakCard({ label, current, longest }: StreakCardProps) {
   return (
-    <div className="flex-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-1">
-      <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{label}</p>
-      <p className="text-3xl font-bold text-gray-900 dark:text-white">{current}</p>
-      <p className="text-xs text-gray-500 dark:text-gray-400">day{current !== 1 ? 's' : ''}</p>
-      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Longest: {longest}</p>
+    <div className="flex flex-col gap-1 py-4 border-b border-line">
+      <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-faint">{label}</p>
+      <p className="font-serif text-3xl text-ink">{current}</p>
+      <p className="text-xs text-faint">day{current !== 1 ? 's' : ''}</p>
+      <p className="text-xs text-faint mt-1">Longest: {longest}</p>
     </div>
   )
 }
@@ -34,8 +34,8 @@ export function StatsSection({ logging, meds, toggles }: Props) {
   ]
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Streaks</h2>
-      <div className="flex gap-3 flex-wrap">
+      <h2 className="text-lg font-semibold text-ink">Streaks</h2>
+      <div className="flex flex-col">
         {items.map(item => (
           <StreakCard key={item.label} label={item.label} current={item.current} longest={item.longest} />
         ))}

@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types'
 import { numericValue } from '../../lib/fields'
+import { CHART_COLORS } from '../../lib/chartColors'
 import { compareGroups, median, type Point } from '../../lib/correlations'
 
 interface Props {
@@ -24,9 +25,9 @@ interface Candidate {
 }
 
 export function CorrelationsSection({ fields, valuesByField, logs, isDark }: Props) {
-  const tickColor = isDark ? '#9ca3af' : '#6b7280'
-  const blue = '#2563eb'
-  const gray = isDark ? '#4b5563' : '#d1d5db'
+  const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
+  const blue = CHART_COLORS.series[0]
+  const gray = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
 
   const primary = fields.find(f => f.type === 'slider') ?? null
 
@@ -99,11 +100,11 @@ export function CorrelationsSection({ fields, valuesByField, logs, isDark }: Pro
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Correlations</h2>
+      <h2 className="text-lg font-semibold text-ink">Correlations</h2>
       {cards.map(({ cfg, result, pA, pB }) => (
-        <div key={cfg.title} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 flex flex-col gap-3">
-          <p className="font-medium text-gray-900 dark:text-white">{cfg.title}</p>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div key={cfg.title} className="bg-surface border border-line rounded-xl p-4 flex flex-col gap-3">
+          <p className="font-medium text-ink">{cfg.title}</p>
+          <p className="text-sm text-muted">
             {result.groupA.label}: avg {result.groupA.avg} ({result.groupA.count} days) —{' '}
             {result.groupB.label}: avg {result.groupB.avg} ({result.groupB.count} days)
           </p>

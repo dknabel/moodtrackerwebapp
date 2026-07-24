@@ -4,6 +4,7 @@ import {
   Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import type { CustomField, FieldValue } from '../../lib/database.types'
+import { CHART_COLORS } from '../../lib/chartColors'
 import { numericValue } from '../../lib/fields'
 import { Section } from '../ui/Section'
 
@@ -22,8 +23,8 @@ function ChartCard({ title, right, children }: {
 }
 
 export function FieldChart({ field, values, isDark }: FieldChartProps) {
-  const gridColor = isDark ? '#374151' : '#f0f0f0'
-  const tickColor = isDark ? '#9ca3af' : '#666'
+  const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
+  const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   if (field.type === 'text' || values.length === 0) return null
 
@@ -41,14 +42,14 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
         <div className="flex flex-col gap-2">
           {sorted.map(([tag, count]) => (
             <div key={tag} className="flex items-center gap-2 text-sm">
-              <span className="w-24 truncate text-gray-700 dark:text-gray-300">{tag}</span>
-              <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded h-4">
+              <span className="w-24 truncate text-ink">{tag}</span>
+              <div className="flex-1 bg-line rounded h-4">
                 <div
-                  className="bg-blue-600 h-4 rounded"
-                  style={{ width: `${(count / max) * 100}%` }}
+                  className="h-4 rounded"
+                  style={{ width: `${(count / max) * 100}%`, backgroundColor: CHART_COLORS.barActive }}
                 />
               </div>
-              <span className="w-6 text-right text-gray-500 dark:text-gray-400">{count}</span>
+              <span className="w-6 text-right text-faint">{count}</span>
             </div>
           ))}
         </div>
@@ -63,12 +64,12 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
 
   if (field.type === 'toggle') {
     const yesDays = data.filter(d => d.value === 1).length
-    const inactiveBarColor = isDark ? '#4b5563' : '#e5e7eb'
+    const inactiveBarColor = isDark ? CHART_COLORS.barInactive.dark : CHART_COLORS.barInactive.light
     return (
       <ChartCard
         title={field.name}
         right={
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-faint">
             {yesDays}/{data.length} days
           </span>
         }
@@ -81,7 +82,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
             <Tooltip formatter={v => [v === 1 ? 'Yes' : 'No', field.name]} />
             <Bar dataKey="value" radius={[3, 3, 0, 0]}>
               {data.map((entry, index) => (
-                <Cell key={index} fill={entry.value ? '#16a34a' : inactiveBarColor} />
+                <Cell key={index} fill={entry.value ? CHART_COLORS.barActive : inactiveBarColor} />
               ))}
             </Bar>
           </BarChart>
@@ -104,7 +105,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
           <XAxis dataKey="date" tick={{ fontSize: 11, fill: tickColor }} />
           <YAxis domain={domain} tick={{ fontSize: 11, fill: tickColor }} />
           <Tooltip />
-          <Line type="monotone" dataKey="value" name={field.name} stroke="#2563eb" dot={false} connectNulls />
+          <Line type="monotone" dataKey="value" name={field.name} stroke={CHART_COLORS.series[0]} dot={false} connectNulls />
         </LineChart>
       </ResponsiveContainer>
     </ChartCard>
