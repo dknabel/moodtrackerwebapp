@@ -108,9 +108,9 @@ export function HistoryPage() {
                   <button
                     key={r}
                     onClick={() => setExportRange(r)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium border ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border ${
                       exportRange === r
-                        ? 'bg-clay text-white border-clay'
+                        ? 'bg-clay-deep text-white border-clay-deep'
                         : 'border-line text-ink'
                     }`}
                   >
@@ -127,9 +127,9 @@ export function HistoryPage() {
                   <button
                     key={f}
                     onClick={() => setExportFormat(f)}
-                    className={`px-3 py-1 rounded-md text-xs font-medium border uppercase ${
+                    className={`px-3 py-1 rounded-full text-xs font-medium border uppercase ${
                       exportFormat === f
-                        ? 'bg-clay text-white border-clay'
+                        ? 'bg-clay-deep text-white border-clay-deep'
                         : 'border-line text-ink'
                     }`}
                   >

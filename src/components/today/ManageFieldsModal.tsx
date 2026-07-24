@@ -272,7 +272,7 @@ export function ManageFieldsModal({
                 </label>
                 {editError && <p className="text-danger text-xs">{editError}</p>}
                 <div className="flex gap-2">
-                  <button onClick={handleSaveEdit} className="flex-1 bg-clay text-white rounded p-2 text-sm">
+                  <button onClick={handleSaveEdit} className="flex-1 bg-clay-deep text-white rounded p-2 text-sm">
                     Save
                   </button>
                   <button
@@ -308,7 +308,7 @@ export function ManageFieldsModal({
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <button onClick={() => startEdit(f)} className="text-clay text-sm">Edit</button>
+                  <button onClick={() => startEdit(f)} className="text-clay-deep text-sm">Edit</button>
                   <button onClick={() => handleArchive(f)} className="text-danger text-sm">Archive</button>
                 </div>
               </div>
@@ -327,7 +327,7 @@ export function ManageFieldsModal({
                   <p className="text-xs text-faint">{TYPE_LABELS[f.type]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => onReactivate(f.id)} className="text-clay text-sm">Restore</button>
+                  <button onClick={() => onReactivate(f.id)} className="text-clay-deep text-sm">Restore</button>
                   <button onClick={() => handleDelete(f)} className="text-danger text-sm">Delete forever</button>
                 </div>
               </div>
@@ -362,7 +362,7 @@ export function ManageFieldsModal({
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim()}
-            className="bg-clay text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+            className="bg-clay-deep text-white rounded p-2 text-sm font-medium disabled:opacity-50"
           >
             Add
           </button>

@@ -79,7 +79,7 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
                   onClick={() => toggleTag(opt)}
                   className={`px-3 py-1.5 rounded-full text-sm border ${
                     isOn
-                      ? 'bg-clay text-white border-clay'
+                      ? 'bg-clay-deep text-white border-clay-deep'
                       : 'border-line text-ink'
                   }`}
                 >

@@ -7,6 +7,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  color-scheme: light;
   --bg: #FAF9F6;
   --surface: #FFFFFF;
   --ink: #1B1916;
@@ -20,6 +21,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --bg: #1B1916;
   --surface: #26211B;
   --ink: #F2EDE6;
@@ -53,5 +55,12 @@
     background-color: var(--bg);
     color: var(--ink);
     font-family: var(--font-sans);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
   }
 }

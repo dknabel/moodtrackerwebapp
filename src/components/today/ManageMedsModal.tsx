@@ -126,7 +126,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-2">
                   <button
                     onClick={handleSaveEdit}
-                    className="flex-1 bg-clay text-white rounded p-2 text-sm"
+                    className="flex-1 bg-clay-deep text-white rounded p-2 text-sm"
                   >
                     Save
                   </button>
@@ -150,7 +150,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-3">
                   <button
                     onClick={() => startEdit(med)}
-                    className="text-clay text-sm"
+                    className="text-clay-deep text-sm"
                   >
                     Edit
                   </button>
@@ -195,7 +195,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
           <button
             onClick={handleAdd}
             disabled={!addForm.name.trim() || !addForm.dose.trim()}
-            className="bg-clay text-white rounded p-2 text-sm font-medium disabled:opacity-50"
+            className="bg-clay-deep text-white rounded p-2 text-sm font-medium disabled:opacity-50"
           >
             Add
           </button>

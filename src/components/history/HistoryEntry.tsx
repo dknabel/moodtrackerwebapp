@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import type { CustomField, FieldValueData } from '../../lib/database.types'
 import { displayValue } from '../../lib/fields'
 import { formatDay } from '../../lib/dates'
+import { focusRing } from '../../lib/styles'
 
 function truncate(text: string, max: number): string {
   return text.length <= max ? text : text.slice(0, max) + '…'
@@ -27,7 +28,7 @@ export function HistoryEntry({ date, sleepHours, items }: HistoryEntryProps) {
     <button
       type="button"
       onClick={() => navigate(`/log/${date}`)}
-      className="w-full text-left flex flex-col gap-1 py-4 border-b border-line"
+      className={`w-full text-left flex flex-col gap-1 py-4 border-b border-line rounded-lg ${focusRing}`}
     >
       <span className="font-serif text-lg tracking-[-0.02em] text-ink">{formatDay(date)}</span>
       <div className="flex flex-wrap gap-3 text-xs text-muted">

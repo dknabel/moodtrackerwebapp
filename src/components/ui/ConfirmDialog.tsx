@@ -13,7 +13,7 @@ export function ConfirmDialog({ title, message, confirmLabel, onConfirm, onCance
   const ref = useModal(onCancel)
   return (
     <div
-      className="fixed inset-0 bg-ink/40 flex items-center justify-center z-[60] p-6"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-6"
       onClick={onCancel}
     >
       <div

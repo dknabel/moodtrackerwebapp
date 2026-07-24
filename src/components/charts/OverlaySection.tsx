@@ -77,7 +77,7 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
               onClick={() => toggle(s.key)}
               className={`px-3 py-1.5 rounded-full text-xs border ${
                 isOn
-                  ? 'bg-clay text-white border-clay'
+                  ? 'bg-clay-deep text-white border-clay-deep'
                   : 'border-line text-ink'
               }`}
             >

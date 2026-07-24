@@ -69,7 +69,7 @@ export function ChartsPage() {
               onClick={() => setRangeDays(r.days)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 rangeDays === r.days
-                  ? 'bg-clay-tint text-clay'
+                  ? 'bg-clay-tint text-clay-deep'
                   : 'text-faint'
               }`}
             >

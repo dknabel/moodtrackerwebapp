@@ -50,7 +50,7 @@ export function MedsSection({ date }: Props) {
         ) : medications.length === 0 ? (
           <p className="text-sm text-muted">
             No medications added.{' '}
-            <button onClick={() => setShowModal(true)} className="text-clay underline">
+            <button onClick={() => setShowModal(true)} className="text-clay-deep underline">
               Add yours
             </button>
           </p>
