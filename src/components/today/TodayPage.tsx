@@ -8,8 +8,9 @@ import { useFieldValues } from '../../hooks/useFieldValues'
 import type { CustomField, DailyLog, DailyLogUpdate, FieldValueData } from '../../lib/database.types'
 import { defaultFieldValue } from '../../lib/fields'
 import { formatDay } from '../../lib/dates'
-import { focusRing } from '../../lib/styles'
-import { Card } from '../ui/Card'
+import { focusRing, linkText } from '../../lib/styles'
+import { greeting } from '../../lib/greeting'
+import { Section } from '../ui/Section'
 import { Skeleton } from '../ui/Skeleton'
 import { FieldSection } from './FieldSection'
 import { ManageFieldsModal } from './ManageFieldsModal'
@@ -93,7 +94,7 @@ export function TodayPage() {
 
   const loadError = error ?? fieldsError ?? valuesError
   if (loadError) {
-    return <div className="text-center text-red-500 dark:text-red-400 mt-12">Could not load this entry: {loadError}</div>
+    return <div className="text-center text-danger mt-12">Could not load this entry: {loadError}</div>
   }
 
   const autoBedtime = yesterdayLog?.tonight_bedtime?.slice(0, 5) ?? ''
@@ -211,61 +212,68 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center">
-          <button
-            type="button"
-            onClick={() => goTo(prevDay)}
-            aria-label="Previous day"
-            className={`p-2 -ml-2 text-gray-500 dark:text-gray-400 rounded-lg ${focusRing}`}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <div className="relative rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white whitespace-nowrap">
-              {formatDay(date)}
-            </h1>
-            <input
-              type="date"
-              aria-label="Choose date"
-              value={date}
-              max={todayStr()}
-              onChange={e => { if (e.target.value) goTo(e.target.value) }}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => goTo(nextDay)}
-            aria-label="Next day"
-            disabled={isToday}
-            className={`p-2 text-gray-500 dark:text-gray-400 disabled:opacity-30 rounded-lg ${focusRing}`}
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-          {!isToday && (
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
             <button
               type="button"
-              onClick={() => goTo(todayStr())}
-              className={`text-sm text-blue-600 dark:text-blue-400 font-medium rounded-lg ${focusRing}`}
+              onClick={() => goTo(prevDay)}
+              aria-label="Previous day"
+              className={`p-2 -ml-2 text-faint rounded-lg ${focusRing}`}
             >
-              Today
+              <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
             </button>
-          )}
+            <div className="relative rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay">
+              <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink whitespace-nowrap">
+                {formatDay(date)}
+              </h1>
+              <input
+                type="date"
+                aria-label="Choose date"
+                value={date}
+                max={todayStr()}
+                onChange={e => { if (e.target.value) goTo(e.target.value) }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => goTo(nextDay)}
+              aria-label="Next day"
+              disabled={isToday}
+              className={`p-2 text-faint disabled:opacity-30 rounded-lg ${focusRing}`}
+            >
+              <ChevronRight className="w-5 h-5" strokeWidth={1.5} />
+            </button>
+            {!isToday && (
+              <button
+                type="button"
+                onClick={() => goTo(todayStr())}
+                className={`text-sm ${linkText} rounded-lg ${focusRing}`}
+              >
+                Today
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
+            <SaveStatus status={status} error={saveError} onRetry={runSave} />
+            <button
+              type="button"
+              onClick={onManageFields}
+              className={`text-sm ${linkText} rounded-lg ${focusRing}`}
+            >
+              Manage fields
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          <SaveStatus status={status} error={saveError} onRetry={runSave} />
-          <button
-            type="button"
-            onClick={onManageFields}
-            className={`text-sm text-blue-600 dark:text-blue-400 font-medium rounded-lg ${focusRing}`}
-          >
-            Manage fields
-          </button>
-        </div>
+        {isToday && (
+          <p className="font-serif text-lg text-muted">
+            Good <em className="italic text-clay">{greeting(new Date())}</em>.
+          </p>
+        )}
       </div>
 
-      <Card>
+      <Section title="Sleep">
         <SleepSection
           values={{
             bedtime: form.bedtime,
@@ -276,10 +284,10 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
           }}
           onChange={v => update(f => ({ ...f, ...v }))}
         />
-      </Card>
+      </Section>
 
       {fields.map(field => (
-        <Card key={field.id}>
+        <Section key={field.id} title={field.name}>
           <FieldSection
             field={field}
             value={fieldValue(field)}
@@ -287,12 +295,12 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
               update(f => ({ ...f, fieldValues: { ...f.fieldValues, [field.id]: v } }))
             }
           />
-        </Card>
+        </Section>
       ))}
 
-      <Card>
+      <Section title="Medications">
         <MedsSection date={date} />
-      </Card>
+      </Section>
     </div>
   )
 }
@@ -303,11 +311,11 @@ function SaveStatus({ status, error, onRetry }: {
   onRetry: () => void
 }) {
   if (status === 'saving') {
-    return <span className="text-xs text-gray-400 dark:text-gray-500">Saving…</span>
+    return <span className="text-xs text-faint">Saving…</span>
   }
   if (status === 'saved') {
     return (
-      <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
+      <span className="text-xs text-muted flex items-center gap-1">
         <Check className="w-3.5 h-3.5" />
         Saved
       </span>
@@ -315,7 +323,7 @@ function SaveStatus({ status, error, onRetry }: {
   }
   if (status === 'error') {
     return (
-      <span className="text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+      <span className="text-xs text-danger flex items-center gap-2">
         <span className="max-w-40 truncate">{error}</span>
         <button type="button" onClick={onRetry} className="underline font-medium shrink-0">
           Retry

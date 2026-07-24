@@ -48,8 +48,10 @@ const renderAt = (path: string) =>
 describe('TodayPage', () => {
   it('renders a section per active field in order', () => {
     renderPage()
-    expect(screen.getByText('Mood')).toBeInTheDocument()
-    expect(screen.getByText('Meditated')).toBeInTheDocument()
+    // The Section eyebrow heading and the field widget's own label both show
+    // the field name, so multiples are expected here.
+    expect(screen.getAllByText('Mood').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Meditated').length).toBeGreaterThan(0)
     expect(screen.getByText('sleep-section')).toBeInTheDocument()
     expect(screen.getByText('meds-section')).toBeInTheDocument()
   })

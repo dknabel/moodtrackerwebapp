@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import type { CustomField, FieldValue } from '../../lib/database.types'
 import { numericValue } from '../../lib/fields'
-import { Card } from '../ui/Card'
+import { Section } from '../ui/Section'
 
 interface FieldChartProps {
   field: CustomField
@@ -18,15 +18,7 @@ function ChartCard({ title, right, children }: {
   right?: ReactNode
   children: ReactNode
 }) {
-  return (
-    <Card>
-      <div className="flex justify-between items-baseline mb-3">
-        <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{title}</h2>
-        {right}
-      </div>
-      {children}
-    </Card>
-  )
+  return <Section title={title} action={right}>{children}</Section>
 }
 
 export function FieldChart({ field, values, isDark }: FieldChartProps) {

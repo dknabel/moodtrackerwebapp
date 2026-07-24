@@ -3,7 +3,7 @@ import {
   Legend, ResponsiveContainer,
 } from 'recharts'
 import type { DailyLog } from '../../lib/database.types'
-import { Card } from '../ui/Card'
+import { Section } from '../ui/Section'
 
 interface SleepChartProps {
   logs: DailyLog[]
@@ -21,8 +21,7 @@ export function SleepChart({ logs, isDark }: SleepChartProps) {
   const tickColor = isDark ? '#9ca3af' : '#666'
 
   return (
-    <Card>
-      <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Sleep</h2>
+    <Section title="Sleep">
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
@@ -35,6 +34,6 @@ export function SleepChart({ logs, isDark }: SleepChartProps) {
           <Line yAxisId="quality" type="monotone" dataKey="Quality" stroke="#0891b2" dot={false} connectNulls />
         </LineChart>
       </ResponsiveContainer>
-    </Card>
+    </Section>
   )
 }

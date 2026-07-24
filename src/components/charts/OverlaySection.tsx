@@ -5,7 +5,7 @@ import {
 import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types'
 import { numericValue } from '../../lib/fields'
 import { buildOverlayData, type OverlaySeries } from '../../lib/overlay'
-import { Card } from '../ui/Card'
+import { Section } from '../ui/Section'
 
 interface Props {
   fields: CustomField[]
@@ -64,8 +64,7 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
   const tickColor = isDark ? '#9ca3af' : '#666'
 
   return (
-    <Card className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Compare</h2>
+    <Section title="Compare">
       <div className="flex flex-wrap gap-2">
         {available.map(s => {
           const isOn = selected.includes(s.key)
@@ -116,6 +115,6 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
           </LineChart>
         </ResponsiveContainer>
       )}
-    </Card>
+    </Section>
   )
 }
