@@ -1,53 +1,60 @@
-@import '@fontsource-variable/fraunces';
-@import '@fontsource-variable/fraunces/wght-italic.css';
-@import '@fontsource-variable/geist';
-@import '@fontsource-variable/geist-mono';
+@import '@fontsource-variable/jetbrains-mono';
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'Clash Display';
+  src: url('/fonts/clash-display/ClashDisplay-Variable.woff2') format('woff2');
+  font-weight: 200 700;
+  font-display: swap;
+}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   color-scheme: light;
-  --bg: #FAF9F6;
+  --bg: #F6F6F4;
   --surface: #FFFFFF;
-  --ink: #1B1916;
-  --muted: #6B6359;
-  --faint: #9C9388;
-  --line: #E6DFD3;
-  --clay: #E5604A;
-  --clay-deep: #C8472F;
-  --clay-tint: #FBE7E0;
-  --danger: #B3402F;
+  --line: #E3E3DE;
+  --ink: #101012;
+  --muted: #55575C;
+  --faint: #9A9C9F;
+  --signal: #D9730F;
+  --signal-soft: rgba(217, 115, 15, 0.14);
+  --pass: #3E7C99;
+  --warn: #B07E2E;
+  --danger: #B84A36;
+  --ease-reveal: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dark {
   color-scheme: dark;
-  --bg: #1B1916;
-  --surface: #26211B;
-  --ink: #F2EDE6;
-  --muted: #A89F92;
-  --faint: #7C7468;
-  --line: #3A342B;
-  --clay: #E5604A;
-  --clay-deep: #EC7B66;
-  --clay-tint: #3A2621;
-  --danger: #E0705F;
+  --bg: #0A0B0D;
+  --surface: #121316;
+  --line: #262A31;
+  --ink: #FBFBFB;
+  --muted: #B8BCC4;
+  --faint: #69707A;
+  --signal: #FF9E40;
+  --signal-soft: rgba(255, 158, 64, 0.12);
+  --pass: #5FA8C7;
+  --warn: #D9A24A;
+  --danger: #D85C46;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-line: var(--line);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-faint: var(--faint);
-  --color-line: var(--line);
-  --color-clay: var(--clay);
-  --color-clay-deep: var(--clay-deep);
-  --color-clay-tint: var(--clay-tint);
+  --color-signal: var(--signal);
+  --color-signal-soft: var(--signal-soft);
+  --color-pass: var(--pass);
+  --color-warn: var(--warn);
   --color-danger: var(--danger);
-  --font-serif: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
-  --font-sans: 'Geist Variable', -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', monospace;
+  --font-sans: 'Clash Display', -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', monospace;
 }
 
 @layer base {
@@ -55,6 +62,7 @@
     background-color: var(--bg);
     color: var(--ink);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -63,4 +71,50 @@
       animation-duration: 0.01ms !important;
     }
   }
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@utility meta-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@utility glow-signal {
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--signal) 18%, transparent),
+    0 0 32px color-mix(in srgb, var(--signal) 10%, transparent);
+}
+
+@keyframes cta-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--signal) 18%, transparent); }
+}
+
+@utility animate-breathe {
+  animation: cta-breathe 3.4s ease-in-out infinite;
+}
+
+@keyframes dial-pulse {
+  0%, 100% { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--signal) 18%, transparent)); }
+  50% { filter: drop-shadow(0 0 20px color-mix(in srgb, var(--signal) 30%, transparent)); }
+}
+
+@utility animate-dial-pulse {
+  animation: dial-pulse 3s ease-in-out infinite;
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@utility animate-reveal {
+  animation: reveal-up 0.56s var(--ease-reveal) both;
 }
