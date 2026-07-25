@@ -223,8 +223,8 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
             >
               <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
             </button>
-            <div className="relative rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-clay">
-              <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink whitespace-nowrap">
+            <div className="relative rounded-lg has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-signal">
+              <h1 className="font-sans font-medium text-3xl tracking-[-0.025em] text-ink whitespace-nowrap">
                 {formatDay(date)}
               </h1>
               <input
@@ -269,8 +269,8 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
           </div>
         </div>
         {isToday && (
-          <p className="font-serif text-lg text-muted">
-            Good <em className="italic text-clay">{greeting(new Date())}</em>.
+          <p className="text-lg text-muted">
+            Good <span className="text-signal">{greeting(new Date())}</span>.
           </p>
         )}
       </div>

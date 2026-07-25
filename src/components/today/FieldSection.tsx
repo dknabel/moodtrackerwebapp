@@ -44,7 +44,7 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
               type="checkbox"
               checked={safe as boolean}
               onChange={e => onChange(e.target.checked)}
-              className="w-5 h-5 accent-clay cursor-pointer"
+              className="w-5 h-5 accent-signal cursor-pointer"
             />
             <span className="text-sm text-ink">Yes</span>
           </label>
@@ -59,7 +59,7 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
             rows={4}
             value={safe as string}
             onChange={e => onChange(e.target.value)}
-            className="w-full rounded-lg border border-line bg-surface text-ink placeholder:text-faint p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-clay"
+            className="w-full rounded-lg border border-line bg-surface text-ink placeholder:text-faint p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-signal"
           />
         </div>
       )
@@ -80,8 +80,8 @@ export function FieldSection({ field, value, onChange }: FieldSectionProps) {
                   onClick={() => toggleTag(opt)}
                   className={`px-3 py-1.5 rounded-full text-sm border ${
                     isOn
-                      ? 'bg-clay-deep text-white border-clay-deep'
-                      : 'border-line text-ink'
+                      ? 'bg-signal text-bg border-signal'
+                      : 'border-line text-ink hover:border-ink'
                   }`}
                 >
                   {opt}

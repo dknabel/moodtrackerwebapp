@@ -50,7 +50,7 @@ export function MedsSection({ date }: Props) {
         ) : medications.length === 0 ? (
           <p className="text-sm text-muted">
             No medications added.{' '}
-            <button onClick={() => setShowModal(true)} className="text-clay-deep underline">
+            <button onClick={() => setShowModal(true)} className="text-signal underline">
               Add yours
             </button>
           </p>
@@ -66,7 +66,7 @@ export function MedsSection({ date }: Props) {
                     type="checkbox"
                     checked={taken}
                     onChange={e => handleSetTaken(med.id, e.target.checked)}
-                    className="w-5 h-5 accent-clay cursor-pointer"
+                    className="w-5 h-5 accent-signal cursor-pointer"
                   />
                   <span className={`flex-1 text-sm ${taken ? 'line-through text-faint' : 'text-ink'}`}>
                     {med.name} — {med.dose}

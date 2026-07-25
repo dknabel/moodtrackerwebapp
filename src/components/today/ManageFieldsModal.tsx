@@ -217,17 +217,17 @@ export function ManageFieldsModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end z-50" onClick={onClose}>
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="manage-fields-title"
-        className="bg-surface w-full max-h-[80vh] rounded-t-2xl shadow-[0_20px_48px_rgba(27,25,22,0.12)] p-6 flex flex-col gap-4 overflow-y-auto"
+        className="bg-surface w-full max-h-[80vh] rounded-t-2xl border-t border-x border-line p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 id="manage-fields-title" className="font-serif text-lg text-ink">Manage Fields</h2>
+          <h2 id="manage-fields-title" className="font-sans font-medium text-lg text-ink">Manage Fields</h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -266,7 +266,7 @@ export function ManageFieldsModal({
                     type="checkbox"
                     checked={editForm.show_in_charts}
                     onChange={e => setEditForm(v => ({ ...v, show_in_charts: e.target.checked }))}
-                    className="w-4 h-4 accent-clay"
+                    className="w-4 h-4 accent-signal"
                   />
                   Show in charts
                 </label>
@@ -308,7 +308,7 @@ export function ManageFieldsModal({
                       <ChevronDown className="w-4 h-4" />
                     </button>
                   </div>
-                  <button onClick={() => startEdit(f)} className={`text-clay-deep text-sm rounded ${focusRing}`}>Edit</button>
+                  <button onClick={() => startEdit(f)} className={`text-signal text-sm rounded ${focusRing}`}>Edit</button>
                   <button onClick={() => handleArchive(f)} className={`text-danger text-sm rounded ${focusRing}`}>Archive</button>
                 </div>
               </div>
@@ -327,7 +327,7 @@ export function ManageFieldsModal({
                   <p className="text-xs text-faint">{TYPE_LABELS[f.type]}</p>
                 </div>
                 <div className="flex gap-3">
-                  <button onClick={() => onReactivate(f.id)} className={`text-clay-deep text-sm rounded ${focusRing}`}>Restore</button>
+                  <button onClick={() => onReactivate(f.id)} className={`text-signal text-sm rounded ${focusRing}`}>Restore</button>
                   <button onClick={() => handleDelete(f)} className={`text-danger text-sm rounded ${focusRing}`}>Delete forever</button>
                 </div>
               </div>

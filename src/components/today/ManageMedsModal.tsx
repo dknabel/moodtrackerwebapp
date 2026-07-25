@@ -76,7 +76,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-end z-50"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end z-50"
       onClick={onClose}
     >
       <div
@@ -84,11 +84,11 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
         role="dialog"
         aria-modal="true"
         aria-labelledby="manage-meds-title"
-        className="bg-surface w-full max-h-[80vh] rounded-t-2xl shadow-[0_20px_48px_rgba(27,25,22,0.12)] p-6 flex flex-col gap-4 overflow-y-auto"
+        className="bg-surface w-full max-h-[80vh] rounded-t-2xl border-t border-x border-line p-6 flex flex-col gap-4 overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center">
-          <h2 id="manage-meds-title" className="font-serif text-lg text-ink">Manage Medications</h2>
+          <h2 id="manage-meds-title" className="font-sans font-medium text-lg text-ink">Manage Medications</h2>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -150,7 +150,7 @@ export function ManageMedsModal({ medications, onAdd, onUpdate, onDeactivate, on
                 <div className="flex gap-3">
                   <button
                     onClick={() => startEdit(med)}
-                    className={`text-clay-deep text-sm rounded ${focusRing}`}
+                    className={`text-signal text-sm rounded ${focusRing}`}
                   >
                     Edit
                   </button>
