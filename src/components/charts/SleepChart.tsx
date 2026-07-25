@@ -22,7 +22,7 @@ export function SleepChart({ logs, isDark }: SleepChartProps) {
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   return (
-    <Section title="Sleep">
+    <Section index={2} title="Sleep">
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />

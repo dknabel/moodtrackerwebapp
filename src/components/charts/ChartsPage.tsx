@@ -56,6 +56,7 @@ export function ChartsPage() {
   const streaks = useStreaks(logs365, fields, values365, medLogs365, medications)
 
   const hasData = chronologicalLogs.length > 0 || rangeValues.length > 0
+  const fieldChartCount = activeFields.filter(f => f.show_in_charts).length
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,10 +98,10 @@ export function ChartsPage() {
           {chronologicalLogs.length > 0 && <SleepChart logs={chronologicalLogs} isDark={isDark} />}
           {activeFields
             .filter(f => f.show_in_charts)
-            .map(f => (
-              <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
+            .map((f, i) => (
+              <FieldChart key={f.id} index={i + 3} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
             ))}
-          <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
+          <OverlaySection index={3 + fieldChartCount} fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
         </>
       )}
 

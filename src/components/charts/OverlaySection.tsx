@@ -9,6 +9,7 @@ import { CHART_COLORS } from '../../lib/chartColors'
 import { Section } from '../ui/Section'
 
 interface Props {
+  index?: number
   fields: CustomField[]
   valuesByField: Map<string, FieldValue[]>
   logs: DailyLog[]
@@ -18,7 +19,7 @@ interface Props {
 const COLORS = CHART_COLORS.series
 const MAX_SERIES = 3
 
-export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
+export function OverlaySection({ index: overlayIndex, fields, valuesByField, logs, isDark }: Props) {
   const [selected, setSelected] = useState<string[]>([])
 
   const available = useMemo<OverlaySeries[]>(() => {
@@ -65,7 +66,7 @@ export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   return (
-    <Section title="Compare">
+    <Section index={overlayIndex} title="Compare">
       <div className="flex flex-wrap gap-2">
         {available.map(s => {
           const isOn = selected.includes(s.key)

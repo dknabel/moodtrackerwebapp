@@ -51,7 +51,7 @@ describe('TodayPage', () => {
     // The Section eyebrow heading and the field widget's own label both show
     // the field name, so multiples are expected here.
     expect(screen.getAllByText('Mood').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Meditated').length).toBeGreaterThan(0)
+    expect(screen.getByText('03 / Meditated')).toBeInTheDocument()
     expect(screen.getByText('sleep-section')).toBeInTheDocument()
     expect(screen.getByText('meds-section')).toBeInTheDocument()
   })

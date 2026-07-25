@@ -275,7 +275,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         )}
       </div>
 
-      <Section title="Sleep">
+      <Section index={1} title="Sleep">
         <SleepSection
           values={{
             bedtime: form.bedtime,
@@ -288,8 +288,8 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         />
       </Section>
 
-      {fields.map(field => (
-        <Section key={field.id} title={field.name}>
+      {fields.map((field, i) => (
+        <Section key={field.id} index={i + 2} title={field.name}>
           <FieldSection
             field={field}
             value={fieldValue(field)}
@@ -300,7 +300,7 @@ function LogForm({ date, fields, initial, save, saveValues, onManageFields }: Lo
         </Section>
       ))}
 
-      <Section title="Medications">
+      <Section index={2 + fields.length} title="Medications">
         <MedsSection date={date} />
       </Section>
     </div>

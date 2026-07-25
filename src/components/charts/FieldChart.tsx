@@ -9,20 +9,22 @@ import { numericValue } from '../../lib/fields'
 import { Section } from '../ui/Section'
 
 interface FieldChartProps {
+  index?: number
   field: CustomField
   values: FieldValue[]
   isDark?: boolean
 }
 
-function ChartCard({ title, right, children }: {
+function ChartCard({ index, title, right, children }: {
+  index?: number
   title: string
   right?: ReactNode
   children: ReactNode
 }) {
-  return <Section title={title} action={right}>{children}</Section>
+  return <Section index={index} title={title} action={right}>{children}</Section>
 }
 
-export function FieldChart({ field, values, isDark }: FieldChartProps) {
+export function FieldChart({ index, field, values, isDark }: FieldChartProps) {
   const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
@@ -38,7 +40,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
     const max = sorted[0][1]
     return (
-      <ChartCard title={field.name}>
+      <ChartCard index={index} title={field.name}>
         <div className="flex flex-col gap-2">
           {sorted.map(([tag, count]) => (
             <div key={tag} className="flex items-center gap-2 text-sm">
@@ -67,6 +69,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
     const inactiveBarColor = isDark ? CHART_COLORS.barInactive.dark : CHART_COLORS.barInactive.light
     return (
       <ChartCard
+        index={index}
         title={field.name}
         right={
           <span className="text-xs text-faint">
@@ -98,7 +101,7 @@ export function FieldChart({ field, values, isDark }: FieldChartProps) {
       : [0, 'auto']
 
   return (
-    <ChartCard title={field.name}>
+    <ChartCard index={index} title={field.name}>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
