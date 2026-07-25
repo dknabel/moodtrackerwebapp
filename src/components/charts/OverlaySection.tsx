@@ -52,6 +52,11 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
     return series
   }, [fields, valuesByField, logs])
 
+  const colorByKey = useMemo(
+    () => new Map(available.map((s, i) => [s.key, COLORS[i % COLORS.length]])),
+    [available]
+  )
+
   if (available.length < 2) return null
 
   const toggle = (key: string) =>
@@ -69,7 +74,7 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
   return (
     <Section index={overlayIndex} title="Compare">
       <div className="flex flex-wrap gap-2">
-        {available.map((s, i) => {
+        {available.map(s => {
           const isOn = selected.includes(s.key)
           return (
             <button
@@ -85,7 +90,7 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
             >
               <span
                 className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
-                style={{ backgroundColor: COLORS[i % COLORS.length] }}
+                style={{ backgroundColor: colorByKey.get(s.key) }}
               />
               {s.label}
             </button>
@@ -113,14 +118,14 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
             />
             <Tooltip content={<ChartTooltip />} cursor={{ stroke: gridColor }} />
             <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'JetBrains Mono Variable' }} />
-            {chosen.map((s, i) => (
+            {chosen.map(s => (
               <Line
                 key={s.key}
                 type="monotone"
                 dataKey={s.label}
-                stroke={COLORS[i % COLORS.length]}
+                stroke={colorByKey.get(s.key)}
                 strokeWidth={2}
-                dot={{ r: 2, fill: COLORS[i % COLORS.length], strokeWidth: 0 }}
+                dot={{ r: 2, fill: colorByKey.get(s.key), strokeWidth: 0 }}
                 connectNulls
               />
             ))}
