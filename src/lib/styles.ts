@@ -1,13 +1,12 @@
 export const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay'
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal'
 
 export const btnPrimary =
-  'bg-clay-deep text-white rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 hover:-translate-y-0.5 hover:bg-clay disabled:opacity-50 disabled:hover:translate-y-0'
+  'bg-signal text-bg rounded-full px-4 py-2 text-sm font-medium transition-shadow duration-200 animate-breathe hover:glow-signal disabled:opacity-40 disabled:animate-none'
 
 export const btnSecondary =
-  'border border-line text-ink rounded-full px-4 py-2 text-sm font-medium transition-all duration-150 hover:-translate-y-0.5 disabled:opacity-50'
+  'border border-line text-ink rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 hover:border-ink disabled:opacity-40'
 
-export const linkText = 'text-clay-deep font-medium'
+export const linkText = 'text-signal font-medium'
 
-export const eyebrow =
-  'font-mono text-[11px] uppercase tracking-[0.08em] text-faint'
+export const eyebrow = 'meta-label'
