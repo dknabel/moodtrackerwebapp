@@ -7,6 +7,7 @@ import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types
 import { numericValue } from '../../lib/fields'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { compareGroups, median, type Point } from '../../lib/correlations'
+import { ChartTooltip } from './ChartTooltip'
 
 interface Props {
   index: number
@@ -27,7 +28,7 @@ interface Candidate {
 
 export function CorrelationsSection({ index, fields, valuesByField, logs, isDark }: Props) {
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
-  const blue = CHART_COLORS.series[0]
+  const signalColor = CHART_COLORS.series[0]
   const gray = isDark ? CHART_COLORS.barInactive.dark : CHART_COLORS.barInactive.light
 
   const primary = fields.find(f => f.type === 'slider') ?? null
@@ -105,9 +106,9 @@ export function CorrelationsSection({ index, fields, valuesByField, logs, isDark
         {String(index).padStart(2, '0')} / Comparisons
       </h2>
       {cards.map(({ cfg, result, pA, pB }) => (
-        <div key={cfg.title} className="bg-surface border border-line rounded-xl p-4 flex flex-col gap-3">
+        <div key={cfg.title} className="border-t border-line pt-4 flex flex-col gap-3">
           <p className="font-medium text-ink">{cfg.title}</p>
-          <p className="text-sm text-muted">
+          <p className="font-mono text-xs tnum text-muted">
             {result.groupA.label}: avg {result.groupA.avg} ({result.groupA.count} days) —{' '}
             {result.groupB.label}: avg {result.groupB.avg} ({result.groupB.count} days)
           </p>
@@ -115,9 +116,9 @@ export function CorrelationsSection({ index, fields, valuesByField, logs, isDark
             <ScatterChart>
               <XAxis dataKey="x" name={cfg.xAxisLabel} tick={{ fontSize: 11, fill: tickColor }} stroke={tickColor} />
               <YAxis dataKey="y" name={primary.name} domain={yDomain} tick={{ fontSize: 11, fill: tickColor }} stroke={tickColor} />
-              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+              <Tooltip content={<ChartTooltip />} />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Scatter name={result.groupA.label} data={pA} fill={blue} />
+              <Scatter name={result.groupA.label} data={pA} fill={signalColor} />
               <Scatter name={result.groupB.label} data={pB} fill={gray} />
             </ScatterChart>
           </ResponsiveContainer>

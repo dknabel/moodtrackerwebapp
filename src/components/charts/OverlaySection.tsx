@@ -6,6 +6,7 @@ import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types
 import { numericValue } from '../../lib/fields'
 import { buildOverlayData, type OverlaySeries } from '../../lib/overlay'
 import { CHART_COLORS } from '../../lib/chartColors'
+import { ChartTooltip } from './ChartTooltip'
 import { Section } from '../ui/Section'
 
 interface Props {
@@ -68,7 +69,7 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
   return (
     <Section index={overlayIndex} title="Compare">
       <div className="flex flex-wrap gap-2">
-        {available.map(s => {
+        {available.map((s, i) => {
           const isOn = selected.includes(s.key)
           return (
             <button
@@ -78,10 +79,14 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
               onClick={() => toggle(s.key)}
               className={`px-3 py-1.5 rounded-full text-xs border ${
                 isOn
-                  ? 'bg-clay-deep text-white border-clay-deep'
-                  : 'border-line text-ink'
+                  ? 'bg-signal text-bg border-signal'
+                  : 'border-line text-ink hover:border-ink'
               }`}
             >
+              <span
+                className="inline-block w-1.5 h-1.5 rounded-full mr-1.5"
+                style={{ backgroundColor: COLORS[i % COLORS.length] }}
+              />
               {s.label}
             </button>
           )
@@ -94,23 +99,28 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
       ) : (
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: tickColor }} />
-            <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: tickColor }} unit="%" />
-            <Tooltip
-              formatter={(_value, name, item) => {
-                const payload = (item as { payload: Record<string, number | string> }).payload
-                return [payload[`${String(name)} raw`], name]
-              }}
+            <CartesianGrid stroke={gridColor} vertical={false} />
+            <XAxis
+              dataKey="date"
+              tickLine={false}
+              tick={{ fontSize: 11, fontFamily: 'JetBrains Mono Variable', fill: tickColor }}
             />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
+            <YAxis
+              domain={[0, 100]}
+              tickLine={false}
+              tick={{ fontSize: 11, fontFamily: 'JetBrains Mono Variable', fill: tickColor }}
+              unit="%"
+            />
+            <Tooltip content={<ChartTooltip />} cursor={{ stroke: gridColor }} />
+            <Legend wrapperStyle={{ fontSize: 11, fontFamily: 'JetBrains Mono Variable' }} />
             {chosen.map((s, i) => (
               <Line
                 key={s.key}
                 type="monotone"
                 dataKey={s.label}
                 stroke={COLORS[i % COLORS.length]}
-                dot={false}
+                strokeWidth={2}
+                dot={{ r: 2, fill: COLORS[i % COLORS.length], strokeWidth: 0 }}
                 connectNulls
               />
             ))}

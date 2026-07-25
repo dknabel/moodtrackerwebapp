@@ -8,9 +8,9 @@ function StreakCard({ label, current, longest }: StreakCardProps) {
   return (
     <div className="flex flex-col gap-1 py-4 border-b border-line">
       <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-faint">{label}</p>
-      <p className="font-serif text-3xl text-ink">{current}</p>
+      <p className="font-sans font-semibold text-3xl tnum text-ink">{current}</p>
       <p className="text-xs text-faint">day{current !== 1 ? 's' : ''}</p>
-      <p className="text-xs text-faint mt-1">Longest: {longest}</p>
+      <p className="font-mono text-xs tnum text-faint mt-1">Longest: {longest}</p>
     </div>
   )
 }
