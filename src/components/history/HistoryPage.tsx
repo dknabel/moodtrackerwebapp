@@ -89,7 +89,7 @@ export function HistoryPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex justify-between items-center">
-        <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink">Journal</h1>
+        <h1 className="font-sans font-medium text-3xl tracking-[-0.025em] text-ink">Journal</h1>
         <button
           onClick={() => setShowExport(v => !v)}
           className={`text-sm ${linkText}`}
@@ -100,7 +100,7 @@ export function HistoryPage() {
 
       <div className="flex flex-col gap-3">
         {showExport && (
-          <div className="bg-surface border border-line rounded-xl p-4 flex flex-col gap-3">
+          <div className="border border-line rounded-xl p-4 flex flex-col gap-3">
             <div className="flex flex-col gap-1">
               <p className="font-mono text-[11px] uppercase tracking-[0.08em] text-faint">Date range</p>
               <div className="flex gap-2">
@@ -110,8 +110,8 @@ export function HistoryPage() {
                     onClick={() => setExportRange(r)}
                     className={`px-3 py-1 rounded-full text-xs font-medium border ${
                       exportRange === r
-                        ? 'bg-clay-deep text-white border-clay-deep'
-                        : 'border-line text-ink'
+                        ? 'bg-signal text-bg border-signal'
+                        : 'border-line text-faint'
                     }`}
                   >
                     {r === 'all' ? 'All time' : `Last ${r} days`}
@@ -129,8 +129,8 @@ export function HistoryPage() {
                     onClick={() => setExportFormat(f)}
                     className={`px-3 py-1 rounded-full text-xs font-medium border uppercase ${
                       exportFormat === f
-                        ? 'bg-clay-deep text-white border-clay-deep'
-                        : 'border-line text-ink'
+                        ? 'bg-signal text-bg border-signal'
+                        : 'border-line text-faint'
                     }`}
                   >
                     {f}
@@ -154,7 +154,7 @@ export function HistoryPage() {
 
         {days.length === 0 ? (
           <div className="text-center text-faint mt-12">
-            <p className="font-serif text-lg text-muted">Nothing logged <em className="italic text-clay">yet</em>.</p>
+            <p className="font-sans font-medium text-lg text-muted">Nothing logged <span className="text-signal">yet</span>.</p>
             <p className="text-sm mt-1">Log your first day on the Today tab.</p>
           </div>
         ) : (
