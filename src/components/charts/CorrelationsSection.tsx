@@ -7,9 +7,9 @@ import type { CustomField, DailyLog, FieldValue } from '../../lib/database.types
 import { numericValue } from '../../lib/fields'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { compareGroups, median, type Point } from '../../lib/correlations'
-import { eyebrow } from '../../lib/styles'
 
 interface Props {
+  index: number
   fields: CustomField[]
   valuesByField: Map<string, FieldValue[]>
   logs: DailyLog[]
@@ -25,7 +25,7 @@ interface Candidate {
   xAxisLabel: string
 }
 
-export function CorrelationsSection({ fields, valuesByField, logs, isDark }: Props) {
+export function CorrelationsSection({ index, fields, valuesByField, logs, isDark }: Props) {
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
   const blue = CHART_COLORS.series[0]
   const gray = isDark ? CHART_COLORS.barInactive.dark : CHART_COLORS.barInactive.light
@@ -101,7 +101,9 @@ export function CorrelationsSection({ fields, valuesByField, logs, isDark }: Pro
 
   return (
     <div className="flex flex-col gap-6">
-      <h2 className={eyebrow}>Correlations</h2>
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">
+        {String(index).padStart(2, '0')} / Comparisons
+      </h2>
       {cards.map(({ cfg, result, pA, pB }) => (
         <div key={cfg.title} className="bg-surface border border-line rounded-xl p-4 flex flex-col gap-3">
           <p className="font-medium text-ink">{cfg.title}</p>

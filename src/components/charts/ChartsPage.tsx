@@ -8,7 +8,13 @@ import { useMedicationLogsBulk } from '../../hooks/useMedicationLogsBulk'
 import { useTheme } from '../../hooks/useTheme'
 import { useStreaks } from '../../hooks/useStreaks'
 import type { FieldValue } from '../../lib/database.types'
+import { numericValue } from '../../lib/fields'
 import { Skeleton } from '../ui/Skeleton'
+import { Section } from '../ui/Section'
+import { MoodDial } from './MoodDial'
+import { RhythmChart } from './RhythmChart'
+import { CalendarHeatmap } from './CalendarHeatmap'
+import { MedAdherenceSection } from './MedAdherenceSection'
 import { SleepChart } from './SleepChart'
 import { FieldChart } from './FieldChart'
 import { OverlaySection } from './OverlaySection'
@@ -56,12 +62,47 @@ export function ChartsPage() {
   const streaks = useStreaks(logs365, fields, values365, medLogs365, medications)
 
   const hasData = chronologicalLogs.length > 0 || rangeValues.length > 0
-  const fieldChartCount = activeFields.filter(f => f.show_in_charts).length
+
+  const moodField = useMemo(
+    () =>
+      activeFields.find(f => f.type === 'slider' && f.name.toLowerCase() === 'mood') ??
+      activeFields.find(f => f.type === 'slider') ??
+      null,
+    [activeFields],
+  )
+  const moodValues = useMemo(
+    () => (moodField ? valuesByField.get(moodField.id) ?? [] : []),
+    [moodField, valuesByField],
+  )
+  const moodSeries = useMemo(
+    () =>
+      moodValues.map(v => ({
+        date: v.date.slice(5),
+        fullDate: v.date,
+        value: moodField ? numericValue(moodField, v.value) : null,
+      })),
+    [moodValues, moodField],
+  )
+  const moodByDate = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const p of moodSeries) if (p.value !== null) map.set(p.fullDate, p.value)
+    return map
+  }, [moodSeries])
+  const moodMin = moodField?.config.min ?? 1
+  const moodMax = moodField?.config.max ?? 10
+  const latestMood = moodSeries.length > 0 ? moodSeries[moodSeries.length - 1].value : null
+  const recentMood = moodSeries.slice(-8, -1).map(p => p.value).filter((v): v is number => v !== null)
+
+  const chartFields = activeFields.filter(f => f.show_in_charts && f.id !== moodField?.id)
+  const overlayIndex = 3 + chartFields.length
+  const medsIndex = overlayIndex + 1
+  const streaksIndex = medsIndex + 1
+  const comparisonsIndex = streaksIndex + 1
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex justify-between items-center">
-        <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink">Insights</h1>
+        <h1 className="font-sans font-medium text-3xl tracking-[-0.025em] text-ink">Insights</h1>
         <div className="flex gap-1 bg-surface border border-line rounded-full p-1">
           {RANGES.map(r => (
             <button
@@ -70,7 +111,7 @@ export function ChartsPage() {
               onClick={() => setRangeDays(r.days)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 rangeDays === r.days
-                  ? 'bg-clay-tint text-clay-deep'
+                  ? 'bg-signal text-bg'
                   : 'text-faint'
               }`}
             >
@@ -95,23 +136,32 @@ export function ChartsPage() {
 
       {!loading && hasData && (
         <>
+          {moodField && moodSeries.length > 0 && (
+            <Section index={1} title="Mood">
+              <div className="flex flex-col items-center gap-4 pt-2">
+                <MoodDial value={latestMood} min={moodMin} max={moodMax} recent={recentMood} />
+              </div>
+              <RhythmChart data={moodSeries} domain={[moodMin, moodMax]} isDark={isDark} />
+              <CalendarHeatmap month={new Date()} valuesByDate={moodByDate} min={moodMin} max={moodMax} />
+            </Section>
+          )}
           {chronologicalLogs.length > 0 && <SleepChart logs={chronologicalLogs} isDark={isDark} />}
-          {activeFields
-            .filter(f => f.show_in_charts)
-            .map((f, i) => (
-              <FieldChart key={f.id} index={i + 3} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
-            ))}
-          <OverlaySection index={3 + fieldChartCount} fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
+          {chartFields.map((f, i) => (
+            <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} index={i + 3} isDark={isDark} />
+          ))}
+          <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} index={overlayIndex} isDark={isDark} />
+          <MedAdherenceSection index={medsIndex} medications={medications} logs={medLogs365} />
         </>
       )}
 
-      <StatsSection {...streaks} />
+      <StatsSection index={streaksIndex} {...streaks} />
 
       {!loading && hasData && (
         <CorrelationsSection
           fields={activeFields}
           valuesByField={valuesByField}
           logs={chronologicalLogs}
+          index={comparisonsIndex}
           isDark={isDark}
         />
       )}
