@@ -15,7 +15,7 @@ export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, h
     <div className="flex flex-col gap-2">
       <div className="flex justify-between text-sm">
         <span className={hideLabel ? 'sr-only' : 'text-ink'}>{label}</span>
-        <span className="font-serif text-lg text-clay">{value}</span>
+        <span className="font-mono text-lg tnum text-signal">{value}</span>
       </div>
       <input
         type="range"
@@ -32,7 +32,7 @@ export function Slider({ label, value, min = 1, max = 10, lowLabel, highLabel, h
             onChange(Math.max(min, value - 1))
           }
         }}
-        className="w-full accent-clay h-2 cursor-pointer"
+        className="w-full accent-signal h-2 cursor-pointer"
       />
       {(lowLabel || highLabel) && (
         <div className="flex justify-between text-xs text-faint">
