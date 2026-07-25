@@ -1,17 +1,19 @@
 import type { ReactNode } from 'react'
 import {
-  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell,
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import type { CustomField, FieldValue } from '../../lib/database.types'
 import { CHART_COLORS } from '../../lib/chartColors'
 import { numericValue } from '../../lib/fields'
 import { Section } from '../ui/Section'
+import { ChartTooltip } from './ChartTooltip'
+
+const MONO = 'JetBrains Mono Variable'
 
 interface FieldChartProps {
-  index?: number
   field: CustomField
   values: FieldValue[]
+  index?: number
   isDark?: boolean
 }
 
@@ -24,9 +26,10 @@ function ChartCard({ index, title, right, children }: {
   return <Section index={index} title={title} action={right}>{children}</Section>
 }
 
-export function FieldChart({ index, field, values, isDark }: FieldChartProps) {
+export function FieldChart({ field, values, index, isDark }: FieldChartProps) {
   const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
+  const tick = { fontSize: 11, fontFamily: MONO, fill: tickColor } as const
 
   if (field.type === 'text' || values.length === 0) return null
 
@@ -45,13 +48,13 @@ export function FieldChart({ index, field, values, isDark }: FieldChartProps) {
           {sorted.map(([tag, count]) => (
             <div key={tag} className="flex items-center gap-2 text-sm">
               <span className="w-24 truncate text-ink">{tag}</span>
-              <div className="flex-1 bg-line rounded h-4">
+              <div className="flex-1 bg-line rounded-[2px] h-3">
                 <div
-                  className="h-4 rounded"
+                  className="h-3 rounded-[2px]"
                   style={{ width: `${(count / max) * 100}%`, backgroundColor: CHART_COLORS.barActive }}
                 />
               </div>
-              <span className="w-6 text-right text-faint">{count}</span>
+              <span className="w-6 text-right font-mono text-xs tnum text-faint">{count}</span>
             </div>
           ))}
         </div>
@@ -66,30 +69,25 @@ export function FieldChart({ index, field, values, isDark }: FieldChartProps) {
 
   if (field.type === 'toggle') {
     const yesDays = data.filter(d => d.value === 1).length
-    const inactiveBarColor = isDark ? CHART_COLORS.barInactive.dark : CHART_COLORS.barInactive.light
     return (
       <ChartCard
         index={index}
         title={field.name}
-        right={
-          <span className="text-xs text-faint">
-            {yesDays}/{data.length} days
-          </span>
-        }
+        right={<span className="font-mono text-xs tnum text-faint">{yesDays}/{data.length} days</span>}
       >
-        <ResponsiveContainer width="100%" height={120}>
-          <BarChart data={data} barSize={8}>
-            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: tickColor }} />
-            <YAxis domain={[0, 1]} ticks={[0, 1]} tick={{ fontSize: 11, fill: tickColor }} />
-            <Tooltip formatter={v => [v === 1 ? 'Yes' : 'No', field.name]} />
-            <Bar dataKey="value" radius={[3, 3, 0, 0]}>
-              {data.map((entry, index) => (
-                <Cell key={index} fill={entry.value ? CHART_COLORS.barActive : inactiveBarColor} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div
+          role="img"
+          aria-label={`${field.name}: yes on ${yesDays} of ${data.length} days`}
+          className="flex gap-[3px]"
+        >
+          {data.map(d => (
+            <div
+              key={d.date}
+              title={`${d.date}: ${d.value === 1 ? 'Yes' : 'No'}`}
+              className={`h-6 flex-1 rounded-[2px] ${d.value === 1 ? 'bg-signal' : 'border border-line'}`}
+            />
+          ))}
+        </div>
       </ChartCard>
     )
   }
@@ -104,11 +102,12 @@ export function FieldChart({ index, field, values, isDark }: FieldChartProps) {
     <ChartCard index={index} title={field.name}>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: tickColor }} />
-          <YAxis domain={domain} tick={{ fontSize: 11, fill: tickColor }} />
-          <Tooltip />
-          <Line type="monotone" dataKey="value" name={field.name} stroke={CHART_COLORS.series[0]} dot={false} connectNulls />
+          <CartesianGrid vertical={false} stroke={gridColor} />
+          <XAxis dataKey="date" tick={tick} tickLine={false} axisLine={{ stroke: gridColor }} />
+          <YAxis domain={domain} tick={tick} tickLine={false} axisLine={false} width={28} />
+          <Tooltip content={<ChartTooltip />} cursor={{ stroke: gridColor }} />
+          <Line type="monotone" dataKey="value" name={field.name} stroke={CHART_COLORS.series[0]} strokeWidth={2}
+            dot={{ r: 2, fill: CHART_COLORS.series[0], strokeWidth: 0 }} connectNulls />
         </LineChart>
       </ResponsiveContainer>
     </ChartCard>
