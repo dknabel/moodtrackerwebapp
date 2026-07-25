@@ -35,11 +35,11 @@ describe('useTheme', () => {
     expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
 
-  it('defaults to light when system preference is light', () => {
+  it('defaults to dark even when system preference is light', () => {
     mockMatchMedia(false)
     const { result } = renderHook(() => useTheme(), { wrapper: ThemeProvider })
-    expect(result.current.isDark).toBe(false)
-    expect(document.documentElement.classList.contains('dark')).toBe(false)
+    expect(result.current.isDark).toBe(true)
+    expect(document.documentElement.classList.contains('dark')).toBe(true)
   })
 
   it('reads "dark" from localStorage over system preference', () => {
@@ -49,7 +49,7 @@ describe('useTheme', () => {
     expect(result.current.isDark).toBe(true)
   })
 
-  it('reads "light" from localStorage over system preference', () => {
+  it('reads "light" from localStorage over the dark default', () => {
     localStorage.setItem('theme', 'light')
     mockMatchMedia(true)
     const { result } = renderHook(() => useTheme(), { wrapper: ThemeProvider })
@@ -59,19 +59,22 @@ describe('useTheme', () => {
   it('toggle flips isDark and persists to localStorage', () => {
     mockMatchMedia(false)
     const { result } = renderHook(() => useTheme(), { wrapper: ThemeProvider })
-    act(() => result.current.toggle())
     expect(result.current.isDark).toBe(true)
-    expect(localStorage.getItem('theme')).toBe('dark')
     act(() => result.current.toggle())
     expect(result.current.isDark).toBe(false)
     expect(localStorage.getItem('theme')).toBe('light')
+    act(() => result.current.toggle())
+    expect(result.current.isDark).toBe(true)
+    expect(localStorage.getItem('theme')).toBe('dark')
   })
 
-  it('follows OS changes when no explicit preference is saved', () => {
+  it('stays dark on OS changes when no explicit preference is saved', () => {
     const { triggerChange } = mockMatchMedia(false)
     const { result } = renderHook(() => useTheme(), { wrapper: ThemeProvider })
-    expect(result.current.isDark).toBe(false)
+    expect(result.current.isDark).toBe(true)
     act(() => triggerChange(true))
+    expect(result.current.isDark).toBe(true)
+    act(() => triggerChange(false))
     expect(result.current.isDark).toBe(true)
   })
 
@@ -89,6 +92,8 @@ describe('useTheme', () => {
     const { result } = renderHook(() => ({ shell: useTheme(), charts: useTheme() }), {
       wrapper: ThemeProvider,
     })
+    act(() => result.current.shell.toggle())
+    expect(result.current.charts.isDark).toBe(false)
     act(() => result.current.shell.toggle())
     expect(result.current.charts.isDark).toBe(true)
   })

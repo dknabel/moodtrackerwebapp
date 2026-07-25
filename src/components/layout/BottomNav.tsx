@@ -19,12 +19,17 @@ export function BottomNav() {
           end={to === '/'}
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center py-2.5 gap-1 font-mono text-[10px] uppercase tracking-[0.08em] ${focusRing} ${
-              isActive ? 'text-clay' : 'text-faint'
+              isActive ? 'text-signal' : 'text-faint'
             }`
           }
         >
-          <Icon className="w-5 h-5" strokeWidth={1.5} />
-          {label}
+          {({ isActive }) => (
+            <>
+              <Icon className="w-5 h-5" strokeWidth={1.5} />
+              {label}
+              <span className={`w-1 h-1 rounded-full ${isActive ? 'bg-signal glow-signal' : 'bg-transparent'}`} />
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

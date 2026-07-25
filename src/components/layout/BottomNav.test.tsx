@@ -13,10 +13,10 @@ describe('BottomNav', () => {
     }
   })
 
-  it('marks the active tab with clay, not blue', () => {
+  it('marks the active tab with signal, not clay or blue', () => {
     render(<MemoryRouter initialEntries={['/']}><BottomNav /></MemoryRouter>)
     const today = screen.getByRole('link', { name: 'Today' })
-    expect(today.className).toContain('text-clay')
-    expect(today.className).not.toMatch(/blue/)
+    expect(today.className).toContain('text-signal')
+    expect(today.className).not.toMatch(/clay|blue/)
   })
 })
