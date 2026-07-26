@@ -20,6 +20,8 @@ import { FieldChart } from './FieldChart'
 import { OverlaySection } from './OverlaySection'
 import { StatsSection } from './StatsSection'
 import { CorrelationsSection } from './CorrelationsSection'
+import { buildCorrelationCards } from '../../lib/correlations'
+import { buildOverlaySeries } from '../../lib/overlay'
 
 const RANGES = [
   { label: '7 days', days: 7 },
@@ -93,11 +95,46 @@ export function ChartsPage() {
   const latestMood = moodSeries.length > 0 ? moodSeries[moodSeries.length - 1].value : null
   const recentMood = moodSeries.slice(-8, -1).map(p => p.value).filter((v): v is number => v !== null)
 
-  const chartFields = activeFields.filter(f => f.show_in_charts && f.id !== moodField?.id)
-  const overlayIndex = 3 + chartFields.length
-  const medsIndex = overlayIndex + 1
-  const streaksIndex = medsIndex + 1
-  const comparisonsIndex = streaksIndex + 1
+  const chartFields = useMemo(
+    () => activeFields.filter(f => f.show_in_charts && f.id !== moodField?.id),
+    [activeFields, moodField],
+  )
+  // FieldChart renders nothing for text fields, fields with no values, or tag
+  // fields with no tag values — mirror those early returns exactly so section
+  // numbers only count charts that actually appear.
+  const visibleChartFields = useMemo(
+    () =>
+      chartFields.filter(f => {
+        if (f.type === 'text') return false
+        const vals = valuesByField.get(f.id) ?? []
+        if (vals.length === 0) return false
+        if (f.type === 'tags') return vals.some(v => Array.isArray(v.value) && v.value.length > 0)
+        return true
+      }),
+    [chartFields, valuesByField],
+  )
+
+  const showMood = !!moodField && moodSeries.length > 0
+  const showSleep = chronologicalLogs.length > 0
+  const showOverlay = useMemo(
+    () => buildOverlaySeries(activeFields, valuesByField, chronologicalLogs).length >= 2,
+    [activeFields, valuesByField, chronologicalLogs],
+  )
+  const showMeds = useMemo(() => medications.some(m => m.active), [medications])
+  const showComparisons = useMemo(
+    () => buildCorrelationCards(activeFields, valuesByField, chronologicalLogs).length > 0,
+    [activeFields, valuesByField, chronologicalLogs],
+  )
+
+  // Number only the sections that will render, in display order.
+  let nextIndex = 1
+  const moodIndex = showMood ? nextIndex++ : undefined
+  const sleepIndex = showSleep ? nextIndex++ : undefined
+  const fieldIndexById = new Map(visibleChartFields.map(f => [f.id, nextIndex++] as [string, number]))
+  const overlayIndex = showOverlay ? nextIndex++ : undefined
+  const medsIndex = showMeds ? nextIndex++ : undefined
+  const streaksIndex = nextIndex++ // StatsSection always renders
+  const comparisonsIndex = nextIndex
 
   return (
     <div className="flex flex-col gap-6">
@@ -137,7 +174,7 @@ export function ChartsPage() {
       {!loading && hasData && (
         <>
           {moodField && moodSeries.length > 0 && (
-            <Section index={1} title="Mood">
+            <Section index={moodIndex} title="Mood">
               <div className="flex flex-col items-center gap-4 pt-2">
                 <MoodDial value={latestMood} min={moodMin} max={moodMax} recent={recentMood} />
               </div>
@@ -145,18 +182,22 @@ export function ChartsPage() {
               <CalendarHeatmap month={new Date()} valuesByDate={moodByDate} min={moodMin} max={moodMax} />
             </Section>
           )}
-          {chronologicalLogs.length > 0 && <SleepChart logs={chronologicalLogs} isDark={isDark} />}
-          {chartFields.map((f, i) => (
-            <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} index={i + 3} isDark={isDark} />
+          {sleepIndex !== undefined && <SleepChart logs={chronologicalLogs} index={sleepIndex} isDark={isDark} />}
+          {visibleChartFields.map(f => (
+            <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} index={fieldIndexById.get(f.id)} isDark={isDark} />
           ))}
-          <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} index={overlayIndex} isDark={isDark} />
-          <MedAdherenceSection index={medsIndex} medications={medications} logs={medLogs365} />
+          {overlayIndex !== undefined && (
+            <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} index={overlayIndex} isDark={isDark} />
+          )}
+          {medsIndex !== undefined && (
+            <MedAdherenceSection index={medsIndex} medications={medications} logs={medLogs365} />
+          )}
         </>
       )}
 
       <StatsSection index={streaksIndex} {...streaks} />
 
-      {!loading && hasData && (
+      {!loading && hasData && showComparisons && (
         <CorrelationsSection
           fields={activeFields}
           valuesByField={valuesByField}

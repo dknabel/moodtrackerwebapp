@@ -40,7 +40,7 @@ export function RemindersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">01 / Reminders</h1>
+      <h1 className="font-sans font-medium text-3xl tracking-[-0.025em] text-ink">Reminders</h1>
 
       <section className="flex flex-col gap-3">
         <h2 className={eyebrow}>Daily check-ins</h2>

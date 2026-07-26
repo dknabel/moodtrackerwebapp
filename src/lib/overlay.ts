@@ -1,9 +1,46 @@
+import type { CustomField, DailyLog, FieldValue } from './database.types'
+import { numericValue } from './fields'
+
 export interface OverlaySeries {
   key: string
   label: string
   points: Array<{ date: string; raw: number }>
   min: number
   max: number
+}
+
+/** Build the plottable overlay series: numeric fields with data, plus sleep hours/quality. */
+export function buildOverlaySeries(
+  fields: CustomField[],
+  valuesByField: Map<string, FieldValue[]>,
+  logs: DailyLog[],
+): OverlaySeries[] {
+  const series: OverlaySeries[] = []
+  for (const f of fields) {
+    if (f.type !== 'slider' && f.type !== 'number') continue
+    const points = (valuesByField.get(f.id) ?? [])
+      .map(v => ({ date: v.date, raw: numericValue(f, v.value) }))
+      .filter((p): p is { date: string; raw: number } => p.raw !== null)
+    if (points.length === 0) continue
+    const min = f.type === 'slider' ? (f.config.min ?? 1) : 0
+    const max = f.type === 'slider'
+      ? (f.config.max ?? 10)
+      : Math.max(1, ...points.map(p => p.raw))
+    series.push({ key: `field:${f.id}`, label: f.name, points, min, max })
+  }
+  const sleepHours = logs
+    .filter(l => l.sleep_hours != null)
+    .map(l => ({ date: l.date, raw: l.sleep_hours! }))
+  if (sleepHours.length > 0) {
+    series.push({ key: 'sleep_hours', label: 'Sleep hours', points: sleepHours, min: 0, max: 12 })
+  }
+  const sleepQuality = logs
+    .filter(l => l.sleep_quality != null)
+    .map(l => ({ date: l.date, raw: l.sleep_quality! }))
+  if (sleepQuality.length > 0) {
+    series.push({ key: 'sleep_quality', label: 'Sleep quality', points: sleepQuality, min: 1, max: 5 })
+  }
+  return series
 }
 
 /** Percent of [min, max], clamped to 0–100, rounded to 1 decimal. */
