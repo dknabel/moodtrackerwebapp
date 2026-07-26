@@ -6,7 +6,16 @@ describe('CHART_COLORS', () => {
     const all = JSON.stringify(CHART_COLORS)
     expect(all).not.toMatch(/#2563eb|#16a34a|#7c3aed|#0891b2|#f59e0b|#E5604A/i)
     expect(CHART_COLORS.series[0]).toBe('#FF9E40')
-    expect(CHART_COLORS.series).toEqual(['#FF9E40', '#5FA8C7', '#D9A24A'])
+    expect(CHART_COLORS.series).toEqual([
+      '#FF9E40',
+      '#5FA8C7',
+      '#7BC98C',
+      '#B493E8',
+      '#E06C7D',
+      '#4EC9B0',
+      '#E8D44D',
+      '#E87AB8',
+    ])
   })
 
   it('mirrors the dark CSS tokens for grid and ticks', () => {
