@@ -61,7 +61,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
         onChange={e => setPassword(e.target.value)}
         placeholder="New password"
         required
-        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-signal"
       />
       <input
         type="password"
@@ -69,7 +69,7 @@ export function ResetPasswordForm({ onExpiredLink }: Props) {
         onChange={e => setConfirm(e.target.value)}
         placeholder="Confirm new password"
         required
-        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-signal"
       />
       {error === 'link-expired' ? (
         <p className="text-danger text-sm text-center">

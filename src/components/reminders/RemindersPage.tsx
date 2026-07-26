@@ -40,7 +40,7 @@ export function RemindersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-serif text-3xl tracking-[-0.025em] text-ink">Reminders</h1>
+      <h1 className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">01 / Reminders</h1>
 
       <section className="flex flex-col gap-3">
         <h2 className={eyebrow}>Daily check-ins</h2>
@@ -68,7 +68,7 @@ export function RemindersPage() {
                 checked={reminder.enabled}
                 disabled={!native}
                 onChange={e => void (e.target.checked ? enableReminder(reminder, reminder.time, null) : disableReminder(reminder.id))}
-                className="w-5 h-5 accent-clay cursor-pointer disabled:cursor-not-allowed"
+                className="w-5 h-5 accent-signal cursor-pointer disabled:cursor-not-allowed"
               />
             </label>
             <button
@@ -82,7 +82,7 @@ export function RemindersPage() {
           </div>
         ))}
 
-        <div className="flex items-center gap-3 p-3 border border-dashed border-line rounded-lg">
+        <div className="flex items-center gap-3 p-3 border border-dashed border-line rounded-lg hover:border-ink">
           <input
             type="time"
             aria-label="New reminder time"
@@ -134,7 +134,7 @@ export function RemindersPage() {
                   checked={existing?.enabled ?? false}
                   disabled={!native}
                   onChange={e => void (e.target.checked ? enableReminder(existing, time, med.id) : existing && disableReminder(existing.id))}
-                  className="w-5 h-5 accent-clay cursor-pointer disabled:cursor-not-allowed"
+                  className="w-5 h-5 accent-signal cursor-pointer disabled:cursor-not-allowed"
                 />
               </label>
             </div>

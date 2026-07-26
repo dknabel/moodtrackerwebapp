@@ -29,7 +29,7 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-signal"
       />
       <input
         type="password"
@@ -37,7 +37,7 @@ export function SignInForm({ onForgotPassword }: Props) {
         onChange={e => setPassword(e.target.value)}
         placeholder="Password"
         required
-        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-signal"
       />
       {error && (
         <>

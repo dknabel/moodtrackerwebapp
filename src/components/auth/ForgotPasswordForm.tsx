@@ -39,7 +39,7 @@ export function ForgotPasswordForm() {
         onChange={e => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base"
+        className="border border-line bg-surface text-ink placeholder-faint rounded-lg p-3 text-base focus:outline-none focus:ring-2 focus:ring-signal"
       />
       {error && <p className="text-danger text-sm">{error}</p>}
       <button

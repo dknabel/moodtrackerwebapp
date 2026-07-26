@@ -25,7 +25,7 @@ export function AuthPage({ initialMode = 'sign-in' }: Props) {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 gap-4">
-      <h1 className="font-serif text-2xl font-bold tracking-[-0.025em] text-ink">Mood <em className="italic text-clay">Tracker</em></h1>
+      <h1 className="font-sans font-medium text-xl text-ink tracking-[-0.02em]">Mood Tracker<span className="text-signal">.</span></h1>
 
       {mode === 'verify-email' && <VerifyEmailNotice email={verifyEmail} />}
 
