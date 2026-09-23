@@ -11,11 +11,10 @@ const MONO = 'JetBrains Mono Variable'
 
 interface SleepChartProps {
   logs: DailyLog[]
-  index: number
   isDark?: boolean
 }
 
-export function SleepChart({ logs, index, isDark }: SleepChartProps) {
+export function SleepChart({ logs, isDark }: SleepChartProps) {
   const data = logs.map(l => ({
     date: l.date.slice(5),
     Hours: l.sleep_hours,
@@ -27,7 +26,7 @@ export function SleepChart({ logs, index, isDark }: SleepChartProps) {
   const tick = { fontSize: 11, fontFamily: MONO, fill: tickColor } as const
 
   return (
-    <Section index={index} title="Sleep">
+    <Section title="Sleep">
       <ResponsiveContainer width="100%" height={200}>
         <ComposedChart data={data}>
           <CartesianGrid vertical={false} stroke={gridColor} />

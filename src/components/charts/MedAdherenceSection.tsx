@@ -3,17 +3,16 @@ import { buildAdherenceDays } from '../../lib/adherence'
 import { Section } from '../ui/Section'
 
 interface MedAdherenceSectionProps {
-  index: number
   medications: Medication[]
   logs: MedicationLog[]
   days?: number
 }
 
-export function MedAdherenceSection({ index, medications, logs, days = 14 }: MedAdherenceSectionProps) {
+export function MedAdherenceSection({ medications, logs, days = 14 }: MedAdherenceSectionProps) {
   const active = medications.filter(m => m.active)
   if (active.length === 0) return null
   return (
-    <Section index={index} title="Medications">
+    <Section title="Medications">
       <div className="flex flex-col gap-3">
         {active.map(med => {
           const segments = buildAdherenceDays(logs, med.id, days)

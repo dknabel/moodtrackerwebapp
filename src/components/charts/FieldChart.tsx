@@ -13,20 +13,18 @@ const MONO = 'JetBrains Mono Variable'
 interface FieldChartProps {
   field: CustomField
   values: FieldValue[]
-  index?: number
   isDark?: boolean
 }
 
-function ChartCard({ index, title, right, children }: {
-  index?: number
+function ChartCard({ title, right, children }: {
   title: string
   right?: ReactNode
   children: ReactNode
 }) {
-  return <Section index={index} title={title} action={right}>{children}</Section>
+  return <Section title={title} action={right}>{children}</Section>
 }
 
-export function FieldChart({ field, values, index, isDark }: FieldChartProps) {
+export function FieldChart({ field, values, isDark }: FieldChartProps) {
   const gridColor = isDark ? CHART_COLORS.grid.dark : CHART_COLORS.grid.light
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
   const tick = { fontSize: 11, fontFamily: MONO, fill: tickColor } as const
@@ -43,7 +41,7 @@ export function FieldChart({ field, values, index, isDark }: FieldChartProps) {
     const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1])
     const max = sorted[0][1]
     return (
-      <ChartCard index={index} title={field.name}>
+      <ChartCard title={field.name}>
         <div className="flex flex-col gap-2">
           {sorted.map(([tag, count]) => (
             <div key={tag} className="flex items-center gap-2 text-sm">
@@ -71,7 +69,6 @@ export function FieldChart({ field, values, index, isDark }: FieldChartProps) {
     const yesDays = data.filter(d => d.value === 1).length
     return (
       <ChartCard
-        index={index}
         title={field.name}
         right={<span className="font-mono text-xs tnum text-faint">{yesDays}/{data.length} days</span>}
       >
@@ -99,7 +96,7 @@ export function FieldChart({ field, values, index, isDark }: FieldChartProps) {
       : [0, 'auto']
 
   return (
-    <ChartCard index={index} title={field.name}>
+    <ChartCard title={field.name}>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data}>
           <CartesianGrid vertical={false} stroke={gridColor} />

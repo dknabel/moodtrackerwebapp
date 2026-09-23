@@ -100,8 +100,7 @@ export function ChartsPage() {
     [activeFields, moodField],
   )
   // FieldChart renders nothing for text fields, fields with no values, or tag
-  // fields with no tag values — mirror those early returns exactly so section
-  // numbers only count charts that actually appear.
+  // fields with no tag values, so filter those out before rendering.
   const visibleChartFields = useMemo(
     () =>
       chartFields.filter(f => {
@@ -125,16 +124,6 @@ export function ChartsPage() {
     () => buildCorrelationCards(activeFields, valuesByField, chronologicalLogs).length > 0,
     [activeFields, valuesByField, chronologicalLogs],
   )
-
-  // Number only the sections that will render, in display order.
-  let nextIndex = 1
-  const moodIndex = showMood ? nextIndex++ : undefined
-  const sleepIndex = showSleep ? nextIndex++ : undefined
-  const fieldIndexById = new Map(visibleChartFields.map(f => [f.id, nextIndex++] as [string, number]))
-  const overlayIndex = showOverlay ? nextIndex++ : undefined
-  const medsIndex = showMeds ? nextIndex++ : undefined
-  const streaksIndex = nextIndex++ // StatsSection always renders
-  const comparisonsIndex = nextIndex
 
   return (
     <div className="flex flex-col gap-6">
@@ -173,8 +162,8 @@ export function ChartsPage() {
 
       {!loading && hasData && (
         <>
-          {moodField && moodSeries.length > 0 && (
-            <Section index={moodIndex} title="Mood">
+          {showMood && (
+            <Section title="Mood">
               <div className="flex flex-col items-center gap-4 pt-2">
                 <MoodDial value={latestMood} min={moodMin} max={moodMax} recent={recentMood} />
               </div>
@@ -182,27 +171,26 @@ export function ChartsPage() {
               <CalendarHeatmap month={new Date()} valuesByDate={moodByDate} min={moodMin} max={moodMax} />
             </Section>
           )}
-          {sleepIndex !== undefined && <SleepChart logs={chronologicalLogs} index={sleepIndex} isDark={isDark} />}
+          {showSleep && <SleepChart logs={chronologicalLogs} isDark={isDark} />}
           {visibleChartFields.map(f => (
-            <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} index={fieldIndexById.get(f.id)} isDark={isDark} />
+            <FieldChart key={f.id} field={f} values={valuesByField.get(f.id) ?? []} isDark={isDark} />
           ))}
-          {overlayIndex !== undefined && (
-            <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} index={overlayIndex} isDark={isDark} />
+          {showOverlay && (
+            <OverlaySection fields={activeFields} valuesByField={valuesByField} logs={chronologicalLogs} isDark={isDark} />
           )}
-          {medsIndex !== undefined && (
-            <MedAdherenceSection index={medsIndex} medications={medications} logs={medLogs365} />
+          {showMeds && (
+            <MedAdherenceSection medications={medications} logs={medLogs365} />
           )}
         </>
       )}
 
-      <StatsSection index={streaksIndex} {...streaks} />
+      <StatsSection {...streaks} />
 
       {!loading && hasData && showComparisons && (
         <CorrelationsSection
           fields={activeFields}
           valuesByField={valuesByField}
           logs={chronologicalLogs}
-          index={comparisonsIndex}
           isDark={isDark}
         />
       )}

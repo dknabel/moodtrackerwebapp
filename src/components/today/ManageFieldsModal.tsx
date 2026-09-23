@@ -72,7 +72,7 @@ function toFormValues(f: CustomField): FormValues {
 }
 
 const TYPE_LABELS: Record<FieldType, string> = {
-  slider: 'Slider (rate 1–10)',
+  slider: 'Slider (rate 1-10)',
   number: 'Number',
   toggle: 'Yes / No',
   text: 'Text',

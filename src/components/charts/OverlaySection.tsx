@@ -9,7 +9,6 @@ import { ChartTooltip } from './ChartTooltip'
 import { Section } from '../ui/Section'
 
 interface Props {
-  index?: number
   fields: CustomField[]
   valuesByField: Map<string, FieldValue[]>
   logs: DailyLog[]
@@ -19,7 +18,7 @@ interface Props {
 const COLORS = CHART_COLORS.series
 const MAX_SERIES = 3
 
-export function OverlaySection({ index: overlayIndex, fields, valuesByField, logs, isDark }: Props) {
+export function OverlaySection({ fields, valuesByField, logs, isDark }: Props) {
   const [selected, setSelected] = useState<string[]>([])
 
   const available = useMemo<OverlaySeries[]>(
@@ -47,7 +46,7 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
   const tickColor = isDark ? CHART_COLORS.tick.dark : CHART_COLORS.tick.light
 
   return (
-    <Section index={overlayIndex} title="Compare">
+    <Section title="Compare">
       <div className="flex flex-wrap gap-2">
         {available.map(s => {
           const isOn = selected.includes(s.key)
@@ -74,7 +73,7 @@ export function OverlaySection({ index: overlayIndex, fields, valuesByField, log
       </div>
       {chosen.length < 2 ? (
         <p className="text-xs text-faint">
-          Pick 2–{MAX_SERIES} series to compare (scaled to each one's own range).
+          Pick 2-{MAX_SERIES} series to compare (scaled to each one's own range).
         </p>
       ) : (
         <ResponsiveContainer width="100%" height={200}>

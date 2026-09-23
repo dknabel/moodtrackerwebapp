@@ -69,7 +69,7 @@ export function MedsSection({ date }: Props) {
                     className="w-5 h-5 accent-signal cursor-pointer"
                   />
                   <span className={`flex-1 text-sm ${taken ? 'line-through text-faint' : 'text-ink'}`}>
-                    {med.name} — {med.dose}
+                    {med.name}, {med.dose}
                     {med.scheduled_time && (
                       <span className="text-xs text-faint ml-1">
                         @ {formatTime(med.scheduled_time)}

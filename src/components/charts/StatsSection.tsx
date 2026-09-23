@@ -21,13 +21,12 @@ interface StreakResult {
 }
 
 interface Props {
-  index: number
   logging: StreakResult
   meds: StreakResult
   toggles: Array<{ name: string; streak: StreakResult }>
 }
 
-export function StatsSection({ index, logging, meds, toggles }: Props) {
+export function StatsSection({ logging, meds, toggles }: Props) {
   const items = [
     { label: 'Logging', ...logging },
     ...toggles.map(t => ({ label: t.name, ...t.streak })),
@@ -35,9 +34,7 @@ export function StatsSection({ index, logging, meds, toggles }: Props) {
   ]
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">
-        {String(index).padStart(2, '0')} / Streaks
-      </h2>
+      <h2 className="font-mono text-[11px] uppercase tracking-[0.12em] text-faint">Streaks</h2>
       <div className="flex flex-col">
         {items.map(item => (
           <StreakCard key={item.label} label={item.label} current={item.current} longest={item.longest} />

@@ -13,7 +13,7 @@ export function AppShell({ children, signOut }: Props) {
   const { isDark, toggle } = useTheme()
 
   return (
-    <div className="min-h-screen bg-bg pb-[calc(5rem+env(safe-area-inset-bottom))]">
+    <div className="min-h-[100dvh] bg-bg pb-[calc(5rem+env(safe-area-inset-bottom))]">
       <header className="max-w-[680px] mx-auto px-4 pt-[calc(1rem+env(safe-area-inset-top))] pb-2 flex justify-between items-center gap-3">
         <span className="font-sans font-medium text-xl text-ink tracking-[-0.02em]">
           Mood Tracker<span className="text-signal">.</span>
